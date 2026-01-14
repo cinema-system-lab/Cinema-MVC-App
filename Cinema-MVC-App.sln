@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVC-CinemaApp", "MVC-CinemaApp\MVC-CinemaApp.csproj", "{CEBE33F6-F58B-43FE-AD68-F345A396067C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{3E246FFB-6B57-4469-863B-89A3E7ED9C89}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{2D5A6F88-F0DB-43B4-994D-DA7618EC3340}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CEBE33F6-F58B-43FE-AD68-F345A396067C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEBE33F6-F58B-43FE-AD68-F345A396067C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEBE33F6-F58B-43FE-AD68-F345A396067C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEBE33F6-F58B-43FE-AD68-F345A396067C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E246FFB-6B57-4469-863B-89A3E7ED9C89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E246FFB-6B57-4469-863B-89A3E7ED9C89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E246FFB-6B57-4469-863B-89A3E7ED9C89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E246FFB-6B57-4469-863B-89A3E7ED9C89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D5A6F88-F0DB-43B4-994D-DA7618EC3340}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5A6F88-F0DB-43B4-994D-DA7618EC3340}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5A6F88-F0DB-43B4-994D-DA7618EC3340}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5A6F88-F0DB-43B4-994D-DA7618EC3340}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
