@@ -15,5 +15,4 @@ public class Movie
 
     public virtual ICollection<MovieGenre> MovieGenres { get; set; } = new List<MovieGenre>();
     public virtual ICollection<MovieActor> MovieActors { get; set; } = new List<MovieActor>();
-    public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
 }
