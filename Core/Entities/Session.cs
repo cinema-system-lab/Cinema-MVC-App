@@ -1,12 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Core.Entities
+﻿namespace Core.Entities
 {
-    internal class Session
+    public class Session
     {
+        public int Id { get; set; }
+        public int MovieId { get; set; }
+        public int HallId { get; set; }
+
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+
+        public decimal BasePrice { get; set; }
+
+        public Movie Movie { get; set; } = null!;
+        public Hall Hall { get; set; } = null!;
+
+        public virtual ICollection<SessionSeat> SessionSeats { get; set; } = new List<SessionSeat>();
+        public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
     }
 }

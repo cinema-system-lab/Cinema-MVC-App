@@ -8,4 +8,6 @@ public class Seat
 
     public int RowNumber { get; set; }
     public int SeatNumber { get; set; }
+
+    public virtual ICollection<SessionSeat> SessionSeats { get; set; } = new List<SessionSeat>();
 }
