@@ -22,13 +22,13 @@ public class MovieConfig : IEntityTypeConfiguration<Movie>
             .IsRequired();
 
         // Старий варіант: Зберігання акторів просто строкою
-        // builder.Property(x => x.Actors)
-        //    .HasMaxLength(500);
+        builder.Property(x => x.Actors)
+           .HasMaxLength(500);
 
-        // Новий варіант: Зв'язок Many-to-Many з сутністю Actor
-        builder.HasMany(x => x.Actors)
-            .WithMany(x => x.Movies)
-            .UsingEntity(j => j.ToTable("MovieActors"));
+        // // Новий варіант: Зв'язок Many-to-Many з сутністю Actor
+        // builder.HasMany(x => x.Actors)
+        //     .WithMany(x => x.Movies)
+        //     .UsingEntity(j => j.ToTable("MovieActors"));
 
         builder.Property(x => x.DurationMinutes)
             .IsRequired();

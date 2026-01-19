@@ -9,13 +9,12 @@ public class Movie
     public string Title { get; set; } = string.Empty;
     
     /* ВАЖЛИВО: атрибути замінив використанням FluentApi (конфіги прописав в: Infrastructure -> Configurations).
-       Будеш робити міграції — обов'язково врахуй конфіги, оскільки вони ставлять обмеження. */
+       Будеш робити міграції — обов'язково врахуй конфіги, оскільки вони ставлять обмеження на стрінгу. */
     public string Description { get; set; } = string.Empty;
     public string Director { get; set; } = string.Empty;
     
     // Зберігаємо акторів просто строкою: "Brad Pitt, Leonardo DiCaprio"
-    // public string Actors { get; set; } = string.Empty;
-    public ICollection<Actor> Actors { get; set; } = new List<Actor>();
+    public string Actors { get; set; } = string.Empty;
     public DateTime ReleaseDate { get; set; }
     
     public short DurationMinutes { get; set; } // Оптимізовано: short замість int
