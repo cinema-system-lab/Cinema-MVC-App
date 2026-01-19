@@ -6,8 +6,10 @@ public class Seat
 {
     public int Id { get; set; }
     public int HallId { get; set; }
-    public virtual Hall Hall { get; set; }
-    public int RowNumber { get; set; }
-    public int SeatNumber { get; set; }
+    
+    public Hall Hall { get; set; } // -virtual
+    public byte RowNumber { get; set; } //було інт
+    
+    public byte SeatNumber { get; set; } // було інт
     public SeatType Type { get; set; }
 }

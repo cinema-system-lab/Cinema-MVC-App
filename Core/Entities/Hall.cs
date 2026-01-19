@@ -9,7 +9,10 @@ public class Hall
     //[MaxLength(50)]
     public string Name { get; set; } = string.Empty;
     
-    
     public HallType Type { get; set; }
-    public virtual ICollection<Seat> Seats { get; set; } = new List<Seat>();
+    /* Прибрав virtual у навігаційних властивостях. В EF Core є Eager Loading через .Include().
+     Приклад властивості до змін:
+         public virtual ICollection<Seat> Seats { get; set; } = new List<Seat>(); */
+    
+    public ICollection<Seat> Seats { get; set; } = new List<Seat>(); //-virtual
 }

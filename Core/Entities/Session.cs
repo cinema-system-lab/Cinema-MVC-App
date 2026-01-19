@@ -6,10 +6,13 @@ namespace Core.Entities
     {
         public int Id { get; set; }
         public int MovieId { get; set; }
-        public virtual Movie Movie { get; set; }
+        
+        public Movie Movie { get; set; } //-virtual
         public int HallId { get; set; }
-        public virtual Hall Hall { get; set; }
+        
+        public Hall Hall { get; set; }//-virtual
         public DateTime StartTime { get; set; }
+        
         public DateTime EndTime { get; set; }
         public decimal BasePrice { get; set; }
     }
