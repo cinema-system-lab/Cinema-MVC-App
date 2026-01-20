@@ -1,15 +1,16 @@
-﻿namespace Core.Entities
+﻿using Core.Enums;
+
+namespace Core.Entities;
+
+public class Payment
 {
-    public class Payment
-    {
-        public int Id { get; set; }
-        public int BookingId { get; set; }
-        public decimal Amount { get; set; }
-        public DateTime PaymentDate { get; set; }
-
-        public int StatusId { get; set; }
-        public PaymentStatus Status { get; set; } = null!;
-
-        public Booking Booking { get; set; } = null!;
-    }
+    public Guid Id { get; set; } // було інт
+    
+    // Тип має збігатися з Order.Id
+    public Guid OrderId { get; set; } 
+    public Order Order { get; set; } 
+    
+    public decimal Amount { get; set; }
+    public DateTime PaymentDate { get; set; }
+    public PaymentStatus Status { get; set; }
 }
