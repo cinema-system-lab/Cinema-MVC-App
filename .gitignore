@@ -421,6 +421,8 @@ FodyWeavers.xsd
 .idea/
 *.sln.iml
 
+appsettings.json
+
 # Rider caches
 .idea/.idea.*
 .idea/workspace.xml

@@ -5,7 +5,7 @@ namespace Core.Entities;
 public class Order
 {
     public Guid Id { get; set; } // було інт
-    public string UserId { get; set; } // IdentityUser.Id has a string type
+    public required string UserId { get; set; } // IdentityUser.Id has a string type
     public User User { get; set; } = null!;
     public int SessionId { get; set; }
     public DateTime CreatedAt { get; set; }
