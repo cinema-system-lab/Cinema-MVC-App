@@ -13,14 +13,17 @@ public class TicketConfig : IEntityTypeConfiguration<Ticket>
 
         builder.HasOne(x => x.Order)
             .WithMany(x => x.Tickets)
-            .HasForeignKey(x => x.OrderId);
-
+            .HasForeignKey(x => x.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
         builder.HasOne(x => x.Session)
             .WithMany()
-            .HasForeignKey(x => x.SessionId);
-
+            .HasForeignKey(x => x.SessionId)
+            .OnDelete(DeleteBehavior.NoAction);
+        
         builder.HasOne(x => x.Seat)
             .WithMany()
-            .HasForeignKey(x => x.SeatId);
+            .HasForeignKey(x => x.SeatId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }
