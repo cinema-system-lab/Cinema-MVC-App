@@ -11,7 +11,7 @@ public class Order
     public DateTime CreatedAt { get; set; }
 
     public OrderStatus Status { get; set; }
-    public Session Session { get; set; }
+    public Session Session { get; set; } = null!;
     public Payment? Payment { get; set; }
     public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }
