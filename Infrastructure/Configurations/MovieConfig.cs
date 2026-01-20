@@ -37,7 +37,7 @@ public class MovieConfig : IEntityTypeConfiguration<Movie>
             .IsRequired();
 
         builder.Property(x => x.Rating)
-            .HasColumnType("decimal(3,1)");
+            .HasColumnType("decimal(4,2)");
 
         builder.Property(x => x.Genres)
             .HasConversion<int>()

@@ -24,4 +24,3 @@ public class CinemaAppDbContext : IdentityDbContext<User>
         builder.ApplyConfigurationsFromAssembly(typeof(HallConfig).Assembly);
     }
 }
-}
