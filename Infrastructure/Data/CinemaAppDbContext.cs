@@ -17,6 +17,7 @@ public class CinemaAppDbContext : IdentityDbContext<User>
     public DbSet<Seat> Seats { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<Ticket> Tickets { get; set; }
+    public DbSet<User> Users { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
