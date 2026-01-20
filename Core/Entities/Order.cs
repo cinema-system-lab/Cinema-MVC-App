@@ -6,7 +6,7 @@ public class Order
 {
     public Guid Id { get; set; } // було інт
     public required string UserId { get; set; } // IdentityUser.Id has a string type
-    public User User { get; set; } = null!;
+    public User? User { get; set; }
     public int SessionId { get; set; }
     public DateTime CreatedAt { get; set; }
 

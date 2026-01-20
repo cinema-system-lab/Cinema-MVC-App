@@ -3,7 +3,7 @@ using Infrastructure.Configurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Data;
+namespace Infrastructure.Data;
 
 public class CinemaAppDbContext : IdentityDbContext<User>
 {
