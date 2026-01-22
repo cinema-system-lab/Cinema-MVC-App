@@ -10,10 +10,10 @@ namespace Core.Validators
         {
             RuleFor(x => x.Title)
                 .NotEmpty().WithMessage("Title is required")
-                .MaximumLength(200);
+                .MaximumLength(100);
 
             RuleFor(x => x.Description)
-                .MaximumLength(2000); 
+                .MaximumLength(1000); 
 
             RuleFor(x => x.Director)
                 .NotEmpty().WithMessage("Director is required")
