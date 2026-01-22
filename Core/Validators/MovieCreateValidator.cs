@@ -49,7 +49,7 @@ namespace Core.Validators
                 .NotEmpty()
                 .Must(IsUrl)
                 .WithMessage("Poster URL must be valid if provided")
-                .MaximumLength(500);
+                .MaximumLength(300);
             
             RuleFor(x => x.TrailerUrl)
                 .Must(uri => string.IsNullOrEmpty(uri) || IsUrl(uri))
