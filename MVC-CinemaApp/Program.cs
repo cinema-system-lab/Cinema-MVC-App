@@ -13,12 +13,8 @@ using Core.Validators;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews()
-    .AddFluentValidation(fv =>
-    {
-        fv.RegisterValidatorsFromAssemblyContaining<MovieCreateValidator>();
-        fv.RegisterValidatorsFromAssemblyContaining<MovieUpdateValidator>();
-    });
+builder.Services.AddControllersWithViews();
+builder.Services.AddValidatorsFromAssemblyContaining<MovieCreateValidator>();
 
 builder.Services.AddDbContext<CinemaAppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
