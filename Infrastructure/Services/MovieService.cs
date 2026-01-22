@@ -50,7 +50,7 @@ public class MovieService : IMovieService
         var entity = _context.Movies.Find(id);
         if (entity == null) return;
 
-        _context.Movies.Remove(entity);
+        entity.IsActive = false;
         _context.SaveChanges();
     }
 }
