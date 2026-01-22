@@ -49,11 +49,20 @@ public class MoviesController : Controller
         {
             movie.Genres = (GenreType)selectedGenres.Aggregate(0, (current, next) => current | next);
         }
+
         if (!ModelState.IsValid) return View(movie);
 
-        _movieService.CreateMovie(movie);
-        TempData["SuccessMessage"] = "Movie successfully created!";
-        return RedirectToAction(nameof(Index));
+        try
+        {
+            _movieService.CreateMovie(movie);
+            TempData["SuccessMessage"] = "Movie successfully created!";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception)
+        {
+            ModelState.AddModelError(string.Empty, "An error occurred while creating the movie.");
+            return View(movie);
+        }
     }
 
     // GET: /Movies/Edit/{id}
@@ -77,9 +86,18 @@ public class MoviesController : Controller
         
         if (!ModelState.IsValid) return View(movie);
 
-        _movieService.UpdateMovie(movie);
-        TempData["SuccessMessage"] = "Movie successfully updated!";
-        return RedirectToAction(nameof(Index));
+        try
+        {
+            _movieService.UpdateMovie(movie);
+            TempData["SuccessMessage"] = "Movie successfully updated!";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception)
+        {
+            ModelState.AddModelError(string.Empty, "An error occurred while updating the movie.");
+            return View(movie);
+        }
+
     }
 
     // GET: /Movies/Delete/{id}
