@@ -69,7 +69,7 @@ public class MoviesController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult Edit(MovieDTO movie, int[] selectedGenres)
-        {
+    {
         movie.Genres = (GenreType)(selectedGenres?.Sum() ?? 0);
         
         if (!ModelState.IsValid) return View(movie);
