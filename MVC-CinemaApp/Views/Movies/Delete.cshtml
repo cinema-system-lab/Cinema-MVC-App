@@ -1,0 +1,11 @@
+@model Core.DTOs.MovieDTO
+
+<h2>Delete Movie</h2>
+
+<p>Are you sure you want to delete <strong>@Model.Title</strong>?</p>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit">Yes, delete</button>
+    <a asp-action="Index">Cancel</a>
+</form>
