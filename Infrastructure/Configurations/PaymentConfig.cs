@@ -22,7 +22,8 @@ public class PaymentConfig : IEntityTypeConfiguration<Payment>
             .IsRequired();
 
         builder.HasOne(x => x.Order)
-            .WithOne()
-            .HasForeignKey<Payment>(x => x.OrderId);
+            .WithOne(x => x.Payment)
+            .HasForeignKey<Payment>(x => x.OrderId)
+            .IsRequired();
     }
 }

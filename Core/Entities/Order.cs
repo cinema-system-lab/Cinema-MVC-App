@@ -5,12 +5,13 @@ namespace Core.Entities;
 public class Order
 {
     public Guid Id { get; set; } // було інт
-    public int UserId { get; set; } 
-    
+    public required string UserId { get; set; } // IdentityUser.Id has a string type
+    public User? User { get; set; }
     public int SessionId { get; set; }
     public DateTime CreatedAt { get; set; }
-    
+
     public OrderStatus Status { get; set; }
-    public Session Session { get; set; } 
-    public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>(); 
+    public Session Session { get; set; } = null!;
+    public Payment? Payment { get; set; }
+    public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

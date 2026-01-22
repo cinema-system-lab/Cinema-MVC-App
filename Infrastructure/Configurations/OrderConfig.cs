@@ -24,5 +24,10 @@ public class OrderConfig : IEntityTypeConfiguration<Order>
         builder.HasMany(x => x.Tickets)
             .WithOne(x => x.Order)
             .HasForeignKey(x => x.OrderId);
+        
+        builder.HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .IsRequired();
     }
 }

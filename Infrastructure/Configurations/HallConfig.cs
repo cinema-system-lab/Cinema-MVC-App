@@ -2,7 +2,7 @@ using Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DataAccessLayer.Configurations;
+namespace Infrastructure.Configurations;
 
 public class HallConfig : IEntityTypeConfiguration<Hall>
 {
