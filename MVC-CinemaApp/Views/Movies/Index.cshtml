@@ -12,16 +12,19 @@
         <th>Director</th>
         <th>Actions</th>
     </tr>
-    @foreach (var movie in Model)
+    @if (Model != null)
     {
-        <tr>
-            <td>@movie.Title</td>
-            <td>@movie.Director</td>
-            <td>
-                <a asp-action="Details" asp-route-id="@movie.Id">Details</a> |
-                <a asp-action="Edit" asp-route-id="@movie.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@movie.Id">Delete</a>
-            </td>
-        </tr>
+        foreach (var movie in Model)
+        {
+            <tr>
+                <td>@movie.Title</td>
+                <td>@movie.Director</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@movie.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@movie.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@movie.Id">Delete</a>
+                </td>
+            </tr>
+        }
     }
 </table>
