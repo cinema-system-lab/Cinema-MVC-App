@@ -1,4 +1,4 @@
-@model List<Core.DTOs.MovieDTO>
+@model IEnumerable<Core.DTOs.MovieDTO>
 
 <h2>Movies</h2>
 
@@ -6,15 +6,22 @@
     <a asp-action="Create">Create New Movie</a>
 </p>
 
-<table>
-    <tr>
-        <th>Title</th>
-        <th>Director</th>
-        <th>Actions</th>
-    </tr>
-    @if (Model != null)
-    {
-        foreach (var movie in Model)
+@if (Model == null || !Model.Any())
+{
+    <p>No movies found.</p>
+}
+else
+{
+    <table>
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Director</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var movie in Model)
         {
             <tr>
                 <td>@movie.Title</td>
@@ -26,5 +33,6 @@
                 </td>
             </tr>
         }
-    }
-</table>
+        </tbody>
+    </table>
+}
