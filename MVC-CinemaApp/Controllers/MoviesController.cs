@@ -43,11 +43,11 @@ public class MoviesController : Controller
     // POST: /Movies/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(MovieDTO movie, int[]? genres)
+    public IActionResult Create(MovieDTO movie, int[]? selectedGenres)
     {
-        if (genres != null && genres.Length > 0)
+        if (selectedGenres != null && selectedGenres.Length > 0)
         {
-            movie.Genres = (GenreType)genres.Aggregate(0, (current, next) => current | next);
+            movie.Genres = (GenreType)selectedGenres.Aggregate(0, (current, next) => current | next);
         }
         if (!ModelState.IsValid) return View(movie);
 
