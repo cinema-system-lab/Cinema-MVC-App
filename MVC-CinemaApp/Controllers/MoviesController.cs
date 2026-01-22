@@ -70,7 +70,10 @@ public class MoviesController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Edit(MovieDTO movie, int[] selectedGenres)
     {
-        movie.Genres = (GenreType)(selectedGenres?.Sum() ?? 0);
+        var combinedGenres = (selectedGenres != null && selectedGenres.Length > 0)
+            ? selectedGenres.Aggregate(0, (current, next) => current | next)
+            : 0;
+        movie.Genres = (GenreType)combinedGenres;
         
         if (!ModelState.IsValid) return View(movie);
 
