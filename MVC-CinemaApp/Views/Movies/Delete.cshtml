@@ -6,6 +6,6 @@
 
 <form asp-action="DeleteConfirmed" method="post">
     <input type="hidden" asp-for="Id" />
-    <button type="submit">Yes, delete</button>
-    <a asp-action="Index">Cancel</a>
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
