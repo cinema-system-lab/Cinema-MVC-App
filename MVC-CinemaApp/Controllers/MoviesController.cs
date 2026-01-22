@@ -15,16 +15,16 @@ public class MoviesController : Controller
     }
 
     // GET: /Movies or /Movies/Index
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        var movies = _movieService.GetAllMovies();
+        var movies = await _movieService.GetAllMoviesAsync();
         return View(movies);
     }
 
     // GET: /Movies/Details/{id}
-    public IActionResult Details(int id)
+    public async Task<IActionResult> Details(int id)
     {
-        var movie = _movieService.GetMovie(id);
+        var movie = await _movieService.GetMovieAsync(id);
         if (movie == null) return NotFound();
         return View(movie);
     }
@@ -39,11 +39,10 @@ public class MoviesController : Controller
         return View(movie);
     }
 
-
     // POST: /Movies/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(MovieDTO movie, int[]? selectedGenres)
+    public async Task<IActionResult> Create(MovieDTO movie, int[]? selectedGenres)
     {
         if (selectedGenres != null && selectedGenres.Length > 0)
         {
@@ -54,7 +53,7 @@ public class MoviesController : Controller
 
         try
         {
-            _movieService.CreateMovie(movie);
+            await _movieService.CreateMovieAsync(movie);
             TempData["SuccessMessage"] = "Movie successfully created!";
             return RedirectToAction(nameof(Index));
         }
@@ -66,9 +65,9 @@ public class MoviesController : Controller
     }
 
     // GET: /Movies/Edit/{id}
-    public IActionResult Edit(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var movie = _movieService.GetMovie(id);
+        var movie = await _movieService.GetMovieAsync(id);
         if (movie == null) return NotFound();
 
         return View(movie);
@@ -77,18 +76,18 @@ public class MoviesController : Controller
     // POST: /Movies/Edit
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(MovieDTO movie, int[] selectedGenres)
+    public async Task<IActionResult> Edit(MovieDTO movie, int[]? selectedGenres)
     {
         var combinedGenres = (selectedGenres != null && selectedGenres.Length > 0)
             ? selectedGenres.Aggregate(0, (current, next) => current | next)
             : 0;
         movie.Genres = (GenreType)combinedGenres;
-        
+
         if (!ModelState.IsValid) return View(movie);
 
         try
         {
-            _movieService.UpdateMovie(movie);
+            await _movieService.UpdateMovieAsync(movie);
             TempData["SuccessMessage"] = "Movie successfully updated!";
             return RedirectToAction(nameof(Index));
         }
@@ -97,24 +96,23 @@ public class MoviesController : Controller
             ModelState.AddModelError(string.Empty, "An error occurred while updating the movie.");
             return View(movie);
         }
-
     }
 
     // GET: /Movies/Delete/{id}
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var movie = _movieService.GetMovie(id);
+        var movie = await _movieService.GetMovieAsync(id);
         if (movie == null) return NotFound();
         return View(movie);
     }
-    
+
+    // POST: /Movies/DeleteConfirmed
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        _movieService.DeleteMovie(id);
+        await _movieService.DeleteMovieAsync(id);
         TempData["SuccessMessage"] = "Movie deleted!";
         return RedirectToAction(nameof(Index));
     }
-
 }

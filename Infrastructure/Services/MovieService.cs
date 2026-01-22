@@ -3,6 +3,7 @@ using Core.Entities;
 using Core.Interfaces.Services;
 using AutoMapper;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessLayer.Services;
 
@@ -17,40 +18,40 @@ public class MovieService : IMovieService
         _mapper = mapper;
     }
 
-    public List<MovieDTO> GetAllMovies()
+    public async Task<List<MovieDTO>> GetAllMoviesAsync()
     {
-        var movies = _context.Movies.Where(x => x.IsActive).ToList();
+        var movies = await _context.Movies.Where(x => x.IsActive).ToListAsync();
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 
-    public MovieDTO? GetMovie(int id)
+    public async Task<MovieDTO?> GetMovieAsync(int id)
     {
-        var movie = _context.Movies.Find(id);
+        var movie = await _context.Movies.FindAsync(id);
         return movie == null ? null : _mapper.Map<MovieDTO>(movie);
     }
 
-    public void CreateMovie(MovieDTO movie)
+    public async Task CreateMovieAsync(MovieDTO movie)
     {
         var entity = _mapper.Map<Movie>(movie);
         _context.Movies.Add(entity);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void UpdateMovie(MovieDTO movie)
+    public async Task UpdateMovieAsync(MovieDTO movie)
     {
-        var entity = _context.Movies.Find(movie.Id);
+        var entity = await _context.Movies.FindAsync(movie.Id);
         if (entity == null) return;
 
         _mapper.Map(movie, entity);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void DeleteMovie(int id)
+    public async Task DeleteMovieAsync(int id)
     {
-        var entity = _context.Movies.Find(id);
+        var entity = await _context.Movies.FindAsync(id);
         if (entity == null) return;
 
         entity.IsActive = false;
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 }
