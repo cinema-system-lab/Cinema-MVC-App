@@ -62,12 +62,65 @@ public class SeatsController : Controller
             return View(generationDto);
         }
     }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Add(SeatDTO seat)
+    {
+        // Валідація мінімальна
+        if (seat.RowNumber < 1 || seat.SeatNumber < 1)
+        {
+            TempData["ErrorMessage"] = "Row and Seat numbers must be greater than 0.";
+            return RedirectToAction(nameof(Index), new { hallId = seat.HallId });
+        }
 
+        try
+        {
+            await _seatService.AddSeatAsync(seat);
+            TempData["SuccessMessage"] = "Seat added successfully!";
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Якщо місце вже існує
+            TempData["ErrorMessage"] = ex.Message;
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "Error adding seat.";
+        }
+
+        return RedirectToAction(nameof(Index), new { hallId = seat.HallId });
+    }
+    
     // POST: /Seats/Delete/5
     [HttpPost]
     public async Task<IActionResult> Delete(int id, int hallId)
     {
         await _seatService.DeleteSeatAsync(id);
+        return RedirectToAction(nameof(Index), new { hallId = hallId });
+    }
+    
+    // POST: /Seats/DeleteAll?hallId=5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAll(int hallId)
+    {
+        try
+        {
+            await _seatService.DeleteAllSeatsByHallIdAsync(hallId);
+            TempData["SuccessMessage"] = "All seats have been deleted from this hall.";
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "Error clearing the hall.";
+        }
+
+        return RedirectToAction(nameof(Index), new { hallId = hallId });
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> ToggleType(int id, int hallId)
+    {
+        await _seatService.ToggleSeatTypeAsync(id);
         return RedirectToAction(nameof(Index), new { hallId = hallId });
     }
 }

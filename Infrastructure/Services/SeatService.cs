@@ -68,7 +68,22 @@ public class SeatService : ISeatService
             throw;
         }
     }
+    public async Task AddSeatAsync(SeatDTO seatDto)
+    {
+        bool exists = await _context.Seats.AnyAsync(s => 
+            s.HallId == seatDto.HallId && 
+            s.RowNumber == seatDto.RowNumber && 
+            s.SeatNumber == seatDto.SeatNumber);
 
+        if (exists)
+        {
+            throw new InvalidOperationException($"Seat {seatDto.RowNumber}-{seatDto.SeatNumber} already exists.");
+        }
+
+        var seat = _mapper.Map<Seat>(seatDto);
+        _context.Seats.Add(seat);
+        await _context.SaveChangesAsync();
+    }
     public async Task DeleteSeatAsync(int id)
     {
         var seat = await _context.Seats.FindAsync(id);
@@ -77,5 +92,23 @@ public class SeatService : ISeatService
             _context.Seats.Remove(seat);
             await _context.SaveChangesAsync();
         }
+    }
+    
+    public async Task ToggleSeatTypeAsync(int id)
+    {
+        var seat = await _context.Seats.FindAsync(id);
+        if (seat != null)
+        {
+            seat.Type = seat.Type == SeatType.Regular ? SeatType.Premium : SeatType.Regular;
+        
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task DeleteAllSeatsByHallIdAsync(int hallId)
+    {
+        var seats = _context.Seats.Where(s => s.HallId == hallId);
+        _context.Seats.RemoveRange(seats);
+        await _context.SaveChangesAsync();
     }
 }

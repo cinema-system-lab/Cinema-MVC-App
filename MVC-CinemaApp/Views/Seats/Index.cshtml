@@ -1,67 +1,153 @@
-﻿@model List<Core.DTOs.SeatDTO>
+﻿@using Core.Enums
+@model List<Core.DTOs.SeatDTO>
 
 @{
     int hallId = ViewBag.HallId;
     string hallName = ViewBag.HallName;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Seat Layout: @hallName</h2>
-    <div>
-        @* Кнопка для перегенерації *@
-        <a asp-action="Create" asp-route-hallId="@hallId" class="btn btn-warning">Regenerate Layout</a>
-        <a asp-controller="Halls" asp-action="Index" class="btn btn-outline-secondary">Back to Halls</a>
-    </div>
-</div>
+<div class="container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-@if (!Model.Any())
-{
-    <div class="text-center mt-5">
-        <h4>No seats configured yet.</h4>
-        <a asp-action="Create" asp-route-hallId="@hallId" class="btn btn-primary mt-3">Create Layout</a>
-    </div>
-}
-else
-{
-    <div class="mb-4">
-        <div class="w-100 bg-secondary text-white text-center py-2 shadow-sm" style="border-radius: 0 0 50% 50%; letter-spacing: 5px;">
-            SCREEN
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+        <h2>Seat Layout: <span class="text-primary">@hallName</span></h2>
+        
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addSeatModal">
+                <i class="bi bi-plus-circle"></i> Add Seat
+            </button>
+
+            <a asp-action="Create" asp-route-hallId="@hallId" class="btn btn-warning shadow-sm">
+                <i class="bi bi-arrow-repeat"></i> Regenerate
+            </a>
+
+            @if (Model.Any())
+            {
+                <form asp-action="DeleteAll" method="post" onsubmit="return confirm('Are you sure you want to delete ALL seats in this hall? This cannot be undone.');">
+                    <input type="hidden" name="hallId" value="@hallId" />
+                    <button type="submit" class="btn btn-danger shadow-sm">
+                        <i class="bi bi-trash"></i> Clear Hall
+                    </button>
+                </form>
+            }
+
+            <a asp-controller="Halls" asp-action="Index" class="btn btn-outline-secondary">Back</a>
         </div>
     </div>
 
-    <div class="d-flex flex-column align-items-center">
-        @* Групуємо місця по рядах *@
-        @foreach (var rowGroup in Model.GroupBy(x => x.RowNumber).OrderBy(x => x.Key))
-        {
-            <div class="d-flex mb-2 align-items-center">
-                <div class="me-3 fw-bold text-muted">Row @rowGroup.Key</div>
-                
-                @foreach (var seat in rowGroup.OrderBy(x => x.SeatNumber))
-                {
-                    <div class="seat-container mx-1 text-center" style="position: relative;">
-                        <div class="card p-1 text-white @(seat.Type == Core.Enums.SeatType.Premium ? "bg-warning" : "bg-success")" 
-                             style="width: 40px; height: 40px; font-size: 0.8rem; cursor: pointer;"
-                             title="Seat @seat.SeatNumber (@seat.Type)">
-                            @seat.SeatNumber
-                        </div>
-                        
-                        <form asp-action="Delete" method="post" class="position-absolute" style="top: -5px; right: -5px;">
-                             <input type="hidden" name="id" value="@seat.Id" />
-                             <input type="hidden" name="hallId" value="@seat.HallId" />
-                             <button type="submit" class="btn btn-sm btn-danger p-0" 
-                                     style="width: 15px; height: 15px; line-height: 10px; font-size: 10px; border-radius: 50%;"
-                                     onclick="return confirm('Remove seat @seat.RowNumber-@seat.SeatNumber?');">
-                                 &times;
-                             </button>
-                        </form>
-                    </div>
-                }
+    @if (!Model.Any())
+    {
+        <div class="text-center mt-5 p-5 bg-light rounded shadow-sm">
+            <h4 class="text-muted">No seats configured for this hall yet.</h4>
+            <p>Generate a grid layout to start selling tickets.</p>
+            <a asp-action="Create" asp-route-hallId="@hallId" class="btn btn-primary mt-3 btn-lg">Create Seat Layout</a>
+            <button type="button" class="btn btn-success mt-3 btn-lg ms-2" data-bs-toggle="modal" data-bs-target="#addSeatModal">
+                Add Manually
+            </button>
+        </div>
+    }
+    else 
+    {
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8">
+                <div class="w-100 bg-dark text-white text-center py-2 shadow" 
+                     style="border-radius: 0 0 50% 50%; letter-spacing: 5px; font-weight: bold; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+                    SCREEN
+                </div>
             </div>
-        }
+        </div>
+        
+        <div class="d-flex flex-column align-items-center overflow-auto pb-4">
+            @foreach (var rowGroup in Model.GroupBy(x => x.RowNumber).OrderBy(x => x.Key))
+            {
+                var maxSeatInRow = rowGroup.Max(x => x.SeatNumber);
+                <div class="d-flex mb-2 align-items-center">
+                    <div class="me-3 fw-bold text-muted text-end" style="width: 50px;">Row @rowGroup.Key</div>
+                    @for (byte i = 1; i <= maxSeatInRow; i++)
+                    {
+                        var seat = rowGroup.FirstOrDefault(x => x.SeatNumber == i);
+                        if (seat != null)
+                        {
+                            <div class="seat-wrapper mx-1" style="position: relative;">
+                                <form asp-action="ToggleType" method="post">
+                                    <input type="hidden" name="id" value="@seat.Id" />
+                                    <input type="hidden" name="hallId" value="@seat.HallId" />
+                                    <button type="submit" class="btn p-0 border-0 shadow-sm d-flex align-items-center justify-content-center text-white"
+                                            style="width: 40px; height: 40px; transition: all 0.2s; 
+                                                   @(seat.Type == SeatType.Premium ? "background-color: #ffc107; color: #212529 !important;" : "background-color: #198754;")">
+                                        <span style="font-size: 0.8rem; font-weight: 500;">@seat.SeatNumber</span>
+                                    </button>
+                                </form>
+                                <form asp-action="Delete" method="post" class="position-absolute" style="top: -8px; right: -8px; z-index: 10;">
+                                     <input type="hidden" name="id" value="@seat.Id" />
+                                     <input type="hidden" name="hallId" value="@seat.HallId" />
+                                     <button type="submit" class="btn btn-danger rounded-circle p-0 d-flex justify-content-center align-items-center shadow-sm" style="width: 18px; height: 18px; font-size: 10px; line-height: 1;" onclick="return confirm('Delete seat?');">&times;</button>
+                                </form>
+                            </div>
+                        }
+                        else { <div class="mx-1" style="width: 40px; height: 40px;"></div> }
+                    }
+                </div>
+            }
+        </div>
+        
+        <div class="mt-4 text-center p-3 bg-light rounded border">
+             <span class="d-inline-flex align-items-center me-4">
+                <span class="d-inline-block bg-success rounded me-2" style="width: 20px; height: 20px;"></span> Regular Seat
+            </span>
+            <span class="d-inline-flex align-items-center">
+                <span class="d-inline-block bg-warning rounded me-2" style="width: 20px; height: 20px;"></span> Premium Seat
+            </span>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="addSeatModal" tabindex="-1" aria-labelledby="addSeatModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Add" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSeatModalLabel">Add Single Seat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="HallId" value="@hallId" />
+                    <div class="mb-3">
+                        <label for="RowNumber" class="form-label">Row Number</label>
+                        <input type="number" class="form-control" name="RowNumber" required min="1" max="50">
+                    </div>
+                    <div class="mb-3">
+                        <label for="SeatNumber" class="form-label">Seat Number</label>
+                        <input type="number" class="form-control" name="SeatNumber" required min="1" max="50">
+                    </div>
+                    <div class="mb-3">
+                        <label for="Type" class="form-label">Seat Type</label>
+                        <select class="form-select" name="Type">
+                            @foreach (var type in Enum.GetValues(typeof(SeatType)))
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save Seat</button>
+                </div>
+            </form>
+        </div>
     </div>
-    
-    <div class="mt-4 text-center">
-        <span class="badge bg-success me-2">Regular Seat</span>
-        <span class="badge bg-warning text-dark">Premium Seat</span>
-    </div>
-}
+</div>
