@@ -15,6 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddValidatorsFromAssemblyContaining<MovieCreateValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
 
 builder.Services.AddDbContext<CinemaAppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -24,10 +26,13 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddDefaultTokenProviders();
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(MovieProfile));
+builder.Services.AddAutoMapper(typeof(MovieProfile).Assembly);
 
 // DI for MovieService
 builder.Services.AddScoped<IMovieService, MovieService>();
+
+// DI for HallService
+builder.Services.AddScoped<IHallService, HallService>();
 
 
 var app = builder.Build();
