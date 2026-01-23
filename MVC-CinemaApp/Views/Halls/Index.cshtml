@@ -27,6 +27,7 @@ else
                 <td>@hall.Name</td>
                 <td>@hall.Type</td>
                 <td>
+                    <a asp-controller="Seats" asp-action="Index" asp-route-hallId="@hall.Id" class="btn btn-sm btn-info text-white">Seats</a>
                     <a asp-action="Details" asp-route-id="@hall.Id">Details</a> |
                     <a asp-action="Edit" asp-route-id="@hall.Id">Edit</a> |
                     <a asp-action="Delete" asp-route-id="@hall.Id">Delete</a>

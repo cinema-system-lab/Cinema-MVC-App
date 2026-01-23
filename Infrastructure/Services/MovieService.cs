@@ -5,7 +5,7 @@ using AutoMapper;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Services;
+namespace Infrastructure.Services;
 
 public class MovieService : IMovieService
 {
