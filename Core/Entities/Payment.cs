@@ -4,9 +4,8 @@ namespace Core.Entities;
 
 public class Payment
 {
-    public Guid Id { get; set; } // було інт
+    public Guid Id { get; set; } 
     
-    // Тип має збігатися з Order.Id
     public Guid OrderId { get; set; } 
     public Order Order { get; set; } 
     
