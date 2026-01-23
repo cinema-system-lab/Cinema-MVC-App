@@ -8,9 +8,6 @@ public class HallUpdateValidator : AbstractValidator<HallDTO>
 {
     public HallUpdateValidator()
     {
-        RuleFor(x => x.Id)
-            .GreaterThan(0).WithMessage("Invalid hall id");
-
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required")
             .MaximumLength(50).WithMessage("Name cannot exceed 50 characters");
