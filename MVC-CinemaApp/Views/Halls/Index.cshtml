@@ -1,0 +1,38 @@
+@model IEnumerable<Core.DTOs.HallDTO>
+
+<h2>Halls</h2>
+
+<p>
+    <a asp-action="Create">Create New Hall</a>
+</p>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No halls found.</p>
+}
+else
+{
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var hall in Model)
+        {
+            <tr>
+                <td>@hall.Name</td>
+                <td>@hall.Type</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@hall.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@hall.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@hall.Id">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
