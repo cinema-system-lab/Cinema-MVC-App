@@ -5,7 +5,7 @@ using Core.Interfaces.Services;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Services;
+namespace Infrastructure.Services;
 
 public class HallService : IHallService
 {

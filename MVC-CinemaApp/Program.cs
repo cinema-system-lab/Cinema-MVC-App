@@ -3,7 +3,7 @@ using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Core.Interfaces.Services;
-using DataAccessLayer.Services;
+using Infrastructure.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Core.DTOs;
@@ -34,6 +34,7 @@ builder.Services.AddScoped<IMovieService, MovieService>();
 // DI for HallService
 builder.Services.AddScoped<IHallService, HallService>();
 
+builder.Services.AddScoped<ISeatService, SeatService>();
 
 var app = builder.Build();
 
