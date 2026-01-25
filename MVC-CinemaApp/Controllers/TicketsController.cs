@@ -60,9 +60,14 @@ public class TicketsController : Controller
             TempData["SuccessMessage"] = "Ticket successfully canceled!";
             return RedirectToAction(nameof(Index));
         }
+        catch (InvalidOperationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
         catch (Exception)
         {
-            TempData["ErrorMessage"] = "Error occurred while canceling the ticket.";
+            TempData["ErrorMessage"] = "An unexpected error occurred while canceling the ticket.";
             return RedirectToAction(nameof(Index));
         }
     }
