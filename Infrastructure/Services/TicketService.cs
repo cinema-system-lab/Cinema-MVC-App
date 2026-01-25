@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Core.DTOs;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces.Services;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -85,14 +86,33 @@ public class TicketService : ITicketService
     public async Task DeleteTicketAsync(Guid orderId, int sessionId, int seatId)
     {
         var ticket = await _context.Tickets
+            .Include(t => t.Order)
+            .Include(t => t.Session)
             .FirstOrDefaultAsync(t => t.OrderId == orderId
                                    && t.SessionId == sessionId
                                    && t.SeatId == seatId);
 
-        if (ticket != null)
+        if (ticket == null) return;
+
+        if (ticket.Session.StartTime <= DateTime.Now)
         {
-            _context.Tickets.Remove(ticket);
-            await _context.SaveChangesAsync();
+            throw new InvalidOperationException("Cannot cancel a ticket for a session that has already started or passed.");
         }
+
+        if (ticket.Order.Status != OrderStatus.Pending)
+        {
+            string message = ticket.Order.Status switch
+            {
+                OrderStatus.Paid => "Cannot cancel a paid ticket.",
+                OrderStatus.Cancelled => "This order is already cancelled.",
+                OrderStatus.Refunded => "This ticket has already been refunded.",
+                _ => "Ticket cannot be deleted in current order status."
+            };
+
+            throw new InvalidOperationException(message);
+        }
+
+        _context.Tickets.Remove(ticket);
+        await _context.SaveChangesAsync();
     }
 }
