@@ -25,7 +25,8 @@ public class SessionsController : Controller
     public async Task<IActionResult> Index()
     {
         var sessions = await _sessionService.GetAllSessionsAsync();
-        var movies = await _movieService.GetAllMoviesAsync();
+        var movies = (await _movieService.GetAllMoviesAsync())
+                    .Where(m => m.IsActive);
         var halls = await _hallService.GetAllHallsAsync();
 
         ViewBag.MovieNames = movies.ToDictionary(m => m.Id, m => m.Title);
@@ -157,7 +158,8 @@ public class SessionsController : Controller
     
     private async Task PopulateDropdowns(int? selectedMovieId = null, int? selectedHallId = null)
     {
-        var movies = await _movieService.GetAllMoviesAsync();
+        var movies = (await _movieService.GetAllMoviesAsync())
+                    .Where(m => m.IsActive);
         var halls = await _hallService.GetAllHallsAsync();
 
         ViewBag.Movies = new SelectList(movies, "Id", "Title", selectedMovieId);
