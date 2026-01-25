@@ -40,6 +40,9 @@ builder.Services.AddScoped<ISeatService, SeatService>();
 // DI for SessionService
 builder.Services.AddScoped<ISessionService, SessionService>();
 
+// DI for TicketService
+builder.Services.AddScoped<ITicketService, TicketService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
