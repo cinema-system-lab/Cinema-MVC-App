@@ -58,6 +58,10 @@ public class SessionService : ISessionService
         if (overlapExists)
             throw new InvalidOperationException("Session overlaps with another session in the same hall");
         
+        var hasTickets = await _context.Tickets.AnyAsync(t => t.SessionId == id);
+        if (hasTickets)
+            throw new InvalidOperationException("Cannot update session with sold tickets");
+        
         _mapper.Map(session, entity);
         await _context.SaveChangesAsync();
     }

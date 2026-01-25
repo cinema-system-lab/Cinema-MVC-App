@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace Core.Validators;
 
-public class SessionUpdateValidator : AbstractValidator<SessionDTO>
+public class SessionValidator : AbstractValidator<SessionDTO>
 {
-    public SessionUpdateValidator()
+    public SessionValidator()
     {
         RuleFor(x => x.MovieId)
             .GreaterThan(0);
