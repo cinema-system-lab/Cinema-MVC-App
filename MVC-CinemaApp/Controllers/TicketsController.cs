@@ -15,34 +15,13 @@ public class TicketsController : Controller
     }
 
     // GET: /Tickets
-
-    public async Task<IActionResult> Index()
-    {
-        // Тимчасово для тесту в'юшки:
-        var mockTickets = new List<TicketDTO>
-    {
-        new TicketDTO {
-            MovieTitle = "Avatar 2",
-            HallName = "IMAX",
-            StartTime = DateTime.Now.AddHours(2),
-            RowNumber = 5,
-            SeatNumber = 10,
-            Price = 150.00m,
-            OrderId = Guid.NewGuid(), // Будь-який Guid
-            SessionId = 1,
-            SeatId = 1
-        }
-    };
-        return View(mockTickets);
-    }
-
-    /*
+    
     public async Task<IActionResult> Index()
     {
         var tickets = await _ticketService.GetAllTicketsAsync();
         return View(tickets);
     }
-    */
+    
 
     // GET: /Tickets/ByOrder/{orderId}
     public async Task<IActionResult> ByOrder(Guid orderId)
