@@ -1,0 +1,23 @@
+@model Core.DTOs.SessionDTO
+
+<h2>Session Details</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Movie</dt>
+    <dd class="col-sm-9">@ViewBag.MovieName</dd>
+
+    <dt class="col-sm-3">Hall</dt>
+    <dd class="col-sm-9">@ViewBag.HallName</dd>
+
+    <dt class="col-sm-3">Start Time</dt>
+    <dd class="col-sm-9">@Model.StartTime</dd>
+
+    <dt class="col-sm-3">End Time</dt>
+    <dd class="col-sm-9">@Model.EndTime</dd>
+
+    <dt class="col-sm-3">Base Price</dt>
+    <dd class="col-sm-9">@Model.BasePrice</dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

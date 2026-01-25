@@ -34,7 +34,11 @@ builder.Services.AddScoped<IMovieService, MovieService>();
 // DI for HallService
 builder.Services.AddScoped<IHallService, HallService>();
 
+// DI for SeatService
 builder.Services.AddScoped<ISeatService, SeatService>();
+
+// DI for SessionService
+builder.Services.AddScoped<ISessionService, SessionService>();
 
 var app = builder.Build();
 
