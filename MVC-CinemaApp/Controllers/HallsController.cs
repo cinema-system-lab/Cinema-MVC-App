@@ -8,10 +8,12 @@ namespace Cinema_MVC_App.Controllers;
 public class HallsController : Controller
 {
     private readonly IHallService _hallService;
+    private readonly ISeatService _seatService;
 
-    public HallsController(IHallService hallService)
+    public HallsController(IHallService hallService, ISeatService seatService)
     {
         _hallService = hallService;
+        _seatService = seatService;
     }
 
     // GET: /Halls
@@ -32,6 +34,15 @@ public class HallsController : Controller
         
         // Get active sessions count
         ViewBag.ActiveSessionsCount = await _hallService.GetActiveSessionsCountAsync(id);
+        
+        // Get booked seats count
+        ViewBag.BookedSeatsCount = await _hallService.GetBookedSeatsCountAsync(id);
+        
+        // Get upcoming sessions
+        ViewBag.UpcomingSessions = await _hallService.GetUpcomingSessionsAsync(id);
+        
+        // Get statistics (last 30 days)
+        ViewBag.Statistics = await _hallService.GetHallStatisticsAsync(id, 30);
         
         return View(hall);
     }
@@ -68,6 +79,11 @@ public class HallsController : Controller
     {
         var hall = await _hallService.GetHallAsync(id);
         if (hall == null) return NotFound();
+        
+        // Get seats for the hall
+        ViewBag.Seats = await _seatService.GetSeatsByHallIdAsync(id);
+        ViewBag.SeatsCount = await _hallService.GetSeatsCountAsync(id);
+        
         return View(hall);
     }
 
@@ -76,7 +92,13 @@ public class HallsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(HallDTO hall)
     {
-        if (!ModelState.IsValid) return View(hall);
+        if (!ModelState.IsValid)
+        {
+            // Reload ViewBag data for the view
+            ViewBag.Seats = await _seatService.GetSeatsByHallIdAsync(hall.Id);
+            ViewBag.SeatsCount = await _hallService.GetSeatsCountAsync(hall.Id);
+            return View(hall);
+        }
 
         try
         {
@@ -87,11 +109,17 @@ public class HallsController : Controller
         catch (InvalidOperationException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
+            // Reload ViewBag data for the view
+            ViewBag.Seats = await _seatService.GetSeatsByHallIdAsync(hall.Id);
+            ViewBag.SeatsCount = await _hallService.GetSeatsCountAsync(hall.Id);
             return View(hall);
         }
         catch (Exception)
         {
             ModelState.AddModelError(string.Empty, "An error occurred while updating the hall.");
+            // Reload ViewBag data for the view
+            ViewBag.Seats = await _seatService.GetSeatsByHallIdAsync(hall.Id);
+            ViewBag.SeatsCount = await _hallService.GetSeatsCountAsync(hall.Id);
             return View(hall);
         }
     }

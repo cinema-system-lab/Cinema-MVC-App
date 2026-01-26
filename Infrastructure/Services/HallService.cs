@@ -28,7 +28,6 @@ public class HallService : IHallService
     public async Task<HallDTO?> GetHallAsync(int id)
     {
         var hall = await _context.Halls
-            .Include(h => h.Seats)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
         return hall == null ? null : _mapper.Map<HallDTO>(hall);
@@ -99,5 +98,95 @@ public class HallService : IHallService
         return await _context.Sessions
             .Where(s => s.HallId == hallId && s.StartTime >= now)
             .CountAsync();
+    }
+
+    public async Task<int> GetBookedSeatsCountAsync(int hallId)
+    {
+        var now = DateTime.Now;
+        var activeSessionIds = await _context.Sessions
+            .Where(s => s.HallId == hallId && s.EndTime >= now)
+            .Select(s => s.Id)
+            .ToListAsync();
+
+        return await _context.Tickets
+            .Where(t => activeSessionIds.Contains(t.SessionId))
+            .Select(t => t.SeatId)
+            .Distinct()
+            .CountAsync();
+    }
+
+    public async Task<List<HallSessionInfoDTO>> GetUpcomingSessionsAsync(int hallId, int count = 10)
+    {
+        var now = DateTime.Now;
+        var sessions = await _context.Sessions
+            .Where(s => s.HallId == hallId && s.EndTime >= now)
+            .Include(s => s.Movie)
+            .OrderBy(s => s.StartTime)
+            .Take(count)
+            .AsNoTracking()
+            .Select(s => new HallSessionInfoDTO
+            {
+                SessionId = s.Id,
+                MovieName = s.Movie.Title,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                BasePrice = s.BasePrice,
+                IsOngoing = s.StartTime <= now && s.EndTime >= now,
+                IsStartingSoon = s.StartTime > now && s.StartTime <= now.AddHours(2)
+            })
+            .ToListAsync();
+
+        return sessions;
+    }
+
+    public async Task<HallStatisticsDTO> GetHallStatisticsAsync(int hallId, int? days = null)
+    {
+        var now = DateTime.Now;
+        DateTime? fromDate = days.HasValue ? now.AddDays(-days.Value) : null;
+
+        // Get total seats
+        var totalSeats = await _context.Seats.CountAsync(s => s.HallId == hallId);
+
+        // Build session query with optional date filter
+        var sessionsQuery = _context.Sessions
+            .Where(s => s.HallId == hallId && s.EndTime < now);
+
+        if (fromDate.HasValue)
+        {
+            sessionsQuery = sessionsQuery.Where(s => s.StartTime >= fromDate.Value);
+        }
+
+        var totalSessions = await sessionsQuery.CountAsync();
+
+        // Get session IDs for ticket counting
+        var sessionIds = await sessionsQuery.Select(s => s.Id).ToListAsync();
+
+        // Count tickets sold for these sessions
+        var totalTicketsSold = await _context.Tickets
+            .Where(t => sessionIds.Contains(t.SessionId))
+            .CountAsync();
+
+        // Calculate average occupancy rate
+        var avgOccupancy = totalSessions > 0 && totalSeats > 0
+            ? (decimal)totalTicketsSold / (totalSessions * totalSeats) * 100
+            : 0;
+
+        // Calculate total revenue (tickets * session base price)
+        var revenue = await _context.Tickets
+            .Where(t => sessionIds.Contains(t.SessionId))
+            .Join(_context.Sessions,
+                ticket => ticket.SessionId,
+                session => session.Id,
+                (ticket, session) => session.BasePrice)
+            .SumAsync();
+
+        return new HallStatisticsDTO
+        {
+            TotalSeats = totalSeats,
+            TotalSessions = totalSessions,
+            TotalTicketsSold = totalTicketsSold,
+            AverageOccupancyRate = Math.Round(avgOccupancy, 2),
+            TotalRevenue = revenue
+        };
     }
 }
