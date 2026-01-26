@@ -26,6 +26,13 @@ public class HallsController : Controller
     {
         var hall = await _hallService.GetHallAsync(id);
         if (hall == null) return NotFound();
+        
+        // Get seats count
+        ViewBag.SeatsCount = await _hallService.GetSeatsCountAsync(id);
+        
+        // Get active sessions count
+        ViewBag.ActiveSessionsCount = await _hallService.GetActiveSessionsCountAsync(id);
+        
         return View(hall);
     }
 
@@ -97,8 +104,16 @@ public class HallsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        await _hallService.DeleteHallAsync(id);
-        TempData["SuccessMessage"] = "Hall deleted!";
-        return RedirectToAction(nameof(Index));
+        try
+        {
+            await _hallService.DeleteHallAsync(id);
+            TempData["SuccessMessage"] = "Hall deleted!";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Delete), new { id });
+        }
     }
 }
