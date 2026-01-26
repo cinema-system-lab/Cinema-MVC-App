@@ -50,14 +50,28 @@ public class HallService : IHallService
         var entity = await _context.Halls.FindAsync(hall.Id);
         if (entity == null) return;
 
-        // Check if there are any active sessions in this hall
-        var now = DateTime.Now;
-        var hasActiveSessions = await _context.Sessions
-            .AnyAsync(s => s.HallId == hall.Id && s.StartTime >= now);
+        // Check if there are any sessions in this hall
+        var hasSessions = await _context.Sessions
+            .AnyAsync(s => s.HallId == hall.Id);
         
-        if (hasActiveSessions)
+        if (hasSessions)
         {
-            throw new InvalidOperationException("Cannot edit hall because it has active or scheduled sessions.");
+            throw new InvalidOperationException("Cannot edit hall because it has sessions.");
+        }
+
+        // Check if there are any booked seats
+        var now = DateTime.Now;
+        var activeSessionIds = await _context.Sessions
+            .Where(s => s.HallId == hall.Id && s.EndTime >= now)
+            .Select(s => s.Id)
+            .ToListAsync();
+
+        var hasBookedSeats = await _context.Tickets
+            .AnyAsync(t => activeSessionIds.Contains(t.SessionId));
+
+        if (hasBookedSeats)
+        {
+            throw new InvalidOperationException("Cannot edit hall because it has booked seats.");
         }
 
         _mapper.Map(hall, entity);
