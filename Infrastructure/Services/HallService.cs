@@ -26,7 +26,10 @@ public class HallService : IHallService
 
     public async Task<HallDTO?> GetHallAsync(int id)
     {
-        var hall = await _context.Halls.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        var hall = await _context.Halls
+            .Include(h => h.Seats)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
         return hall == null ? null : _mapper.Map<HallDTO>(hall);
     }
 
@@ -51,7 +54,34 @@ public class HallService : IHallService
         var entity = await _context.Halls.FindAsync(id);
         if (entity == null) return;
 
+        // Check if there are any sessions in this hall
+        var hasSessions = await _context.Sessions.AnyAsync(s => s.HallId == id);
+        if (hasSessions)
+        {
+            throw new InvalidOperationException("Cannot delete hall because it has scheduled sessions.");
+        }
+
+        // Check if there are any seats in this hall
+        var hasSeats = await _context.Seats.AnyAsync(s => s.HallId == id);
+        if (hasSeats)
+        {
+            throw new InvalidOperationException("Cannot delete hall because it has seats.");
+        }
+
         _context.Halls.Remove(entity);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<int> GetSeatsCountAsync(int hallId)
+    {
+        return await _context.Seats.CountAsync(s => s.HallId == hallId);
+    }
+
+    public async Task<int> GetActiveSessionsCountAsync(int hallId)
+    {
+        var now = DateTime.Now;
+        return await _context.Sessions
+            .Where(s => s.HallId == hallId && s.StartTime >= now)
+            .CountAsync();
     }
 }
