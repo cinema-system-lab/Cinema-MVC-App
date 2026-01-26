@@ -1,0 +1,44 @@
+@model IEnumerable<Core.DTOs.SessionDTO>
+
+<h2>Sessions</h2>
+
+<p>
+    <a asp-action="Create">Create New Session</a>
+</p>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No sessions found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Movie</th>
+            <th>Hall</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Base Price</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var session in Model)
+        {
+            <tr>
+                <td>@ViewBag.MovieNames[session.MovieId]</td>
+                <td>@ViewBag.HallNames[session.HallId]</td>
+                <td>@session.StartTime</td>
+                <td>@session.EndTime</td>
+                <td>@session.BasePrice</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@session.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@session.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@session.Id">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

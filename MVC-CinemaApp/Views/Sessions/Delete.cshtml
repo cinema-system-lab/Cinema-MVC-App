@@ -1,0 +1,11 @@
+@model Core.DTOs.SessionDTO
+
+<h2>Delete Session</h2>
+
+<p>Are you sure you want to delete session for <strong>@ViewBag.MovieName</strong> in <strong>@ViewBag.HallName</strong>?</p>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

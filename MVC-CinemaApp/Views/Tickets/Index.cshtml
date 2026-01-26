@@ -1,0 +1,51 @@
+@model IEnumerable<Core.DTOs.TicketDTO>
+
+<h2>Tickets</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (Model == null || !Model.Any())
+{
+    <p>No tickets found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Movie</th>
+                <th>Hall</th>
+                <th>Time</th>
+                <th>Row/Seat</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.MovieTitle</td>
+                    <td>@item.HallName</td>
+                    <td>@item.StartTime.ToString("g")</td>
+                    <td>R: @item.RowNumber / S: @item.SeatNumber</td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>
+                        <a asp-action="Details"
+                           asp-route-orderId="@item.OrderId"
+                           asp-route-sessionId="@item.SessionId"
+                           asp-route-seatId="@item.SeatId">Details</a> |
+
+                        <a asp-action="Delete"
+                           asp-route-orderId="@item.OrderId"
+                           asp-route-sessionId="@item.SessionId"
+                           asp-route-seatId="@item.SeatId">Cancel</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
