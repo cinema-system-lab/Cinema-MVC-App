@@ -7,7 +7,7 @@ using Core.Enums;
 
 namespace Cinema_MVC_App.Controllers;
 
-[Authorize] // Доступ тільки авторизованим
+[Authorize]
 public class OrdersController : Controller
 {
     private readonly IOrderService _orderService;
@@ -17,16 +17,32 @@ public class OrdersController : Controller
         _orderService = orderService;
     }
 
-    // 1. GetOrdersByUser
-    // GET: /Orders/MyOrders
+    // GET: /Orders
     public async Task<IActionResult> Index()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var orders = await _orderService.GetOrdersByUserAsync(userId);
-        return View(orders); 
+        return View(orders);
     }
 
-    // 2. CreateOrder
+    // GET: /Orders/Details/{id}
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id)
+    {
+        var order = await _orderService.GetOrderByIdAsync(id);
+
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        // можна додати перевірку, чи належить замовлення поточному юзеру
+        // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        // if (order.UserId != userId) return Forbid();
+
+        return View(order);
+    }
+
     // POST: /Orders/Create
     [HttpPost]
     public async Task<IActionResult> Create(CreateOrderRequest request)
@@ -46,43 +62,45 @@ public class OrdersController : Controller
         }
     }
 
-    // 3. UpdateStatus
     // POST: /Orders/Cancel/{id}
     [HttpPost]
     public async Task<IActionResult> Cancel(Guid id)
     {
         try
         {
-            await _orderService.UpdateStatusAsync(id, OrderStatus.Cancelled);
+            await _orderService.UpdateStatusAsync(id, OrderStatus.Cancelled); 
         }
         catch (Exception ex)
         {
-            return BadRequest("Error updating status: " + ex.Message);
+            TempData["Error"] = "Error updating status: " + ex.Message;
         }
         return RedirectToAction(nameof(Index));
     }
 
-    // POST: /Orders/UpdateStatus
-    [HttpPost]
-    // [Authorize(Roles = "Admin")] // Розкоментувати, якщо є ролі
-    public async Task<IActionResult> UpdateStatus(Guid id, OrderStatus status)
+
+    // GET: /Orders/Delete/{id}
+    [HttpGet]
+    public async Task<IActionResult> Delete(Guid id)
     {
-        await _orderService.UpdateStatusAsync(id, status);
-        return RedirectToAction(nameof(Index));
+        var order = await _orderService.GetOrderByIdAsync(id);
+        if (order == null) return NotFound();
+
+        return View(order);
     }
 
-    // 4. Delete
     // POST: /Orders/Delete/{id}
-    [HttpPost]
-    public async Task<IActionResult> Delete(Guid id)
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(Guid id)
     {
         try
         {
             await _orderService.DeleteOrderAsync(id);
+            TempData["Success"] = "Order deleted successfully";
         }
         catch (Exception ex)
         {
-            return BadRequest("Error deleting order: " + ex.Message);
+            TempData["Error"] = "Error deleting order: " + ex.Message;
         }
         return RedirectToAction(nameof(Index));
     }

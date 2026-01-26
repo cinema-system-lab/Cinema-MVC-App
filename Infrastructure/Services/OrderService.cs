@@ -103,6 +103,40 @@ public class OrderService : IOrderService
         }).ToList();
     }
 
+    public async Task<OrderDTO?> GetOrderByIdAsync(Guid id)
+    {
+        var order = await _context.Orders
+            .Include(o => o.Session).ThenInclude(s => s.Movie)
+            .Include(o => o.Session).ThenInclude(s => s.Hall)
+            .Include(o => o.Tickets).ThenInclude(t => t.Seat)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order == null) return null;
+
+        return new OrderDTO
+        {
+            Id = order.Id,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            MovieTitle = order.Session.Movie.Title,
+            HallName = order.Session.Hall.Name,
+            SessionStartTime = order.Session.StartTime,
+            TotalPrice = order.Tickets.Count * order.Session.BasePrice,
+            Tickets = order.Tickets.Select(t => new TicketDTO
+            {
+                OrderId = t.OrderId,
+                SessionId = t.SessionId,
+                SeatId = t.SeatId,
+                RowNumber = t.Seat.RowNumber,
+                SeatNumber = t.Seat.SeatNumber,
+                Price = order.Session.BasePrice,
+                MovieTitle = order.Session.Movie.Title,
+                HallName = order.Session.Hall.Name,
+                StartTime = order.Session.StartTime
+            }).ToList()
+        };
+    }
+
     public async Task UpdateStatusAsync(Guid orderId, OrderStatus newStatus)
     {
         var order = await _context.Orders.FindAsync(orderId);
