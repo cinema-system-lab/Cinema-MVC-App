@@ -84,6 +84,11 @@ public class HallsController : Controller
             TempData["SuccessMessage"] = "Hall successfully updated!";
             return RedirectToAction(nameof(Index));
         }
+        catch (InvalidOperationException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View(hall);
+        }
         catch (Exception)
         {
             ModelState.AddModelError(string.Empty, "An error occurred while updating the hall.");
