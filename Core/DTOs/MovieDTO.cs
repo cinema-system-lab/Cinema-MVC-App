@@ -1,4 +1,5 @@
-﻿using Core.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using Core.Enums;
 
 namespace Core.DTOs;
 
@@ -12,7 +13,10 @@ public class MovieDTO
     public DateTime ReleaseDate { get; set; }
     public short DurationMinutes { get; set; }
     public byte AgeRestriction { get; set; }
+    
+    [DisplayFormat(DataFormatString = "{0:F1}", ApplyFormatInEditMode = false)]
     public decimal Rating { get; set; }
+    
     public GenreType Genres { get; set; }
     public string PosterUrl { get; set; } = string.Empty;
     public string TrailerUrl { get; set; } = string.Empty;
