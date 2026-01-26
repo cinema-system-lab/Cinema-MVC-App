@@ -6,6 +6,7 @@ public interface IHallService
 {
     Task<List<HallDTO>> GetAllHallsAsync();
     Task<HallDTO?> GetHallAsync(int id);
+    HallDTO CreateNewHallDTO();
     Task CreateHallAsync(HallDTO hall);
     Task UpdateHallAsync(HallDTO hall);
     Task DeleteHallAsync(int id);

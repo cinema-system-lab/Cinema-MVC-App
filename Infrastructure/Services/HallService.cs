@@ -1,6 +1,7 @@
 using AutoMapper;
 using Core.DTOs;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces.Services;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,11 @@ public class HallService : IHallService
         return hall == null ? null : _mapper.Map<HallDTO>(hall);
     }
 
+    public HallDTO CreateNewHallDTO()
+    {
+        return new HallDTO { Type = HallType.Standard };
+    }
+
     public async Task CreateHallAsync(HallDTO hall)
     {
         var entity = _mapper.Map<Hall>(hall);
@@ -44,6 +50,16 @@ public class HallService : IHallService
     {
         var entity = await _context.Halls.FindAsync(hall.Id);
         if (entity == null) return;
+
+        // Check if there are any active sessions in this hall
+        var now = DateTime.Now;
+        var hasActiveSessions = await _context.Sessions
+            .AnyAsync(s => s.HallId == hall.Id && s.StartTime >= now);
+        
+        if (hasActiveSessions)
+        {
+            throw new InvalidOperationException("Cannot edit hall because it has active or scheduled sessions.");
+        }
 
         _mapper.Map(hall, entity);
         await _context.SaveChangesAsync();

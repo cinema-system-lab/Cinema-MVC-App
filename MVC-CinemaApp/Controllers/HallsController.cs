@@ -39,7 +39,7 @@ public class HallsController : Controller
     // GET: /Halls/Create
     public IActionResult Create()
     {
-        var hall = new HallDTO { Type = HallType.Standard };
+        var hall = _hallService.CreateNewHallDTO();
         return View(hall);
     }
 
