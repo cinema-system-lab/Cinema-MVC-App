@@ -6,7 +6,7 @@ using Infrastructure.Data;
 using Core.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Services
+namespace Infrastructure.Services
 {
     public class MovieService : IMovieService
     {
