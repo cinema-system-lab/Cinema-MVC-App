@@ -74,15 +74,18 @@ public class TicketService : ITicketService
         if (order.SessionId != ticketDto.SessionId)
             throw new InvalidOperationException("Ticket session must match order session.");
 
-        var isOccupied = await _context.Tickets.AnyAsync(t =>
-            t.SessionId == ticketDto.SessionId && t.SeatId == ticketDto.SeatId);
+        var isOccupied = await _context.Tickets.AnyAsync(t => t.SessionId == ticketDto.SessionId
+                   && t.SeatId == ticketDto.SeatId
+                   && t.Order.Status != OrderStatus.Cancelled
+                   && t.Order.Status != OrderStatus.Refunded);
 
-        if (isOccupied) throw new InvalidOperationException("This seat is already booked for this session.");
+        if (isOccupied) throw new InvalidOperationException("This seat is already booked and active.");
 
         var ticket = _mapper.Map<Ticket>(ticketDto);
         _context.Tickets.Add(ticket);
         await _context.SaveChangesAsync();
     }
+
     public async Task DeleteTicketAsync(Guid orderId, int sessionId, int seatId)
     {
         var ticket = await _context.Tickets
