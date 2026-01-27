@@ -6,10 +6,8 @@ using Core.Interfaces.Services;
 using Infrastructure.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Core.DTOs;
 using Core.Helpers;
 using Core.Validators;
-using DataAccessLayer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +33,6 @@ builder.Services.AddScoped<IMovieService, MovieService>();
 // DI for HallService
 builder.Services.AddScoped<IHallService, HallService>();
 
-builder.Services.AddScoped<ISeatService, SeatService>();
 // DI for SeatService
 builder.Services.AddScoped<ISeatService, SeatService>();
 
