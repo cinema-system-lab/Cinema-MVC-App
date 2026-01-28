@@ -1,57 +1,83 @@
-﻿using Core.DTOs;
+using Core.DTOs;
 using Core.Entities;
 using Core.Interfaces.Services;
 using AutoMapper;
 using Infrastructure.Data;
+using Core.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Services;
-
-public class MovieService : IMovieService
+namespace Infrastructure.Services
 {
-    private readonly CinemaAppDbContext _context;
-    private readonly IMapper _mapper;
-
-    public MovieService(CinemaAppDbContext context, IMapper mapper)
+    public class MovieService : IMovieService
     {
-        _context = context;
-        _mapper = mapper;
-    }
+        private readonly CinemaAppDbContext _context;
+        private readonly IMapper _mapper;
 
-    public async Task<List<MovieDTO>> GetAllMoviesAsync()
-    {
-        var movies = await _context.Movies.Where(x => x.IsActive).ToListAsync();
-        return _mapper.Map<List<MovieDTO>>(movies);
-    }
+        public MovieService(CinemaAppDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
 
-    public async Task<MovieDTO?> GetMovieAsync(int id)
-    {
-        var movie = await _context.Movies.FindAsync(id);
-        return movie == null ? null : _mapper.Map<MovieDTO>(movie);
-    }
+        public async Task<IEnumerable<MovieDTO>> GetAllMoviesAsync()
+        {
+            var movies = await _context.Movies.ToListAsync();
+            return _mapper.Map<IEnumerable<MovieDTO>>(movies);
+        }
 
-    public async Task CreateMovieAsync(MovieDTO movie)
-    {
-        var entity = _mapper.Map<Movie>(movie);
-        _context.Movies.Add(entity);
-        await _context.SaveChangesAsync();
-    }
+        public async Task<MovieDTO?> GetMovieAsync(int id)
+        {
+            var movie = await _context.Movies.FindAsync(id);
+            return movie == null ? null : _mapper.Map<MovieDTO>(movie);
+        }
 
-    public async Task UpdateMovieAsync(MovieDTO movie)
-    {
-        var entity = await _context.Movies.FindAsync(movie.Id);
-        if (entity == null) return;
+        public async Task CreateMovieAsync(MovieDTO movieDto, int[] selectedGenres)
+        {
+            if (selectedGenres != null && selectedGenres.Length > 0)
+            {
+                movieDto.Genres = (GenreType)selectedGenres.Aggregate(0, (current, next) => current | next);
+            }
+            else
+            {
+                movieDto.Genres = GenreType.None;
+            }
 
-        _mapper.Map(movie, entity);
-        await _context.SaveChangesAsync();
-    }
+            var entity = _mapper.Map<Movie>(movieDto);
+            _context.Movies.Add(entity);
+            await _context.SaveChangesAsync();
+        }
 
-    public async Task DeleteMovieAsync(int id)
-    {
-        var entity = await _context.Movies.FindAsync(id);
-        if (entity == null) return;
+        public async Task UpdateMovieAsync(MovieDTO movieDto, int[] selectedGenres)
+        {
+            var entity = await _context.Movies.FindAsync(movieDto.Id);
+            if (entity == null) return;
 
-        entity.IsActive = false;
-        await _context.SaveChangesAsync();
+            if (selectedGenres != null && selectedGenres.Length > 0)
+            {
+                movieDto.Genres = (GenreType)selectedGenres.Aggregate(0, (current, next) => current | next);
+            }
+            else
+            {
+                movieDto.Genres = GenreType.None;
+            }
+
+            _mapper.Map(movieDto, entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteMovieAsync(int id)
+        {
+            var entity = await _context.Movies.FindAsync(id);
+            if (entity == null) return;
+
+            var hasSessions = await _context.Sessions.AnyAsync(s => s.MovieId == id);
+            if (hasSessions)
+            {
+                throw new InvalidOperationException("Cannot delete movie with existing sessions");
+            }
+
+            _context.Movies.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
     }
 }

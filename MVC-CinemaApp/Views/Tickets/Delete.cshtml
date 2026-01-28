@@ -1,0 +1,14 @@
+@model Core.DTOs.TicketDTO
+
+<h2>Cancel Ticket</h2>
+
+<h4>Are you sure you want to cancel this ticket for "@Model.MovieTitle"?</h4>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" name="orderId" value="@Model.OrderId" />
+    <input type="hidden" name="sessionId" value="@Model.SessionId" />
+    <input type="hidden" name="seatId" value="@Model.SeatId" />
+
+    <button type="submit" class="btn btn-danger">Yes, Cancel Ticket</button>
+    <a asp-action="Index" class="btn btn-secondary">No, Keep It</a>
+</form>

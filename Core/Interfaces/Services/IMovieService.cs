@@ -1,12 +1,13 @@
 ﻿using Core.DTOs;
 
-namespace Core.Interfaces.Services;
-
-public interface IMovieService
+namespace Core.Interfaces.Services
 {
-    Task<List<MovieDTO>> GetAllMoviesAsync();
-    Task<MovieDTO?> GetMovieAsync(int id);
-    Task CreateMovieAsync(MovieDTO movie);
-    Task UpdateMovieAsync(MovieDTO movie);
-    Task DeleteMovieAsync(int id);
+    public interface IMovieService
+    {
+        Task<IEnumerable<MovieDTO>> GetAllMoviesAsync();
+        Task<MovieDTO?> GetMovieAsync(int id);
+        Task CreateMovieAsync(MovieDTO movieDto, int[] selectedGenres);
+        Task UpdateMovieAsync(MovieDTO movieDto, int[] selectedGenres);
+        Task DeleteMovieAsync(int id);
+    }
 }
