@@ -107,7 +107,8 @@ public class HallService : IHallService
             .ToListAsync();
 
         return await _context.Tickets
-            .Where(t => activeSessionIds.Contains(t.SessionId))
+            .Include(t => t.Order)
+            .Where(t => activeSessionIds.Contains(t.SessionId) && t.Order.Status == OrderStatus.Paid)
             .Select(t => t.SeatId)
             .Distinct()
             .CountAsync();
@@ -159,9 +160,10 @@ public class HallService : IHallService
         // Get session IDs for ticket counting
         var sessionIds = await sessionsQuery.Select(s => s.Id).ToListAsync();
 
-        // Count tickets sold for these sessions
+        // Count tickets sold for these sessions (only Paid orders)
         var totalTicketsSold = await _context.Tickets
-            .Where(t => sessionIds.Contains(t.SessionId))
+            .Include(t => t.Order)
+            .Where(t => sessionIds.Contains(t.SessionId) && t.Order.Status == OrderStatus.Paid)
             .CountAsync();
 
         // Calculate average occupancy rate
@@ -169,9 +171,10 @@ public class HallService : IHallService
             ? (decimal)totalTicketsSold / ((decimal)totalSessions * totalSeats) * 100
             : 0;
 
-        // Calculate total revenue (tickets * session base price)
+        // Calculate total revenue (tickets * session base price, only Paid orders)
         var revenue = await _context.Tickets
-            .Where(t => sessionIds.Contains(t.SessionId))
+            .Include(t => t.Order)
+            .Where(t => sessionIds.Contains(t.SessionId) && t.Order.Status == OrderStatus.Paid)
             .Join(_context.Sessions,
                 ticket => ticket.SessionId,
                 session => session.Id,
