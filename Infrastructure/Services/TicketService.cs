@@ -62,10 +62,16 @@ public class TicketService : ITicketService
         var session = await _context.Sessions.AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == ticketDto.SessionId);
         if (session == null) throw new InvalidOperationException("Session not found.");
+        
+        if (session.StartTime <= DateTime.Now)
+            throw new InvalidOperationException("Cannot create ticket for a started or past session.");
 
         var seat = await _context.Seats.AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == ticketDto.SeatId);
         if (seat == null) throw new InvalidOperationException("Seat not found.");
+        
+        if (seat.HallId != session.HallId)
+            throw new InvalidOperationException("Seat does not belong to the session hall.");
 
         var order = await _context.Orders.AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == ticketDto.OrderId);
@@ -73,6 +79,9 @@ public class TicketService : ITicketService
 
         if (order.SessionId != ticketDto.SessionId)
             throw new InvalidOperationException("Ticket session must match order session.");
+        
+        if (order.Status != OrderStatus.Pending)
+            throw new InvalidOperationException("Tickets can be added only to pending orders.");
 
         var isOccupied = await _context.Tickets.AnyAsync(t => t.SessionId == ticketDto.SessionId
                    && t.SeatId == ticketDto.SeatId
