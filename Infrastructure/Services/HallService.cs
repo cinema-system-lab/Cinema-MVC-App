@@ -166,7 +166,7 @@ public class HallService : IHallService
 
         // Calculate average occupancy rate
         var avgOccupancy = totalSessions > 0 && totalSeats > 0
-            ? (decimal)totalTicketsSold / (totalSessions * totalSeats) * 100
+            ? (decimal)totalTicketsSold / ((decimal)totalSessions * totalSeats) * 100
             : 0;
 
         // Calculate total revenue (tickets * session base price)
