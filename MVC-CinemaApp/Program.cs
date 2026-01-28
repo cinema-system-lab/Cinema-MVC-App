@@ -6,7 +6,6 @@ using Core.Interfaces.Services;
 using Infrastructure.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Core.DTOs;
 using Core.Helpers;
 using Core.Validators;
 
@@ -14,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddValidatorsFromAssemblyContaining<MovieCreateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<MovieValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 
