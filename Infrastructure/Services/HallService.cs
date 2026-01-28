@@ -50,45 +50,35 @@ public class HallService : IHallService
         var entity = await _context.Halls.FindAsync(hall.Id);
         if (entity == null) return;
 
-        // Check if there are any active/future sessions with booked seats
+        // Check if there are any active/future sessions
         var now = DateTime.Now;
-        var activeSessionIds = await _context.Sessions
-            .Where(s => s.HallId == hall.Id && s.EndTime >= now)
-            .Select(s => s.Id)
-            .ToListAsync();
+        var hasFutureSessions = await _context.Sessions
+            .AnyAsync(s => s.HallId == hall.Id && s.EndTime >= now);
 
-        if (activeSessionIds.Any())
+        if (hasFutureSessions)
         {
-            var hasBookedSeats = await _context.Tickets
-                .AnyAsync(t => activeSessionIds.Contains(t.SessionId));
-
-            if (hasBookedSeats)
-            {
-                throw new InvalidOperationException("Cannot edit hall because it has active sessions with booked seats.");
-            }
+            throw new InvalidOperationException("Cannot edit hall because it has scheduled future sessions.");
         }
 
         _mapper.Map(hall, entity);
         await _context.SaveChangesAsync();
     }
 
+    //fix: seats are not a reason to block deletion, sessions are
     public async Task DeleteHallAsync(int id)
     {
         var entity = await _context.Halls.FindAsync(id);
         if (entity == null) return;
 
-        // Check if there are any sessions in this hall
-        var hasSessions = await _context.Sessions.AnyAsync(s => s.HallId == id);
-        if (hasSessions)
-        {
-            throw new InvalidOperationException("Cannot delete hall because it has scheduled sessions.");
-        }
+        var now = DateTime.Now;
+        var hasFutureSessions = await _context.Sessions
+            .AnyAsync(s => s.HallId == id && s.EndTime >= now);
 
-        // Check if there are any seats in this hall
-        var hasSeats = await _context.Seats.AnyAsync(s => s.HallId == id);
-        if (hasSeats)
+        if (hasFutureSessions)
         {
-            throw new InvalidOperationException("Cannot delete hall because it has seats.");
+            throw new InvalidOperationException(
+                "Cannot delete hall because it has scheduled sessions."
+            );
         }
 
         _context.Halls.Remove(entity);
