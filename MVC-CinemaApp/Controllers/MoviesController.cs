@@ -25,7 +25,9 @@ public class MoviesController : Controller
     public async Task<IActionResult> Details(int id)
     {
         var movie = await _movieService.GetMovieAsync(id);
-        if (movie == null) return NotFound();
+        if (movie == null)
+            return NotFound();
+
         return View(movie);
     }
 
@@ -44,22 +46,29 @@ public class MoviesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MovieDTO movie, int[]? selectedGenres)
     {
+        ModelState.Remove(nameof(movie.Genres));
+        
         if (selectedGenres != null && selectedGenres.Length > 0)
         {
-            movie.Genres = (GenreType)selectedGenres.Aggregate(0, (current, next) => current | next);
+            movie.Genres = (GenreType)selectedGenres.Sum();
+        }
+        else
+        {
+            ModelState.AddModelError(nameof(selectedGenres), "Please select at least one genre.");
         }
 
-        if (!ModelState.IsValid) return View(movie);
+        if (!ModelState.IsValid)
+            return View(movie);
 
         try
         {
-            await _movieService.CreateMovieAsync(movie);
+            await _movieService.CreateMovieAsync(movie, selectedGenres ?? Array.Empty<int>());
             TempData["SuccessMessage"] = "Movie successfully created!";
             return RedirectToAction(nameof(Index));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            ModelState.AddModelError(string.Empty, "An error occurred while creating the movie.");
+            ModelState.AddModelError(string.Empty, $"An error occurred: {ex.Message}");
             return View(movie);
         }
     }
@@ -68,7 +77,8 @@ public class MoviesController : Controller
     public async Task<IActionResult> Edit(int id)
     {
         var movie = await _movieService.GetMovieAsync(id);
-        if (movie == null) return NotFound();
+        if (movie == null)
+            return NotFound();
 
         return View(movie);
     }
@@ -78,22 +88,29 @@ public class MoviesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(MovieDTO movie, int[]? selectedGenres)
     {
-        var combinedGenres = (selectedGenres != null && selectedGenres.Length > 0)
-            ? selectedGenres.Aggregate(0, (current, next) => current | next)
-            : 0;
-        movie.Genres = (GenreType)combinedGenres;
+        ModelState.Remove(nameof(movie.Genres));
+        
+        if (selectedGenres != null && selectedGenres.Length > 0)
+        {
+            movie.Genres = (GenreType)selectedGenres.Sum();
+        }
+        else
+        {
+            ModelState.AddModelError(nameof(selectedGenres), "Please select at least one genre.");
+        }
 
-        if (!ModelState.IsValid) return View(movie);
+        if (!ModelState.IsValid)
+            return View(movie);
 
         try
         {
-            await _movieService.UpdateMovieAsync(movie);
+            await _movieService.UpdateMovieAsync(movie, selectedGenres ?? Array.Empty<int>());
             TempData["SuccessMessage"] = "Movie successfully updated!";
             return RedirectToAction(nameof(Index));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            ModelState.AddModelError(string.Empty, "An error occurred while updating the movie.");
+            ModelState.AddModelError(string.Empty, $"Error: {ex.Message}");
             return View(movie);
         }
     }
@@ -102,7 +119,9 @@ public class MoviesController : Controller
     public async Task<IActionResult> Delete(int id)
     {
         var movie = await _movieService.GetMovieAsync(id);
-        if (movie == null) return NotFound();
+        if (movie == null)
+            return NotFound();
+
         return View(movie);
     }
 
@@ -111,8 +130,15 @@ public class MoviesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        await _movieService.DeleteMovieAsync(id);
-        TempData["SuccessMessage"] = "Movie deleted!";
+        try
+        {
+            await _movieService.DeleteMovieAsync(id);
+            TempData["SuccessMessage"] = "Movie deleted!";
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+        }
         return RedirectToAction(nameof(Index));
     }
 }
