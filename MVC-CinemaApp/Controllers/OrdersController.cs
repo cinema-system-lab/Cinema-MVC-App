@@ -68,40 +68,21 @@ public class OrdersController : Controller
     {
         try
         {
-            await _orderService.UpdateStatusAsync(id, OrderStatus.Cancelled); 
+            // Використовуємо Canceled (або Cancelled, як у вас в Enum)
+            await _orderService.UpdateStatusAsync(id, OrderStatus.Cancelled);
+            TempData["SuccessMessage"] = "Order canceled successfully.";
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
-            TempData["Error"] = "Error updating status: " + ex.Message;
+            TempData["ErrorMessage"] = ex.Message; // Наприклад "Не можна скасувати Paid замовлення"
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "Error canceling order.";
         }
         return RedirectToAction(nameof(Index));
     }
 
 
-    // GET: /Orders/Delete/{id}
-    [HttpGet]
-    public async Task<IActionResult> Delete(Guid id)
-    {
-        var order = await _orderService.GetOrderByIdAsync(id);
-        if (order == null) return NotFound();
 
-        return View(order);
-    }
-
-    // POST: /Orders/Delete/{id}
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(Guid id)
-    {
-        try
-        {
-            await _orderService.DeleteOrderAsync(id);
-            TempData["Success"] = "Order deleted successfully";
-        }
-        catch (Exception ex)
-        {
-            TempData["Error"] = "Error deleting order: " + ex.Message;
-        }
-        return RedirectToAction(nameof(Index));
-    }
 }

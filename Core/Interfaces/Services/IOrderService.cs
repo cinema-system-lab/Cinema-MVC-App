@@ -8,9 +8,9 @@ public interface IOrderService
     Task CreateOrderAsync(string userId, CreateOrderRequest request);
     Task<List<OrderDTO>> GetOrdersByUserAsync(string userId);
 
-    // ДОДАЄМО ЦЕЙ МЕТОД:
+    
     Task<OrderDTO?> GetOrderByIdAsync(Guid id);
 
     Task UpdateStatusAsync(Guid orderId, OrderStatus newStatus);
-    Task DeleteOrderAsync(Guid orderId);
+
 }
