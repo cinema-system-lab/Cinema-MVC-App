@@ -19,6 +19,14 @@ public class SeatService : ISeatService
         _mapper = mapper;
     }
 
+    private async Task ValidateNoSessionsAsync(int hallId)
+    {
+        if (await HasAnySessionsAsync(hallId))
+        {
+            throw new InvalidOperationException("Cannot modify seats because there are sessions associated with this hall.");
+        }
+    }
+
     public async Task<List<SeatDTO>> GetSeatsByHallIdAsync(int hallId)
     {
         var seats = await _context.Seats
@@ -33,8 +41,10 @@ public class SeatService : ISeatService
 
     public async Task GenerateSeatsAsync(SeatGenerationDTO generationDto)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        // 1. Перевірка
+        await ValidateNoSessionsAsync(generationDto.HallId);
 
+        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
             var existingSeats = _context.Seats.Where(s => s.HallId == generationDto.HallId);
@@ -68,8 +78,12 @@ public class SeatService : ISeatService
             throw;
         }
     }
+
     public async Task AddSeatAsync(SeatDTO seatDto)
     {
+        // 1. Перевірка
+        await ValidateNoSessionsAsync(seatDto.HallId);
+
         bool exists = await _context.Seats.AnyAsync(s => 
             s.HallId == seatDto.HallId && 
             s.RowNumber == seatDto.RowNumber && 
@@ -84,11 +98,14 @@ public class SeatService : ISeatService
         _context.Seats.Add(seat);
         await _context.SaveChangesAsync();
     }
+
     public async Task DeleteSeatAsync(int id)
     {
         var seat = await _context.Seats.FindAsync(id);
         if (seat != null)
         {
+            await ValidateNoSessionsAsync(seat.HallId);
+
             _context.Seats.Remove(seat);
             await _context.SaveChangesAsync();
         }
@@ -99,16 +116,24 @@ public class SeatService : ISeatService
         var seat = await _context.Seats.FindAsync(id);
         if (seat != null)
         {
+            await ValidateNoSessionsAsync(seat.HallId);
+
             seat.Type = seat.Type == SeatType.Regular ? SeatType.Premium : SeatType.Regular;
-        
             await _context.SaveChangesAsync();
         }
     }
 
     public async Task DeleteAllSeatsByHallIdAsync(int hallId)
     {
+        await ValidateNoSessionsAsync(hallId);
+
         var seats = _context.Seats.Where(s => s.HallId == hallId);
         _context.Seats.RemoveRange(seats);
         await _context.SaveChangesAsync();
+    }
+    
+    public async Task<bool> HasAnySessionsAsync(int hallId)
+    {
+        return await _context.Sessions.AnyAsync(s => s.HallId == hallId);
     }
 }
