@@ -13,9 +13,11 @@ public class PaymentsController : Controller
     public PaymentsController(IPaymentService paymentService) 
         => _paymentService = paymentService;
 
+    // GET: /Payments
     public async Task<IActionResult> Index() 
         => View(await _paymentService.GetAllPaymentsAsync());
 
+    // GET: /Payments/Details/{id}
     public async Task<IActionResult> Details(Guid id)
     {
         var payment = await _paymentService.GetPaymentByIdAsync(id);
@@ -24,21 +26,22 @@ public class PaymentsController : Controller
 
         return View(payment);
     }
-
+    
+    // POST: /Payments/UpdateStatus
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(Guid id, PaymentStatus newStatus)
     {
         try
         {
-            await _paymentService.UpdatePaymentStatusAsync(id, newStatus);
+            await _paymentService.UpdatePaymentStatusAsync(id, newStatus); 
             TempData["Success"] = "Payment status updated successfully.";
         }
         catch (Exception ex)
         {
             TempData["Error"] = $"Error updating payment: {ex.Message}";
         }
-        
+    
         return RedirectToAction(nameof(Details), new { id });
     }
 }

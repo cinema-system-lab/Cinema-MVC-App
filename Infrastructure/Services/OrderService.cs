@@ -16,7 +16,7 @@ public class OrderService : IOrderService
         _context = context;
     }
 
-    public async Task CreateOrderAsync(string userId, CreateOrderRequest request)
+    public async Task<Guid> CreateOrderAsync(string userId, CreateOrderRequest request)
     {
         var session = await _context.Sessions
             .Include(s => s.Hall)
@@ -61,6 +61,8 @@ public class OrderService : IOrderService
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+            
+            return order.Id;
         }
         catch
         {

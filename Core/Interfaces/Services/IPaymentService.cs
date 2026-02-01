@@ -7,9 +7,8 @@ public interface IPaymentService
 {
     Task<IEnumerable<PaymentDTO>> GetAllPaymentsAsync();
     Task<PaymentDTO> GetPaymentByIdAsync(Guid id);
-    
-    Task<Guid> CreatePaymentAsync(Guid orderId, decimal amount, PaymentStatus status = PaymentStatus.Pending);
-    Task UpdatePaymentStatusAsync(Guid id, PaymentStatus newStatus);
-    
     Task<PaymentDTO> GetPaymentByOrderIdAsync(Guid orderId);
+    
+    Task<Guid> CreatePaymentAsync(CreatePaymentDTO createPaymentDto);
+    Task UpdatePaymentStatusAsync(Guid id, PaymentStatus newStatus);
 }

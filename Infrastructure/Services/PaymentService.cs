@@ -47,40 +47,46 @@ public class PaymentService : IPaymentService
         return _mapper.Map<PaymentDTO>(payment);
     }
 
-    public async Task<Guid> CreatePaymentAsync(Guid orderId, decimal amount, PaymentStatus status = PaymentStatus.Pending)
+    public async Task<Guid> CreatePaymentAsync(CreatePaymentDTO createPaymentDto)
     {
-        if (amount <= 0)
-            throw new ArgumentException("Amount must be greater than 0", nameof(amount));
+        if (createPaymentDto.Amount <= 0)
+            throw new ArgumentException("Amount must be greater than 0", nameof(createPaymentDto.Amount));
 
-        var orderExists = await _context.Orders.AnyAsync(o => o.Id == orderId);
-        if (!orderExists)
-            throw new KeyNotFoundException($"Order with ID {orderId} not found");
-
-        var payment = new Payment
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            Id = Guid.NewGuid(),
-            OrderId = orderId,
-            Amount = amount,
-            Status = status,
-            PaymentDate = DateTime.UtcNow
-        };
+            var order = await _context.Orders.FindAsync(createPaymentDto.OrderId);
+            if (order == null)
+                throw new KeyNotFoundException($"Order with ID {createPaymentDto.OrderId} not found");
 
-        _context.Payments.Add(payment);
-        await _context.SaveChangesAsync();
+            var payment = new Payment
+            {
+                Id = Guid.NewGuid(),
+                OrderId = createPaymentDto.OrderId,
+                Amount = createPaymentDto.Amount,
+                Status = createPaymentDto.Status,
+                PaymentDate = DateTime.UtcNow
+            };
 
-        if (status == PaymentStatus.Success)
-        {
-            var order = await _context.Orders.FindAsync(orderId);
-            if (order != null)
+            _context.Payments.Add(payment);
+
+            if (createPaymentDto.Status == PaymentStatus.Success)
             {
                 order.Status = OrderStatus.Paid;
-                await _context.SaveChangesAsync();
             }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return payment.Id;
         }
-
-        return payment.Id;
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
-
+    
     public async Task UpdatePaymentStatusAsync(Guid id, PaymentStatus newStatus)
     {
         var payment = await _context.Payments
