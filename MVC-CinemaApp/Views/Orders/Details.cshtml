@@ -1,0 +1,50 @@
+﻿@model Core.DTOs.OrderDTO
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<h2>Order Details</h2>
+
+<div class="card">
+    <div class="card-body">
+        <p><strong>Movie:</strong> @Model.MovieTitle</p>
+        <p><strong>Hall:</strong> @Model.HallName</p>
+        <p><strong>Session:</strong> @Model.SessionStartTime.ToLocalTime()</p>
+        <p><strong>Status:</strong> @Model.Status</p>
+        <p><strong>Total price:</strong> @Model.TotalPrice ₴</p>
+    </div>
+</div>
+
+<h4 class="mt-4">Tickets</h4>
+
+@if (!Model.Tickets.Any())
+{
+    <p>No tickets yet.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Row</th>
+                <th>Seat</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model.Tickets)
+            {
+                <tr>
+                    <td>@t.RowNumber</td>
+                    <td>@t.SeatNumber</td>
+                    <td>@t.Price ₴</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Index" class="btn btn-secondary mt-3">
+    Back
+</a>

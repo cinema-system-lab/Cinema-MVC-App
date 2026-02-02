@@ -36,10 +36,6 @@ public class OrdersController : Controller
             return NotFound();
         }
 
-        // можна додати перевірку, чи належить замовлення поточному юзеру
-        // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        // if (order.UserId != userId) return Forbid();
-
         return View(order);
     }
 
@@ -68,13 +64,13 @@ public class OrdersController : Controller
     {
         try
         {
-            // Використовуємо Canceled (або Cancelled, як у вас в Enum)
+            
             await _orderService.UpdateStatusAsync(id, OrderStatus.Cancelled);
             TempData["SuccessMessage"] = "Order canceled successfully.";
         }
         catch (InvalidOperationException ex)
         {
-            TempData["ErrorMessage"] = ex.Message; // Наприклад "Не можна скасувати Paid замовлення"
+            TempData["ErrorMessage"] = ex.Message; 
         }
         catch (Exception)
         {
