@@ -13,6 +13,12 @@ using Cinema_MVC_App.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add local configuration file (not tracked in git)
+builder.Configuration.AddJsonFile(
+    $"appsettings.{builder.Environment.EnvironmentName}.Local.json",
+    optional: true,
+    reloadOnChange: true);
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddValidatorsFromAssemblyContaining<MovieValidator>();
