@@ -8,6 +8,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Core.Helpers;
 using Core.Validators;
+using DataAccessLayer.Data;
+using Cinema_MVC_App.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,9 +22,7 @@ builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddDbContext<CinemaAppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<CinemaAppDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddIdentityConfiguration();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MovieProfile).Assembly);
@@ -43,6 +43,7 @@ builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 
 var app = builder.Build();
+await app.SeedDatabaseAsync();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -24,4 +24,10 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore">
+        <HintPath>..\..\..\.dotnet\packs\Microsoft.AspNetCore.App.Ref\8.0.23\ref\net8.0\Microsoft.AspNetCore.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>
