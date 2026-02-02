@@ -23,7 +23,12 @@
                     
                     <div class="mb-3">
                         <label asp-for="Password" class="form-label">Password</label>
-                        <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" autocomplete="current-password" />
+                        <div class="input-group">
+                            <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" autocomplete="current-password" id="loginPassword" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('loginPassword', 'toggleLoginIcon')">
+                                <span id="toggleLoginIcon">👁</span>
+                            </button>
+                        </div>
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
                     
@@ -54,4 +59,17 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                icon.textContent = '👁';
+            }
+        }
+    </script>
 }
