@@ -24,10 +24,10 @@ public class RegisterValidator : AbstractValidator<RegisterDTO>
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Password is required")
-            .MinimumLength(6).WithMessage("Password must be at least 6 characters")
-            .Matches(@"[A-Z]").WithMessage("Password must contain at least one uppercase letter")
-            .Matches(@"[a-z]").WithMessage("Password must contain at least one lowercase letter")
-            .Matches(@"\d").WithMessage("Password must contain at least one digit");
+            .MinimumLength(6).WithMessage("Minimum 6 characters")
+            .Matches(@"[A-Z]").WithMessage("At least one uppercase letter")
+            .Matches(@"[a-z]").WithMessage("At least one lowercase letter")
+            .Matches(@"\d").WithMessage("At least one digit");
 
         RuleFor(x => x.ConfirmPassword)
             .NotEmpty().WithMessage("Password confirmation is required")
