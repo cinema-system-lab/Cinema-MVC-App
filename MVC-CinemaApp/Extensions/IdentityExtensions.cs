@@ -1,5 +1,4 @@
 ﻿using Core.Entities;
-using DataAccessLayer.Data;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 

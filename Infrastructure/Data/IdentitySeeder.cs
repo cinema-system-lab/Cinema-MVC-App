@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DataAccessLayer.Data;
+namespace Infrastructure.Data;
 
 public static class IdentitySeeder
 {

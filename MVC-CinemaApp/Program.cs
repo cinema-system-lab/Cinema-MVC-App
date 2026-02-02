@@ -8,7 +8,6 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Core.Helpers;
 using Core.Validators;
-using DataAccessLayer.Data;
 using Cinema_MVC_App.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
