@@ -18,54 +18,32 @@ public class OrderService : IOrderService
 
     public async Task<Guid> CreateOrderAsync(string userId, CreateOrderRequest request)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
-        
-        try
+        var session = await _context.Sessions
+            .FirstOrDefaultAsync(s => s.Id == request.SessionId);
+
+        if (session == null)
+            throw new InvalidOperationException("Session not found");
+
+      
+        if (session.StartTime <= DateTime.UtcNow)
+            throw new InvalidOperationException("Cannot create order for started session");
+
+        var order = new Order
         {
-            var session = await _context.Sessions
-                .FirstOrDefaultAsync(s => s.Id == request.SessionId);
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            SessionId = request.SessionId,
+            CreatedAt = DateTime.UtcNow,
+            Status = OrderStatus.Pending
+        };
 
-            if (session == null)
-                throw new InvalidOperationException("Session not found");
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
 
-            if (session.StartTime <= DateTime.UtcNow)
-                throw new InvalidOperationException("Cannot create order for started session");
+       
 
-            var order = new Order
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                SessionId = request.SessionId,
-                CreatedAt = DateTime.UtcNow,
-                Status = OrderStatus.Pending
-            };
-
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-
-            foreach (var seatId in request.SeatIds)
-            {
-                var ticket = new Ticket
-                {
-                    OrderId = order.Id,
-                    SessionId = request.SessionId,
-                    SeatId = seatId
-                };
-                _context.Tickets.Add(ticket);
-            }
-
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            
-            return order.Id;
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+        return order.Id;
     }
-
 
     public async Task<List<OrderDTO>> GetOrdersByUserAsync(string userId)
     {

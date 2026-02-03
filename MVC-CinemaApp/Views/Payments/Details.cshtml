@@ -2,6 +2,19 @@
 
 @{
     ViewData["Title"] = "Payment Details";
+    
+    var availableStatuses = new List<(Core.Enums.PaymentStatus Status, string DisplayName)>();
+    
+    switch (Model.Status)
+    {
+        case Core.Enums.PaymentStatus.Pending:
+            availableStatuses.Add((Core.Enums.PaymentStatus.Success, "Success"));
+            availableStatuses.Add((Core.Enums.PaymentStatus.Failed, "Failed"));
+            break;
+        case Core.Enums.PaymentStatus.Success:
+            availableStatuses.Add((Core.Enums.PaymentStatus.Refunded, "Refunded"));
+            break;
+    }
 }
 
 <div class="container mt-4">
@@ -96,56 +109,54 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning">
-                    <h5 class="mb-0">Update Status</h5>
-                </div>
-                <div class="card-body">
-                    <form asp-action="UpdateStatus" method="post">
-                        <input type="hidden" name="id" value="@Model.Id" />
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">New Status:</label>
-                            <select name="newStatus" class="form-select" required>
-                                <option value="">-- Select Status --</option>
-                                @{
-                                    var pendingValue = (int)Core.Enums.PaymentStatus.Pending;
-                                    var successValue = (int)Core.Enums.PaymentStatus.Success;
-                                    var failedValue = (int)Core.Enums.PaymentStatus.Failed;
-                                    var refundedValue = (int)Core.Enums.PaymentStatus.Refunded;
-                                }
-                                <option value="@pendingValue" selected="@(Model.Status == Core.Enums.PaymentStatus.Pending)">
-                                    Pending
-                                </option>
-                                <option value="@successValue" selected="@(Model.Status == Core.Enums.PaymentStatus.Success)">
-                                    Success
-                                </option>
-                                <option value="@failedValue" selected="@(Model.Status == Core.Enums.PaymentStatus.Failed)">
-                                    Failed
-                                </option>
-                                <option value="@refundedValue" selected="@(Model.Status == Core.Enums.PaymentStatus.Refunded)">
-                                    Refunded
-                                </option>
-                            </select>
-                        </div>
+            @if (availableStatuses.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">Update Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="UpdateStatus" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">New Status:</label>
+                                <select name="newStatus" class="form-select" required>
+                                    <option value="">-- Select Status --</option>
+                                    @foreach (var status in availableStatuses)
+                                    {
+                                        <option value="@((int)status.Status)">@status.DisplayName</option>
+                                    }
+                                </select>
+                            </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-arrow-repeat"></i> Update Status
-                            </button>
-                        </div>
-                    </form>
-
-                    <hr>
-
-                    <div class="alert alert-info mb-0">
-                        <small>
-                            <i class="bi bi-info-circle"></i> 
-                            <strong>Note:</strong> Changing payment status will also update the related order status.
-                        </small>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-arrow-repeat"></i> Update Status
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Status Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-secondary mb-0">
+                            <i class="bi bi-lock"></i> 
+                            <strong>Final Status</strong>
+                            <p class="mb-0 mt-2">
+                                This payment has reached a final status and cannot be modified.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>

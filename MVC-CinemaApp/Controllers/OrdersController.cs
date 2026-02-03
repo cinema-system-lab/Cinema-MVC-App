@@ -11,12 +11,10 @@ namespace Cinema_MVC_App.Controllers;
 public class OrdersController : Controller
 {
     private readonly IOrderService _orderService;
-    private readonly IPaymentService _paymentService;
 
-    public OrdersController(IOrderService orderService,  IPaymentService paymentService)
+    public OrdersController(IOrderService orderService)
     {
         _orderService = orderService;
-        _paymentService = paymentService;
     }
 
     // GET: /Orders
@@ -38,9 +36,6 @@ public class OrdersController : Controller
             return NotFound();
         }
 
-        var payment = await _paymentService.GetPaymentByOrderIdAsync(id);
-        ViewBag.Payment = payment;
-        
         return View(order);
     }
 
@@ -53,20 +48,8 @@ public class OrdersController : Controller
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var orderId = await _orderService.CreateOrderAsync(userId, request);
-            var order = await _orderService.GetOrderByIdAsync(orderId);
-            if (order == null)
-                throw new InvalidOperationException("Failed to retrieve created order");
-            
-            var createPaymentDto = new CreatePaymentDTO
-            {
-                OrderId = orderId,
-                Amount = order.TotalPrice,
-                Status = PaymentStatus.Pending
-            };
-            
-            await _paymentService.CreatePaymentAsync(createPaymentDto);
-            
+            await _orderService.CreateOrderAsync(userId, request);
+
             return RedirectToAction(nameof(Index));
         }
         catch (InvalidOperationException ex)
@@ -95,7 +78,4 @@ public class OrdersController : Controller
         }
         return RedirectToAction(nameof(Index));
     }
-
-
-
 }
