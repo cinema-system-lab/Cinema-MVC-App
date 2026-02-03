@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace DataAccessLayer.Migrations
+namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CinemaAppDbContext))]
     [Migration("20260120172938_InitialCreate")]

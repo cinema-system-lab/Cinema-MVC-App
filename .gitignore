@@ -15,6 +15,10 @@
 **/appsettings.Development.Local.json
 **/appsettings.*.Local.json
 
+# Local Docker Compose files
+docker-compose.local.yml
+docker-compose.local.yaml
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

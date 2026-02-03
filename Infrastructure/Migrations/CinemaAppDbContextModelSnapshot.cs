@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace DataAccessLayer.Migrations
+namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CinemaAppDbContext))]
     partial class CinemaAppDbContextModelSnapshot : ModelSnapshot
