@@ -10,10 +10,14 @@ namespace Infrastructure.Services;
 public class OrderService : IOrderService
 {
     private readonly CinemaAppDbContext _context;
+    private readonly ITicketService _ticketService;
 
-    public OrderService(CinemaAppDbContext context)
+    public OrderService(
+        CinemaAppDbContext context,
+        ITicketService ticketService)
     {
         _context = context;
+        _ticketService = ticketService;
     }
 
     public async Task<Guid> CreateOrderAsync(string userId, CreateOrderRequest request)
@@ -22,97 +26,107 @@ public class OrderService : IOrderService
             .FirstOrDefaultAsync(s => s.Id == request.SessionId);
 
         if (session == null)
-            throw new InvalidOperationException("Session not found");
+            throw new Exception("Session not found");
 
-      
         if (session.StartTime <= DateTime.UtcNow)
             throw new InvalidOperationException("Cannot create order for started session");
 
-        var order = new Order
+        if (!request.SeatIds.Any())
+            throw new InvalidOperationException("Order must contain at least one ticket");
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
         {
-            Id = Guid.NewGuid(),
-            UserId = userId,
-            SessionId = request.SessionId,
-            CreatedAt = DateTime.UtcNow,
-            Status = OrderStatus.Pending
-        };
+            var order = new Order
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                SessionId = session.Id,
+                CreatedAt = DateTime.UtcNow,
+                Status = OrderStatus.Pending
+            };
 
-        _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
 
-       
+            foreach (var seatId in request.SeatIds)
+            {
+                await _ticketService.CreateTicketAsync(new TicketCreateDTO
+                {
+                    OrderId = order.Id,
+                    SessionId = session.Id,
+                    SeatId = seatId
+                });
+            }
 
-        return order.Id;
-    }
-
-    public async Task<List<OrderDTO>> GetOrdersByUserAsync(string userId)
-    {
-        var orders = await _context.Orders
-            .Include(o => o.Session).ThenInclude(s => s.Movie)
-            .Include(o => o.Session).ThenInclude(s => s.Hall)
-            .Include(o => o.Tickets).ThenInclude(t => t.Seat)
-            .Where(o => o.UserId == userId)
-            .OrderByDescending(o => o.CreatedAt)
-            .ToListAsync();
-
-        return orders.Select(MapToDto).ToList();
-    }
-
-    public async Task<OrderDTO?> GetOrderByIdAsync(Guid id)
-    {
-        var order = await _context.Orders
-            .Include(o => o.Session).ThenInclude(s => s.Movie)
-            .Include(o => o.Session).ThenInclude(s => s.Hall)
-            .Include(o => o.Tickets).ThenInclude(t => t.Seat)
-            .FirstOrDefaultAsync(o => o.Id == id);
-
-        return order == null ? null : MapToDto(order);
+            await transaction.CommitAsync();
+            return order.Id;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task UpdateStatusAsync(Guid orderId, OrderStatus newStatus)
     {
-        var order = await _context.Orders.FindAsync(orderId);
+        var order = await _context.Orders
+            .Include(o => o.Session)
+            .FirstOrDefaultAsync(o => o.Id == orderId);
+
         if (order == null)
-            throw new InvalidOperationException("Order not found");
+            throw new Exception("Order not found");
 
-        var isValidTransition = order.Status switch
-        {
-            OrderStatus.Pending => newStatus is OrderStatus.Paid or OrderStatus.Cancelled,
-            OrderStatus.Paid => newStatus == OrderStatus.Refunded,
-            _ => false
-        };
+        if (order.Session.StartTime <= DateTime.UtcNow)
+            throw new InvalidOperationException("Cannot update order for started session");
 
-        if (!isValidTransition)
-            throw new InvalidOperationException(
-                $"Invalid status transition: {order.Status} -> {newStatus}");
+        if (!IsValidTransition(order.Status, newStatus))
+            throw new InvalidOperationException("Invalid order status transition");
 
         order.Status = newStatus;
         await _context.SaveChangesAsync();
     }
 
-    private static OrderDTO MapToDto(Order o)
+    private static bool IsValidTransition(OrderStatus current, OrderStatus next)
     {
-        return new OrderDTO
+        return current switch
         {
-            Id = o.Id,
-            CreatedAt = o.CreatedAt,
-            Status = o.Status,
-            MovieTitle = o.Session.Movie.Title,
-            HallName = o.Session.Hall.Name,
-            SessionStartTime = o.Session.StartTime,
-            TotalPrice = o.Tickets.Count * o.Session.BasePrice,
-            Tickets = o.Tickets.Select(t => new TicketDTO
-            {
-                OrderId = t.OrderId,
-                SessionId = t.SessionId,
-                SeatId = t.SeatId,
-                RowNumber = t.Seat.RowNumber,
-                SeatNumber = t.Seat.SeatNumber,
-                Price = o.Session.BasePrice,
-                MovieTitle = o.Session.Movie.Title,
-                HallName = o.Session.Hall.Name,
-                StartTime = o.Session.StartTime
-            }).ToList()
+            OrderStatus.Pending => next is OrderStatus.Paid or OrderStatus.Cancelled,
+            OrderStatus.Paid => next == OrderStatus.Refunded,
+            _ => false
         };
     }
+
+    public async Task<List<OrderDTO>> GetOrdersByUserAsync(string userId)
+    {
+        return await _context.Orders
+            .Where(o => o.UserId == userId)
+            .OrderByDescending(o => o.CreatedAt)
+            .Select(o => new OrderDTO
+            {
+                Id = o.Id,
+                SessionId = o.SessionId,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt
+            })
+            .ToListAsync();
+    }
+
+
+    public async Task<OrderDTO?> GetOrderByIdAsync(Guid id)
+    {
+        return await _context.Orders
+            .Where(o => o.Id == id)
+            .Select(o => new OrderDTO
+            {
+                Id = o.Id,
+                SessionId = o.SessionId,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt
+            })
+            .FirstOrDefaultAsync();
+    }
+
 }
