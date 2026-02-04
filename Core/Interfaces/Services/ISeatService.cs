@@ -10,5 +10,5 @@ public interface ISeatService
     Task DeleteAllSeatsByHallIdAsync(int hallId);
     Task ToggleSeatTypeAsync(int id);
     Task GenerateSeatsAsync(SeatGenerationDTO generationDto);
-
+    Task<bool> HasAnySessionsAsync(int hallId);
 }

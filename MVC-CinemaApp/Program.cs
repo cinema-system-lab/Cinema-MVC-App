@@ -9,8 +9,15 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Core.Helpers;
 using Core.Validators;
+using Cinema_MVC_App.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add local configuration file (not tracked in git)
+builder.Configuration.AddJsonFile(
+    $"appsettings.{builder.Environment.EnvironmentName}.Local.json",
+    optional: true,
+    reloadOnChange: true);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -21,9 +28,7 @@ builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddDbContext<CinemaAppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<CinemaAppDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddIdentityConfiguration();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MovieProfile).Assembly);
@@ -50,6 +55,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 var app = builder.Build();
+await app.SeedDatabaseAsync();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

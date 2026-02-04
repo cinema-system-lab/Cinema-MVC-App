@@ -1,0 +1,14 @@
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/*.*proj.user
+**/*.dbmdl
+**/*.jfm
+**/bin
+**/obj
+**/out
+**/logs
+**/appsettings.*.Local.json
+docker-compose.local.yml
+docker-compose.local.yaml
