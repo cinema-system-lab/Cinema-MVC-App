@@ -21,9 +21,10 @@ public class OrderService : IOrderService
         _ticketService = ticketService;
     }
 
-    public async Task<Guid> CreateOrderAsync(string userId, CreateOrderRequest request)
+    public async Task CreateOrderAsync(string userId, CreateOrderRequest request)
     {
         var session = await _context.Sessions
+            .Include(s => s.Hall)
             .FirstOrDefaultAsync(s => s.Id == request.SessionId);
 
         if (session == null)
