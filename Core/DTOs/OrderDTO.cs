@@ -12,6 +12,7 @@ public class OrderDTO
     public Guid Id { get; set; }
     public DateTime CreatedAt { get; set; }
     public OrderStatus Status { get; set; }
+    public int SessionId { get; set; }
 
     public string MovieTitle { get; set; } = string.Empty;
     public string HallName { get; set; } = string.Empty;
