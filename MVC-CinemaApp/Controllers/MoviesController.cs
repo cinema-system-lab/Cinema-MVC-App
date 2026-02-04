@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Cinema_MVC_App.Controllers;
 
-[Authorize]
 public class MoviesController : Controller
 {
     private readonly IMovieService _movieService;
