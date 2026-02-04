@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Cinema_MVC_App.Controllers;
 
-[Authorize]
 public class SessionsController : Controller
 {
     private readonly ISessionService _sessionService;
