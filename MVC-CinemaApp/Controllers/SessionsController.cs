@@ -1,5 +1,7 @@
-﻿using Core.DTOs;
+﻿using Core.Constants;
+using Core.DTOs;
 using Core.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -22,6 +24,7 @@ public class SessionsController : Controller
     }
 
     // GET: /Sessions
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var sessions = await _sessionService.GetAllSessionsAsync();
@@ -36,6 +39,7 @@ public class SessionsController : Controller
     }
 
     // GET: /Sessions/Details/{id}
+    [AllowAnonymous]
     public async Task<IActionResult> Details(int id)
     {
         var session = await _sessionService.GetSessionAsync(id);
@@ -51,6 +55,7 @@ public class SessionsController : Controller
     }
 
     // GET: /Sessions/Create
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Create()
     {
         await PopulateDropdowns();
@@ -65,6 +70,7 @@ public class SessionsController : Controller
     // POST: /Sessions/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Create(SessionDTO session)
     {
         if (!ModelState.IsValid)
@@ -88,6 +94,7 @@ public class SessionsController : Controller
     }
 
     // GET: /Sessions/Edit/{id}
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Edit(int id)
     {
         var session = await _sessionService.GetSessionAsync(id);
@@ -100,6 +107,7 @@ public class SessionsController : Controller
     // POST: /Sessions/Edit
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Edit(SessionDTO session)
     {
         if (!ModelState.IsValid)
@@ -123,6 +131,7 @@ public class SessionsController : Controller
     }
 
     // GET: /Sessions/Delete/{id}
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Delete(int id)
     {
         var session = await _sessionService.GetSessionAsync(id);
@@ -140,6 +149,7 @@ public class SessionsController : Controller
     // POST: /Sessions/DeleteConfirmed
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         try
