@@ -1,0 +1,12 @@
+﻿using Core.DTOs;
+using Core.Enums;
+
+namespace Core.Interfaces.Services;
+
+public interface IOrderService
+{
+    Task<Guid> CreateOrderAsync(string userId, CreateOrderRequest request);
+    Task UpdateStatusAsync(Guid orderId, OrderStatus newStatus);
+    Task<List<OrderDTO>> GetOrdersByUserAsync(string userId);
+    Task<OrderDTO?> GetOrderByIdAsync(Guid id);
+}

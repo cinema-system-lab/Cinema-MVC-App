@@ -1,4 +1,5 @@
 using Core.Entities;
+using Core.Enums;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,12 @@ builder.Services.AddScoped<ISessionService, SessionService>();
 // DI for TicketService
 builder.Services.AddScoped<ITicketService, TicketService>();
 
+// DI for OrderService
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+// DI for OrderService
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
 var app = builder.Build();
 await app.SeedDatabaseAsync();
 
@@ -73,5 +80,10 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
 
 app.Run();
