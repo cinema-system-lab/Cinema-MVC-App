@@ -1,6 +1,7 @@
 ﻿using Core.DTOs;
 using Core.Entities;
 using Core.Enums;
+using Core.Constants;
 using Core.Interfaces.Services;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -73,6 +74,7 @@ public class OrderService : IOrderService
     public async Task UpdateStatusAsync(Guid orderId, OrderStatus newStatus)
     {
         var order = await _context.Orders
+            .Include(o => o.Tickets)
             .Include(o => o.Session)
             .FirstOrDefaultAsync(o => o.Id == orderId);
 
@@ -81,6 +83,26 @@ public class OrderService : IOrderService
 
         if (order.Session.StartTime <= DateTime.UtcNow)
             throw new InvalidOperationException("Cannot update order for started session");
+        
+        if (order.Status == OrderStatus.Pending &&
+            order.CreatedAt.AddMinutes(OrderConstants.ReservationMinutes) <= DateTime.UtcNow)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.Tickets.RemoveRange(order.Tickets);
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
+            throw new InvalidOperationException("Order expired and deleted");
+        }
 
         if (!IsValidTransition(order.Status, newStatus))
             throw new InvalidOperationException("Invalid order status transition");
