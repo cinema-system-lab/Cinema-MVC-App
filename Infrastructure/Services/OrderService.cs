@@ -79,7 +79,7 @@ public class OrderService : IOrderService
             .Include(o => o.Session)
             .FirstOrDefaultAsync(o => o.Id == orderId);
         
-        var paiment = await _context.Payments
+        var payment = await _context.Payments
             .FirstOrDefaultAsync(p => p.OrderId == orderId);
 
         if (order == null)
@@ -88,7 +88,7 @@ public class OrderService : IOrderService
         if (order.Session.StartTime <= DateTime.UtcNow)
             throw new InvalidOperationException("Cannot update order for started session");
         
-        if (order.Status == OrderStatus.Pending && paiment == null &&
+        if (order.Status == OrderStatus.Pending && payment == null &&
             order.CreatedAt.AddMinutes(OrderConstants.ReservationMinutes) <= DateTime.UtcNow)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
