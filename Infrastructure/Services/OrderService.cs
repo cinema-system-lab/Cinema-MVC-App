@@ -21,7 +21,7 @@ public class OrderService : IOrderService
         _ticketService = ticketService;
     }
 
-    public async Task CreateOrderAsync(string userId, CreateOrderRequest request)
+    public async Task<Guid> CreateOrderAsync(string userId, CreateOrderRequest request)
     {
         var session = await _context.Sessions
             .Include(s => s.Hall)
@@ -77,8 +77,10 @@ public class OrderService : IOrderService
         var order = await _context.Orders
             .Include(o => o.Tickets)
             .Include(o => o.Session)
-            .Include(o => o.Payments)
             .FirstOrDefaultAsync(o => o.Id == orderId);
+        
+        var paiment = await _context.Payments
+            .FirstOrDefaultAsync(p => p.OrderId == orderId);
 
         if (order == null)
             throw new Exception("Order not found");
@@ -86,7 +88,7 @@ public class OrderService : IOrderService
         if (order.Session.StartTime <= DateTime.UtcNow)
             throw new InvalidOperationException("Cannot update order for started session");
         
-        if (order.Status == OrderStatus.Pending && !order.Payments.Any() &&
+        if (order.Status == OrderStatus.Pending && paiment == null &&
             order.CreatedAt.AddMinutes(OrderConstants.ReservationMinutes) <= DateTime.UtcNow)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
