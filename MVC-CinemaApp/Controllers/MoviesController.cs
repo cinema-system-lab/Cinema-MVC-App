@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Core.Constants;
 using Core.DTOs;
-using Core.Interfaces.Services;
 using Core.Enums;
+using Core.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Cinema_MVC_App.Controllers;
 
@@ -15,6 +17,7 @@ public class MoviesController : Controller
     }
 
     // GET: /Movies or /Movies/Index
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var movies = await _movieService.GetAllMoviesAsync();
@@ -22,6 +25,7 @@ public class MoviesController : Controller
     }
 
     // GET: /Movies/Details/{id}
+    [AllowAnonymous]
     public async Task<IActionResult> Details(int id)
     {
         var movie = await _movieService.GetMovieAsync(id);
@@ -32,6 +36,7 @@ public class MoviesController : Controller
     }
 
     // GET: /Movies/Create
+    [Authorize(Roles = Roles.Admin)]
     public IActionResult Create()
     {
         var movie = new MovieDTO
@@ -44,6 +49,7 @@ public class MoviesController : Controller
     // POST: /Movies/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Create(MovieDTO movie, int[]? selectedGenres)
     {
         ModelState.Remove(nameof(movie.Genres));
@@ -74,6 +80,7 @@ public class MoviesController : Controller
     }
 
     // GET: /Movies/Edit/{id}
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Edit(int id)
     {
         var movie = await _movieService.GetMovieAsync(id);
@@ -86,6 +93,7 @@ public class MoviesController : Controller
     // POST: /Movies/Edit
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Edit(MovieDTO movie, int[]? selectedGenres)
     {
         ModelState.Remove(nameof(movie.Genres));
@@ -116,6 +124,7 @@ public class MoviesController : Controller
     }
 
     // GET: /Movies/Delete/{id}
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Delete(int id)
     {
         var movie = await _movieService.GetMovieAsync(id);
@@ -128,6 +137,7 @@ public class MoviesController : Controller
     // POST: /Movies/DeleteConfirmed
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         try
