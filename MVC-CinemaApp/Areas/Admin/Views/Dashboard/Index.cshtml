@@ -1,17 +1,168 @@
-﻿@{
+﻿@model Cinema_MVC_App.Areas.Admin.ViewModels.Dashboard.DashboardViewModel
+@{
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="p-5 mb-4 bg-light rounded-3 border">
-    <div class="container-fluid py-5">
-        <h1 class="display-5 fw-bold">Admin Dashboard</h1>
-        <p class="col-md-8 fs-4">Welcome to the administrative area using Role-Based Authorization.</p>
-        <hr class="my-4">
-        <p>Currently active modules:</p>
-        <ul>
-            <li><span class="badge bg-success">Identity</span> configured (Users & Roles)</li>
-            <li><span class="badge bg-primary">Admin Area</span> structure ready</li>
-            <li><span class="badge bg-secondary">Auth</span> integrated</li>
-        </ul>
+<link rel="stylesheet" href="~/css/dashboard-components.css" />
+
+<div class="container-fluid py-2">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h4 class="fw-bold m-0 text-white">System Overview</h4>
+        </div>
+        <button class="btn btn-sm btn-outline-light border-secondary opacity-75" onclick="location.reload()">
+            <i class="bi bi-arrow-repeat me-1"></i> Sync Data
+        </button>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card dashboard-card p-3 shadow-sm border-green">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="metric-label">Daily Revenue</span>
+                        <div class="metric-value mt-1">₴@Model.TodayRevenue.ToString("N0")</div>
+                    </div>
+                    <div class="icon-box text-success"><i class="bi bi-cash-stack"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card dashboard-card p-3 shadow-sm border-blue">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="metric-label">Monthly Gross</span>
+                        <div class="metric-value mt-1">₴@Model.ThisMonthRevenue.ToString("N0")</div>
+                    </div>
+                    <div class="icon-box text-primary"><i class="bi bi-graph-up-arrow"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card dashboard-card p-3 shadow-sm border-orange">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="metric-label">Tickets Issued</span>
+                        <div class="metric-value mt-1">@Model.TotalTickets</div>
+                    </div>
+                    <div class="icon-box text-warning"><i class="bi bi-ticket-perforated"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card dashboard-card h-100 shadow-sm">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h6 class="fw-bold m-0 text-white">Revenue & Sales Trends</h6>
+                </div>
+                <div class="card-body p-4">
+                    <canvas id="salesChart" style="max-height: 280px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card dashboard-card h-100 shadow-sm">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h6 class="fw-bold m-0 text-white">Order Status</h6>
+                </div>
+                <div class="card-body p-4">
+                    @{
+                        var completedPct = Model.TotalOrders > 0 ? (double)Model.CompletedOrders / Model.TotalOrders * 100 : 0;
+                        var pendingPct = Model.TotalOrders > 0 ? (double)Model.PendingOrders / Model.TotalOrders * 100 : 0;
+                    }
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-medium text-white-50">Completed</span>
+                            <span class="small fw-bold text-success">@completedPct.ToString("F1")%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar bg-success h-100" style="width: @completedPct%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-medium text-white-50">Pending</span>
+                            <span class="small fw-bold text-warning">@pendingPct.ToString("F1")%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar bg-warning h-100" style="width: @pendingPct%"></div>
+                        </div>
+                    </div>
+                    <div class="p-3 rounded-3 mt-4 text-center order-summary">
+                        <div class="metric-label mb-1">Total Transactions</div>
+                        <div class="h4 fw-bold m-0 text-white">@Model.TotalOrders</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h6 class="fw-bold m-0 text-white">Recent Transactions</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table mb-0 mt-2">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Order ID</th>
+                                <th>Customer</th>
+                                <th>Movie</th>
+                                <th class="text-center">Tickets</th>
+                                <th>Amount</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.RecentOrders.Take(6))
+                            {
+                                <tr>
+                                    <td class="ps-4 text-muted font-monospace small">#@order.OrderId</td>
+                                    <td>
+                                        <div class="fw-medium">@order.UserName</div>
+                                        <div class="text-muted customer-badge">Verified Buyer</div>
+                                    </td>
+                                    <td class="text-white-50 small">@order.MovieTitle</td>
+                                    <td class="text-center">
+                                        <span class="ticket-count-badge">@order.TicketsCount</span>
+                                    </td>
+                                    <td class="fw-bold">₴@order.TotalAmount.ToString("N0")</td>
+                                    <td class="text-center">
+                                        @{
+                                            var badge = order.Status switch {
+                                                "Paid" => "bg-soft-success",
+                                                "Pending" => "bg-soft-warning",
+                                                "Refunded" => "bg-soft-info",
+                                                _ => "bg-soft-danger"
+                                            };
+                                        }
+                                        <span class="badge-soft @badge">@order.Status</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="~/js/dashboard-chart.js"></script>
+    <script>
+        const salesRawData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailySales.Select(d => new {
+            date = d.Date.ToString("dd MMM"),
+            rev = d.Revenue,
+            tix = d.TicketsSold
+        })));
+
+        initializeDashboardChart(salesRawData);
+    </script>
+}
