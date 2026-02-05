@@ -1,3 +1,4 @@
+@using Core.Constants
 @using Core.Enums
 @model Core.DTOs.MovieDTO
 
@@ -57,9 +58,13 @@
             </dl>
 
             <div class="mt-4">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Movie</a>
+                @if (User.IsInRole(Roles.Admin))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Movie</a>
+                }
+
                 <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
-                
+
                 @if (!string.IsNullOrEmpty(Model.TrailerUrl))
                 {
                     <a href="@Model.TrailerUrl" target="_blank" class="btn btn-danger">Watch Trailer</a>

@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Cinema Admin</a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse" id="adminNavbar">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning"
+                               asp-area=""
+                               asp-controller="Home"
+                               asp-action="Index">
+                                <i class="bi bi-arrow-left-circle me-1"></i>Back to Site
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <span class="navbar-text text-light me-3">Admin: @User.Identity.Name</span>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-area=""
+                                      asp-controller="Account"
+                                      asp-action="Logout"
+                                      method="post"
+                                      class="d-inline">
+                                    <button type="submit" class="btn btn-outline-light btn-sm ms-2">
+                                        <i class="bi bi-box-arrow-right me-1"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted mt-auto py-3">
+        <div class="container text-center">
+            &copy; @DateTime.Now.Year - Cinema Admin Panel
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
