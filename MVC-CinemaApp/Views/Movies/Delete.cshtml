@@ -1,11 +1,35 @@
 @model Core.DTOs.MovieDTO
+@{
+    ViewData["Title"] = "Delete Movie";
+}
 
-<h2>Delete Movie</h2>
+<link rel="stylesheet" href="~/css/admin-movie.css" asp-append-version="true" />
 
-<p>Are you sure you want to delete <strong>@Model.Title</strong>?</p>
+<div class="container delete-container">
+    <div class="delete-card">
+        <div class="warning-icon">
+            <i class="bi bi-exclamation-octagon"></i>
+        </div>
 
-<form asp-action="DeleteConfirmed" method="post">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Yes, delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+        <h3 class="fw-bold text-white mb-2">Confirm Deletion</h3>
+        <p class="text-muted mb-4">You are about to permanently remove this record. This action cannot be undone.</p>
+
+        <div class="movie-info-box">
+            <span class="text-muted small text-uppercase fw-bold d-block mb-1">Movie Title</span>
+            <h4 class="text-white m-0">@Model.Title</h4>
+            <div class="mt-2 small text-muted font-monospace">UUID: @Model.Id</div>
+        </div>
+
+        <form asp-action="DeleteConfirmed" method="post" class="d-flex align-items-center justify-content-center gap-3">
+            <input type="hidden" asp-for="Id" />
+            
+            <a asp-action="Index" class="btn-cancel">
+                Cancel
+            </a>
+            
+            <button type="submit" class="btn-delete-confirm shadow-sm">
+                <i class="bi bi-trash3 me-2"></i>Permanently Delete
+            </button>
+        </form>
+    </div>
+</div>
