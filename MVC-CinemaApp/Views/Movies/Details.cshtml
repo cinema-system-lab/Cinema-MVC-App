@@ -1,73 +1,80 @@
 @using Core.Constants
-@using Core.Enums
 @model Core.DTOs.MovieDTO
 
 @{
-    ViewData["Title"] = "Movie Details";
+    ViewData["Title"] = Model.Title;
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-4">
-            @if (!string.IsNullOrEmpty(Model.PosterUrl))
-            {
-                <img src="@Model.PosterUrl" class="img-fluid rounded shadow" alt="@Model.Title Poster" />
-            }
-            else
-            {
-                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px; border: 2px dashed #dee2e6;">
-                    <span class="text-muted">No Poster Available</span>
+<div class="movie-hero" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.4), #000), url('@Model.PosterUrl');">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-md-4 col-lg-3">
+                <img src="@Model.PosterUrl" class="img-fluid rounded-4 shadow-lg d-none d-md-block" alt="@Model.Title">
+            </div>
+            <div class="col-md-8 col-lg-9 text-white mt-4 mt-md-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary rounded-pill">@Model.AgeRestriction+</span>
+                    <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> @Model.Rating.ToString("F1")</span>
                 </div>
-            }
+                <h1 class="display-3 fw-bold mb-3">@Model.Title.ToUpper()</h1>
+                <p class="fs-5 text-light opacity-75">@Model.Genres.ToString().Replace(",", " •")</p>
+
+                <div class="mt-4 d-flex gap-3">
+                    @if (Model.IsActive && Model.ReleaseDate <= DateTime.Today)
+                    {
+                        <button class="btn btn-danger btn-lg rounded-0 px-5 fw-bold">GET TICKETS</button>
+                    }
+                    else if (Model.ReleaseDate > DateTime.Today)
+                    {
+                        <button class="btn btn-outline-light btn-lg rounded-0 px-5 fw-bold disabled">COMING SOON</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary btn-lg rounded-0 px-5 fw-bold disabled">ARCHIVED</button>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.TrailerUrl))
+                    {
+                        <a href="@Model.TrailerUrl" target="_blank" class="btn btn-outline-light btn-lg rounded-0 px-4">
+                            <i class="bi bi-play-fill"></i> TRAILER
+                        </a>
+                    }
+                </div>
+            </div>
         </div>
+    </div>
+</div>
 
-        <div class="col-md-8">
-            <h2>@Model.Title</h2>
-            <hr />
-            
-            <dl class="row">
-                <dt class="col-sm-3">Director</dt>
-                <dd class="col-sm-9">@Model.Director</dd>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h4 class="fw-bold mb-3 border-start border-danger border-4 ps-3 text-uppercase">Synopsis</h4>
+            <p class="text-muted fs-5 lh-base mb-5">@Model.Description</p>
 
-                <dt class="col-sm-3">Release Date</dt>
-                <dd class="col-sm-9">@Model.ReleaseDate.ToString("MMMM dd, yyyy")</dd>
+            <h4 class="fw-bold mb-3 border-start border-danger border-4 ps-3 text-uppercase">Cast</h4>
+            <p class="text-muted">@Model.Actors</p>
+        </div>
+        <div class="col-lg-4">
+            <div class="bg-dark p-4 rounded-4 border border-secondary shadow-sm">
+                <h5 class="fw-bold mb-4">DETAILS</h5>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Director:</span>
+                    <span class="fw-bold text-white">@Model.Director</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Release Date:</span>
+                    <span class="fw-bold text-white">@Model.ReleaseDate.ToString("MMMM dd, yyyy")</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Duration:</span>
+                    <span class="fw-bold text-white">@Model.DurationMinutes min</span>
+                </div>
 
-                <dt class="col-sm-3">Duration</dt>
-                <dd class="col-sm-9">@Model.DurationMinutes min</dd>
-
-                <dt class="col-sm-3">Rating</dt>
-                <dd class="col-sm-9">
-                    <span class="badge bg-warning text-dark">⭐ @Model.Rating.ToString("F1") / 10</span>
-                </dd>
-
-                <dt class="col-sm-3">Genres</dt>
-                <dd class="col-sm-9">
-                    @* This splits the Flags Enum into comma-separated strings *@
-                    @string.Join(", ", Enum.GetValues<GenreType>()
-                        .Where(g => g != GenreType.None && Model.Genres.HasFlag(g)))
-                </dd>
-
-                <dt class="col-sm-3">Age Restriction</dt>
-                <dd class="col-sm-9">@Model.AgeRestriction+</dd>
-
-                <dt class="col-sm-3">Actors</dt>
-                <dd class="col-sm-9">@Model.Actors</dd>
-
-                <dt class="col-sm-3">Description</dt>
-                <dd class="col-sm-9">@Model.Description</dd>
-            </dl>
-
-            <div class="mt-4">
                 @if (User.IsInRole(Roles.Admin))
                 {
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Movie</a>
-                }
-
-                <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
-
-                @if (!string.IsNullOrEmpty(Model.TrailerUrl))
-                {
-                    <a href="@Model.TrailerUrl" target="_blank" class="btn btn-danger">Watch Trailer</a>
+                    <div class="mt-4 pt-4 border-top border-secondary">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-warning w-100 mb-2">EDIT MOVIE</a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100">REMOVE MOVIE</a>
+                    </div>
                 }
             </div>
         </div>

@@ -1,11 +1,28 @@
 @model Core.DTOs.MovieDTO
 
-<h2>Delete Movie</h2>
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card bg-dark border-danger shadow-lg text-center">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-octagon display-1 text-danger"></i>
+                    </div>
+                    <h2 class="fw-bold text-white mb-3 text-uppercase">Delete Movie?</h2>
+                    <p class="text-muted mb-4">
+                        You are about to permanently delete <strong class="text-white">"@Model.Title"</strong>.
+                        This action cannot be undone. Are you sure?
+                    </p>
 
-<p>Are you sure you want to delete <strong>@Model.Title</strong>?</p>
-
-<form asp-action="DeleteConfirmed" method="post">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Yes, delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+                    <form asp-action="DeleteConfirmed" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg fw-bold rounded-pill">YES, DELETE FOREVER</button>
+                            <a asp-action="Index" class="btn btn-link text-muted text-decoration-none">No, take me back</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

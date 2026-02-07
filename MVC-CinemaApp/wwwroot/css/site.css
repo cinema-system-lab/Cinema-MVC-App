@@ -1,22 +1,201 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+/* Переменные проекта */
+:root {
+    --mx-red: #FF0000;
+    --mx-red-hover: #CC0000;
+    --bg-black: #000000;
+    --text-gray: #828282;
+    --card-radius: 12px;
 }
 
 body {
-  margin-bottom: 60px;
+    background-color: var(--bg-black);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Шапка (Layout) */
+.navbar {
+    background: rgba(0,0,0,0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #222 !important;
+}
+
+.nav-link {
+    color: #aaa !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+
+    .nav-link:hover, .nav-link.active {
+        color: #fff !important;
+    }
+
+.nav-item .active {
+    border-bottom: 2px solid var(--mx-red);
+}
+
+/* Сетка и контейнеры */
+.movies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 30px;
+}
+
+.section-header {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-weight: 800;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.title-underline {
+    width: 50px;
+    height: 4px;
+    background-color: var(--mx-red);
+    margin-top: 10px;
+}
+
+/* Карточка фильма */
+.poster-container {
+    position: relative;
+    aspect-ratio: 2/3;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    background: #1a1a1a;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.5s;
+}
+
+.movie-item:hover .poster-img {
+    transform: scale(1.1);
+    filter: brightness(0.6);
+}
+
+.poster-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    background: rgba(0,0,0,0.4);
+    transition: 0.3s;
+}
+
+.movie-item:hover .poster-overlay {
+    opacity: 1;
+}
+
+.btn-buy-card {
+    background: var(--mx-red);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+
+.age-tag, .rating-tag {
+    position: absolute;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border-radius: 6px;
+}
+
+.age-tag {
+    bottom: 15px;
+    left: 15px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.rating-tag {
+    top: 15px;
+    right: 15px;
+}
+
+.movie-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 15px;
+    color: #fff;
+}
+
+.movie-genres {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+}
+
+/* FAQ и Privacy */
+.accordion-button::after {
+    filter: invert(1);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #1a1a1a;
+    color: var(--mx-red);
+}
+
+/* Блокировка эффектов для архива */
+
+/* 1. Запрещаем зум картинки */
+.grayscale-filter:hover .poster-img {
+    transform: none !important;
+    filter: grayscale(1) brightness(0.5) !important;
+}
+
+/* 2. Скрываем оверлей с кнопкой "Buy Tickets" для архива */
+.grayscale-filter .poster-overlay {
+    display: none !important; /* Кнопка вообще не появится */
+}
+
+/* 3. Усиливаем эффект ч/б */
+.grayscale-filter {
+    filter: grayscale(1);
+    opacity: 0.6;
+    cursor: default; /* Показываем, что кликать тут нечего */
+    transition: none !important;
+}
+
+    /* 4. Чтобы при наведении карточка не становилась ярче */
+    .grayscale-filter:hover {
+        opacity: 0.6 !important;
+        filter: grayscale(1) !important;
+    }
+
+/* Выделение кнопки Help в меню */
+.nav-link i.bi-question-circle {
+    vertical-align: middle;
+}
+
+/* Улучшение адаптивности для мобильных */
+@media (max-width: 991px) {
+    .navbar-nav .nav-item {
+        padding: 5px 0;
+    }
+
+    .navbar-nav .btn-danger {
+        margin-top: 10px;
+    }
+}
+
+/* Чистый футер без лишних отступов */
+footer {
+    background-color: #050505;
 }
