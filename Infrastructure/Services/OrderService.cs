@@ -128,31 +128,61 @@ public class OrderService : IOrderService
     public async Task<List<OrderDTO>> GetOrdersByUserAsync(string userId)
     {
         return await _context.Orders
-            .Where(o => o.UserId == userId)
+            .Include(o => o.Session)
+                .ThenInclude(s => s.Movie)
+            .Include(o => o.Session)
+                .ThenInclude(s => s.Hall)
+            .Include(o => o.Tickets)
             .OrderByDescending(o => o.CreatedAt)
             .Select(o => new OrderDTO
             {
                 Id = o.Id,
                 SessionId = o.SessionId,
                 Status = o.Status,
-                CreatedAt = o.CreatedAt
+                CreatedAt = o.CreatedAt,
+                MovieTitle = o.Session.Movie.Title,
+                HallName = o.Session.Hall.Name,
+                SessionStartTime = o.Session.StartTime,
+                TotalPrice = o.Tickets.Count * o.Session.BasePrice
             })
             .ToListAsync();
     }
-
-
+    
     public async Task<OrderDTO?> GetOrderByIdAsync(Guid id)
     {
-        return await _context.Orders
-            .Where(o => o.Id == id)
-            .Select(o => new OrderDTO
-            {
-                Id = o.Id,
-                SessionId = o.SessionId,
-                Status = o.Status,
-                CreatedAt = o.CreatedAt
-            })
-            .FirstOrDefaultAsync();
-    }
+        var order = await _context.Orders
+            .Include(o => o.Session)
+            .ThenInclude(s => s.Movie)
+            .Include(o => o.Session)
+            .ThenInclude(s => s.Hall)
+            .Include(o => o.Tickets)
+            .ThenInclude(t => t.Seat)
+            .FirstOrDefaultAsync(o => o.Id == id);
 
+        if (order == null) return null;
+
+        return new OrderDTO
+        {
+            Id = order.Id,
+            SessionId = order.SessionId,
+            Status = order.Status,
+            CreatedAt = order.CreatedAt,
+            MovieTitle = order.Session?.Movie?.Title ?? "N/A",
+            HallName = order.Session?.Hall?.Name ?? "N/A",
+            SessionStartTime = order.Session?.StartTime ?? DateTime.MinValue,
+            TotalPrice = (order.Tickets?.Count ?? 0) * (order.Session?.BasePrice ?? 0),
+            Tickets = order.Tickets?.Select(t => new TicketDTO
+            {
+                OrderId = t.OrderId,
+                SessionId = t.SessionId,
+                SeatId = t.SeatId,
+                MovieTitle = order.Session?.Movie?.Title ?? "N/A",
+                HallName = order.Session?.Hall?.Name ?? "N/A",
+                StartTime = order.Session?.StartTime ?? DateTime.MinValue,
+                RowNumber = t.Seat?.RowNumber ?? 0,
+                SeatNumber = t.Seat?.SeatNumber ?? 0,
+                Price = order.Session?.BasePrice ?? 0
+            }).ToList() ?? new List<TicketDTO>()
+        };
+    }
 }
