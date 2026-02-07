@@ -199,3 +199,78 @@ body {
 footer {
     background-color: #050505;
 }
+
+/* --- Стили Расписания --- */
+
+/* Контейнер кнопок дат */
+.day-picker {
+    border-bottom: 1px solid #222;
+}
+
+.date-btn {
+    min-width: 75px;
+    border: 1px solid #333;
+    color: #888;
+    background: transparent;
+    transition: 0.3s;
+}
+
+    .date-btn:hover {
+        color: #fff;
+        border-color: #555;
+        background: #111;
+    }
+
+    .date-btn.active {
+        background-color: var(--mx-red) !important;
+        border-color: var(--mx-red) !important;
+        color: #fff !important;
+    }
+
+/* Слот сеанса (кнопка времени) */
+.session-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 15px;
+    background: #111;
+    border: 1px solid #333;
+    text-decoration: none !important;
+    min-width: 90px;
+    transition: 0.2s;
+}
+
+    .session-slot:hover {
+        border-color: var(--mx-red);
+        background: #1a1a1a;
+    }
+
+.session-time {
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+.session-hall {
+    color: #666;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.session-price {
+    color: var(--mx-red);
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Линия под заголовком */
+.movie-schedule-row {
+    border-bottom: 1px solid #1a1a1a;
+    padding-bottom: 2rem;
+}
+
+    .movie-schedule-row:last-child {
+        border-bottom: none;
+    }

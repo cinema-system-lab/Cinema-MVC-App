@@ -1,0 +1,215 @@
+﻿@using Core.DTOs
+@using Core.Enums
+@model IEnumerable<SessionDTO>
+@{
+    ViewData["Title"] = "Movie Schedule";
+    var moviesLookup = ViewBag.Movies as Dictionary<int, MovieDTO>;
+    var hallsLookup = ViewBag.Halls as Dictionary<int, HallDTO>;
+
+    var groupedByDate = Model
+        .GroupBy(s => s.StartTime.Date)
+        .OrderBy(g => g.Key);
+
+    // Собираем уникальные жанры
+    var allGenres = moviesLookup?.Values
+        .SelectMany(m => m.Genres.ToString().Split(','))
+        .Select(g => g.Trim())
+        .Distinct()
+        .OrderBy(g => g) ?? Enumerable.Empty<string>();
+
+    // Берем типы залов напрямую из Enum
+    var hallTypes = Enum.GetValues(typeof(HallType)).Cast<HallType>();
+}
+
+<div class="container py-5">
+    <header class="mb-4">
+        <h1 class="display-5 fw-bold text-white text-uppercase">Movie Schedule</h1>
+        <div class="bg-danger" style="height: 4px; width: 60px;"></div>
+    </header>
+
+    @* DATE PICKER *@
+    <div class="d-flex gap-2 mb-4 overflow-auto pb-3 date-scroll-container">
+        @foreach (var dateGroup in groupedByDate)
+        {
+            var isToday = dateGroup.Key == DateTime.Today;
+            <button class="btn date-card @(isToday ? "active" : "")"
+                    onclick="filterDate('@dateGroup.Key.ToString("yyyy-MM-dd")', this)">
+                <span class="d-block small text-uppercase opacity-75">@dateGroup.Key.ToString("ddd")</span>
+                <span class="fw-bold fs-4">@dateGroup.Key.Day</span>
+                <span class="d-block small text-uppercase">@dateGroup.Key.ToString("MMM")</span>
+            </button>
+        }
+    </div>
+
+    @* FILTERS *@
+    <div class="row g-3 mb-5 align-items-center bg-dark p-3 rounded-4 border border-secondary shadow">
+        <div class="col-md-auto">
+            <i class="bi bi-funnel text-danger"></i>
+            <span class="text-muted small text-uppercase fw-bold ms-2">Filters:</span>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select form-select-sm bg-black text-white border-secondary rounded-pill" id="genreFilter" onchange="applyFilters()">
+                <option value="all">All Genres</option>
+                @foreach (var genre in allGenres)
+                {
+                    <option value="@genre.ToLower()">@genre</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select form-select-sm bg-black text-white border-secondary rounded-pill" id="hallTypeFilter" onchange="applyFilters()">
+                <option value="all">All Experience (Types)</option>
+                @foreach (var type in hallTypes)
+                {
+                    <option value="@((byte)type)">@type.ToString()</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div id="schedule-container">
+        @foreach (var dateGroup in groupedByDate)
+        {
+            <div class="date-section @(dateGroup.Key == DateTime.Today ? "" : "d-none")" id="date-@dateGroup.Key.ToString("yyyy-MM-dd")">
+                @foreach (var movieGroup in dateGroup.GroupBy(s => s.MovieId))
+                {
+                    if (moviesLookup != null && moviesLookup.TryGetValue(movieGroup.Key, out var movie))
+                    {
+                        <div class="movie-row mb-5 pb-4 border-bottom border-secondary border-opacity-25"
+                             data-genres="@movie.Genres.ToString().ToLower()">
+
+                            <div class="row g-4">
+                                <div class="col-4 col-md-3 col-lg-2">
+                                    <div class="position-relative poster-hover">
+                                        <img src="@movie.PosterUrl" class="img-fluid rounded-3 shadow-lg" alt="@movie.Title">
+                                        <span class="position-absolute top-0 start-0 badge bg-primary m-2">@movie.AgeRestriction+</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-8 col-md-9 col-lg-10">
+                                    <h4 class="fw-bold text-white mb-1">@movie.Title.ToUpper()</h4>
+                                    <p class="text-danger small mb-3 fw-bold">
+                                        @movie.Genres.ToString().Replace(",", " •") | @movie.DurationMinutes MIN
+                                    </p>
+
+                                    <div class="d-flex flex-wrap gap-3">
+                                        @foreach (var session in movieGroup.OrderBy(s => s.StartTime))
+                                        {
+                                            hallsLookup.TryGetValue(session.HallId, out var hall);
+                                            var hallTypeVal = hall != null ? (byte)hall.Type : 1;
+
+                                            <a asp-controller="Sessions" asp-action="Details" asp-route-id="@session.Id"
+                                               class="session-box text-decoration-none"
+                                               data-hall-type="@hallTypeVal">
+                                                <div class="time">@session.StartTime.ToString("HH:mm")</div>
+                                                <div class="hall text-muted">@(hall?.Name ?? "Standard")</div>
+                                                <div class="price">@session.BasePrice ₴</div>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Стили оставляем те же, что тебе понравились */
+    .date-card {
+        min-width: 80px;
+        background: #1a1a1a;
+        color: #fff;
+        border: 1px solid #333;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+        .date-card:hover, .date-card.active {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+    .session-box {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 10px;
+        text-align: center;
+        transition: 0.3s;
+        min-width: 90px;
+    }
+
+        .session-box .time {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .session-box .hall {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .session-box .price {
+            color: #dc3545;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .session-box:hover {
+            border-color: #dc3545;
+            background: #252525;
+            transform: scale(1.05);
+        }
+
+    .poster-hover:hover img {
+        filter: brightness(1.2);
+        transition: 0.3s;
+    }
+</style>
+
+<script>
+    function filterDate(dateStr, btn) {
+        document.querySelectorAll('.date-card').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.date-section').forEach(s => s.classList.add('d-none'));
+        document.getElementById('date-' + dateStr).classList.remove('d-none');
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const selectedGenre = document.getElementById('genreFilter').value;
+        const selectedHallType = document.getElementById('hallTypeFilter').value;
+        const activeSection = document.querySelector('.date-section:not(.d-none)');
+
+        if (!activeSection) return;
+
+        activeSection.querySelectorAll('.movie-row').forEach(row => {
+            const movieGenres = row.getAttribute('data-genres');
+            let hasVisibleSessions = 0;
+
+            row.querySelectorAll('.session-box').forEach(session => {
+                const sessionType = session.getAttribute('data-hall-type');
+
+                const genreMatch = selectedGenre === 'all' || movieGenres.includes(selectedGenre);
+                const typeMatch = selectedHallType === 'all' || sessionType === selectedHallType;
+
+                if (genreMatch && typeMatch) {
+                    session.style.display = 'block';
+                    hasVisibleSessions++;
+                } else {
+                    session.style.display = 'none';
+                }
+            });
+
+            row.style.display = (hasVisibleSessions > 0) ? 'block' : 'none';
+        });
+    }
+</script>

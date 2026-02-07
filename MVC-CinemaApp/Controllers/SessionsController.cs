@@ -1,6 +1,7 @@
 ﻿using Core.Constants;
 using Core.DTOs;
 using Core.Interfaces.Services;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -48,9 +49,10 @@ public class SessionsController : Controller
         var movie = await _movieService.GetMovieAsync(session.MovieId);
         var hall = await _hallService.GetHallAsync(session.HallId);
 
-        ViewBag.MovieName = movie?.Title ?? "Unknown";
-        ViewBag.HallName = hall?.Name ?? "Unknown";
-        
+        ViewBag.MovieName = movie?.Title;
+        ViewBag.HallName = hall?.Name;
+        ViewBag.HallType = hall?.Type;
+
         return View(session);
     }
 
@@ -165,7 +167,23 @@ public class SessionsController : Controller
         }
     }
 
-    
+    [AllowAnonymous]
+    public async Task<IActionResult> Schedule()
+    {
+        var sessions = await _sessionService.GetAllSessionsAsync();
+        var movies = await _movieService.GetAllMoviesAsync();
+        var halls = await _hallService.GetAllHallsAsync();
+
+        ViewBag.Movies = movies.ToDictionary(m => m.Id);
+        ViewBag.Halls = halls.ToDictionary(h => h.Id);
+
+        var futureSessions = sessions
+            .Where(s => s.StartTime >= DateTime.Today)
+            .OrderBy(s => s.StartTime);
+
+        return View(futureSessions);
+    }
+
     private async Task PopulateDropdowns(int? selectedMovieId = null, int? selectedHallId = null)
     {
         var movies = (await _movieService.GetAllMoviesAsync())
