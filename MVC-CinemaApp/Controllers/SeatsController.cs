@@ -65,10 +65,9 @@ public class SeatsController : Controller
             TempData["SuccessMessage"] = "Seats generated successfully!";
             return RedirectToAction(nameof(Index), new { hallId = generationDto.HallId });
         }
-        catch (InvalidOperationException ex) // Ловимо нашу заборону
+        catch (InvalidOperationException ex)
         {
-             ModelState.AddModelError("", ex.Message); // Покаже помилку над формою
-             // Потрібно відновити назву залу для ViewBag, якщо повертаємо View
+             ModelState.AddModelError("", ex.Message);
              var hall = await _hallService.GetHallAsync(generationDto.HallId);
              ViewBag.HallName = hall?.Name;
              return View(generationDto);
@@ -98,7 +97,6 @@ public class SeatsController : Controller
         }
         catch (InvalidOperationException ex)
         {
-            // Покаже повідомлення "Cannot modify seats..." або "Seat already exists"
             TempData["ErrorMessage"] = ex.Message;
         }
         catch (Exception)
@@ -116,14 +114,33 @@ public class SeatsController : Controller
         try 
         {
             await _seatService.DeleteSeatAsync(id);
+            
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || 
+                Request.Headers.Accept.ToString().Contains("application/json"))
+            {
+                return Ok(new { success = true, message = "Seat deleted." });
+            }
+            
             TempData["SuccessMessage"] = "Seat deleted.";
         }
         catch (InvalidOperationException ex)
         {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || 
+                Request.Headers.Accept.ToString().Contains("application/json"))
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            
             TempData["ErrorMessage"] = ex.Message;
         }
         catch (Exception)
         {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || 
+                Request.Headers.Accept.ToString().Contains("application/json"))
+            {
+                return StatusCode(500, new { success = false, message = "Error deleting seat." });
+            }
+            
             TempData["ErrorMessage"] = "Error deleting seat.";
         }
         
@@ -142,7 +159,6 @@ public class SeatsController : Controller
         }
         catch (InvalidOperationException ex)
         {
-             // "Cannot modify seats because there are sessions..."
             TempData["ErrorMessage"] = ex.Message;
         }
         catch (Exception)
@@ -160,14 +176,34 @@ public class SeatsController : Controller
         try 
         {
             await _seatService.ToggleSeatTypeAsync(id);
+            
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || 
+                Request.Headers.Accept.ToString().Contains("application/json"))
+            {
+                return Ok(new { success = true, message = "Seat type updated." });
+            }
+            
+            TempData["SuccessMessage"] = "Seat type updated.";
         }
         catch (InvalidOperationException ex)
         {
-             TempData["ErrorMessage"] = ex.Message;
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || 
+                Request.Headers.Accept.ToString().Contains("application/json"))
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            
+            TempData["ErrorMessage"] = ex.Message;
         }
         catch 
         {
-             TempData["ErrorMessage"] = "Error updating seat type.";
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || 
+                Request.Headers.Accept.ToString().Contains("application/json"))
+            {
+                return StatusCode(500, new { success = false, message = "Error updating seat type." });
+            }
+            
+            TempData["ErrorMessage"] = "Error updating seat type.";
         }
         
         return RedirectToAction(nameof(Index), new { hallId = hallId });
