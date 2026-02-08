@@ -1,5 +1,11 @@
-@using Core.Constants
-@model IEnumerable<Core.DTOs.SessionDTO>
+﻿@using Core.Constants
+@using Cinema_MVC_App.Models;
+@using System.Linq
+
+
+@{
+    ViewData["Title"] = "Sessions Management";
+}
 
 <h2>Sessions</h2>
 
@@ -10,7 +16,7 @@
     </p>
 }
 
-@if (Model == null || !Model.Any())
+@if (Model?.Sessions == null || Model.Sessions.Count == 0)
 {
     <p>No sessions found.</p>
 }
@@ -28,21 +34,23 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var session in Model)
+            @foreach (var session in Model.Sessions)
             {
                 <tr>
-                    <td>@ViewBag.MovieNames[session.MovieId]</td>
-                    <td>@ViewBag.HallNames[session.HallId]</td>
-                    <td>@session.StartTime</td>
-                    <td>@session.EndTime</td>
-                    <td>@session.BasePrice</td>
+                    <td>@(ViewBag.MovieNames != null && ViewBag.MovieNames.ContainsKey(session.MovieId) ? ViewBag.MovieNames[session.MovieId] : "Unknown")</td>
+                    <td>@(ViewBag.HallNames != null && ViewBag.HallNames.ContainsKey(session.HallId) ? ViewBag.HallNames[session.HallId] : "Unknown")</td>
+                    <td>@session.StartTime.ToString("g")</td>
+                    <td>@session.EndTime.ToString("g")</td>
+                    <td>@session.BasePrice ₴</td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@session.Id" class="btn btn-info btn-sm">Details</a>
-                        @if (User.IsInRole(Roles.Admin))
-                        {
-                            <a asp-action="Edit" asp-route-id="@session.Id" class="btn btn-warning btn-sm">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@session.Id" class="btn btn-danger btn-sm">Delete</a>
-                        }
+                        <div class="btn-group">
+                            <a asp-action="Details" asp-route-id="@session.Id" class="btn btn-info btn-sm">Details</a>
+                            @if (User.IsInRole(Roles.Admin))
+                            {
+                                <a asp-action="Edit" asp-route-id="@session.Id" class="btn btn-warning btn-sm">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@session.Id" class="btn btn-danger btn-sm">Delete</a>
+                            }
+                        </div>
                     </td>
                 </tr>
             }
