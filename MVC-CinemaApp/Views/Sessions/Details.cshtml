@@ -1,23 +1,74 @@
 @model Core.DTOs.SessionDTO
+@{
+    ViewData["Title"] = "Session Details";
+}
 
-<h2>Session Details</h2>
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-sessions.css" asp-append-version="true"/>
 
-<dl class="row">
-    <dt class="col-sm-3">Movie</dt>
-    <dd class="col-sm-9">@ViewBag.MovieName</dd>
+<div class="container py-5">
+    <div class="mb-4">
+        <a asp-action="Index" class="text-decoration-none text-muted small">
+            <i class="bi bi-chevron-left"></i> Back to Sessions
+        </a>
+    </div>
 
-    <dt class="col-sm-3">Hall</dt>
-    <dd class="col-sm-9">@ViewBag.HallName</dd>
+    <div class="details-card">
+        <div class="session-header">
+            <div class="session-title">
+                <i class="bi bi-film text-primary"></i>
+                @ViewBag.MovieName
+            </div>
+            <div class="session-subtitle">
+                <i class="bi bi-door-closed"></i>
+                @ViewBag.HallName
+            </div>
+        </div>
 
-    <dt class="col-sm-3">Start Time</dt>
-    <dd class="col-sm-9">@Model.StartTime</dd>
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="time-block">
+                    <div class="time-label">
+                        <i class="bi bi-play-circle me-1"></i> Start Time
+                    </div>
+                    <div class="time-value">@Model.StartTime.ToString("HH:mm")</div>
+                    <div class="time-date">@Model.StartTime.ToString("MMMM dd, yyyy")</div>
+                </div>
+            </div>
 
-    <dt class="col-sm-3">End Time</dt>
-    <dd class="col-sm-9">@Model.EndTime</dd>
+            <div class="col-md-6">
+                <div class="time-block">
+                    <div class="time-label">
+                        <i class="bi bi-stop-circle me-1"></i> End Time
+                    </div>
+                    <div class="time-value">@Model.EndTime.ToString("HH:mm")</div>
+                    <div class="time-date">@Model.EndTime.ToString("MMMM dd, yyyy")</div>
+                </div>
+            </div>
+        </div>
 
-    <dt class="col-sm-3">Base Price</dt>
-    <dd class="col-sm-9">@Model.BasePrice</dd>
-</dl>
+        <div class="duration-info mb-4">
+            <i class="bi bi-hourglass-split fs-5"></i>
+            <span>
+                Duration: <strong>@((Model.EndTime - Model.StartTime).TotalMinutes) minutes</strong>
+            </span>
+        </div>
 
-<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        <div class="price-display-box mb-4">
+            <div class="price-label">
+                <i class="bi bi-ticket-perforated me-1"></i> Base Ticket Price
+            </div>
+            <div class="price-value">@Model.BasePrice.ToString("C")</div>
+            <small style="color: #6ee7b7; opacity: 0.8;">Premium seats priced higher</small>
+        </div>
+
+        <div class="d-flex gap-3 mt-4 pt-3" style="border-top: 1px solid var(--admin-border);">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-action btn-soft-primary">
+                <i class="bi bi-pencil-square"></i> Edit Session
+            </a>
+            <a asp-action="Index" class="btn-action btn-soft-secondary">
+                <i class="bi bi-list-ul"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>

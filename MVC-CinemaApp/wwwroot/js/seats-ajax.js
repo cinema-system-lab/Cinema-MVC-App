@@ -41,7 +41,7 @@
         form.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            if (!confirm('Видалити це місце?')) return;
+            if (!confirm('Delete this place?')) return;
 
             const seatWrapper = this.closest('.seat-wrapper');
             const formData = new FormData(this);
