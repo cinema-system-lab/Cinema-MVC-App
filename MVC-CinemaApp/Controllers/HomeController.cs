@@ -18,8 +18,11 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var movies = await _movieService.GetAllMoviesAsync();
-        return View(movies);
+        var allMovies = await _movieService.GetAllMoviesAsync();
+
+        var activeMovies = allMovies.Where(m => m.IsActive).ToList();
+
+        return View(activeMovies);
     }
 
     public IActionResult Privacy()
