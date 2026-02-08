@@ -3,8 +3,8 @@
 @model Core.DTOs.SessionDTO
 @{
     ViewData["Title"] = "Session Info";
-
     var hallType = ViewBag.HallType is HallType type ? type : HallType.Standard;
+    var posterUrl = ViewBag.PosterUrl; // Получаем постер
 
     string badgeClass = hallType switch
     {
@@ -14,20 +14,25 @@
     };
 }
 
-<div class="container py-5">
-    <div class="card bg-dark text-white border-secondary shadow-lg">
-        <div class="card-body p-5">
+<div class="session-hero" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), #000), url('@posterUrl');">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Sessions" asp-action="Schedule" class="text-danger text-decoration-none fw-bold">Schedule</a>
+                </li>
+                <li class="breadcrumb-item active text-white-50" aria-current="page">Booking</li>
+            </ol>
+        </nav>
+        <h1 class="display-4 fw-bold text-white shadow-text">@ViewBag.MovieName</h1>
+    </div>
+</div>
+
+<div class="container mb-5" style="margin-top: -60px;">
+    <div class="card bg-dark text-white border-secondary shadow-lg overflow-hidden">
+        <div class="card-body p-4 p-md-5">
             <div class="row">
                 <div class="col-md-8">
-                    <nav aria-label="breadcrumb" class="mb-3">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a asp-controller="Schedule" asp-action="Index" class="text-danger text-decoration-none">Schedule</a></li>
-                            <li class="breadcrumb-item active text-muted" aria-current="page">Session</li>
-                        </ol>
-                    </nav>
-
-                    <h1 class="display-5 fw-bold mb-4">@ViewBag.MovieName</h1>
-
                     <div class="d-flex flex-wrap gap-4 mb-5">
                         <div class="text-center p-3 bg-black rounded-4 border @badgeClass" style="min-width: 120px;">
                             <div class="small text-muted text-uppercase fw-semibold mb-1">Hall Type</div>
@@ -52,7 +57,7 @@
 
                     @if (User.IsInRole(Roles.Admin))
                     {
-                        <div class="alert alert-dark border-secondary d-inline-flex align-items-center mb-4 p-3">
+                        <div class="alert alert-dark border-secondary d-inline-flex align-items-center mb-4 p-3 shadow-sm">
                             <i class="bi bi-shield-lock-fill text-warning me-3 fs-4"></i>
                             <div>
                                 <div class="fw-bold">Administrator Access</div>
@@ -60,7 +65,7 @@
                             </div>
                         </div>
                         <div class="d-flex gap-2">
-                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning px-4 rounded-pill fw-bold">
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning px-4 rounded-pill fw-bold shadow-sm">
                                 <i class="bi bi-pencil-square me-2"></i>Edit
                             </a>
                             <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger px-4 rounded-pill fw-bold">
@@ -71,7 +76,7 @@
                     else
                     {
                         <a asp-controller="Tickets" asp-action="Book" asp-route-sessionId="@Model.Id"
-                           class="btn btn-danger btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg border-0 bg-gradient">
+                           class="btn btn-danger btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg border-0 btn-book-seats">
                             CHOOSE YOUR SEATS <i class="bi bi-arrow-right ms-2"></i>
                         </a>
                     }
@@ -82,11 +87,32 @@
 </div>
 
 <style>
-    .bg-gradient {
-        background: linear-gradient(45deg, #dc3545, #b02a37);
+    /* Стиль для "Героя" */
+    .session-hero {
+        min-height: 400px;
+        background-size: cover;
+        background-position: center 25%;
+        display: flex;
+        align-items: center;
+        padding-bottom: 60px;
     }
 
+    .shadow-text {
+        text-shadow: 2px 4px 10px rgba(0,0,0,0.8);
+    }
+
+    .btn-book-seats {
+        background: linear-gradient(45deg, #dc3545, #b02a37);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .btn-book-seats:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+
     .breadcrumb-item + .breadcrumb-item::before {
-        color: #6c757d;
+        color: rgba(255,255,255,0.5);
     }
 </style>

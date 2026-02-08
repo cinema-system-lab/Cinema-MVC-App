@@ -1,4 +1,5 @@
-﻿using Core.Constants;
+﻿using Cinema_MVC_App.Models;
+using Core.Constants;
 using Core.DTOs;
 using Core.Enums;
 using Core.Interfaces.Services;
@@ -10,10 +11,17 @@ namespace Cinema_MVC_App.Controllers;
 public class MoviesController : Controller
 {
     private readonly IMovieService _movieService;
+    private readonly ISessionService _sessionService;
+    private readonly IHallService _hallService;
 
-    public MoviesController(IMovieService movieService)
+    public MoviesController(
+        IMovieService movieService,
+        ISessionService sessionService,
+        IHallService hallService)
     {
         _movieService = movieService;
+        _sessionService = sessionService;
+        _hallService = hallService;
     }
 
     // GET: /Movies or /Movies/Index
@@ -32,7 +40,24 @@ public class MoviesController : Controller
         if (movie == null)
             return NotFound();
 
-        return View(movie);
+        var allSessions = await _sessionService.GetAllSessionsAsync();
+        var allHalls = await _hallService.GetAllHallsAsync();
+
+        var viewModel = new MovieDetailsVM
+        {
+            Movie = movie,
+            HallNames = allHalls.ToDictionary(h => h.Id, h => h.Name),
+            SessionsByDate = allSessions
+                .Where(s => s.MovieId == id && s.StartTime >= DateTime.Now)
+                .GroupBy(s => s.StartTime.Date)
+                .OrderBy(g => g.Key)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(s => s.StartTime).ToList()
+                )
+        };
+
+        return View(viewModel);
     }
 
     // GET: /Movies/Create

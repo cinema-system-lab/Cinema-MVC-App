@@ -1,4 +1,5 @@
-﻿using Core.Constants;
+﻿using Cinema_MVC_App.Models;
+using Core.Constants;
 using Core.DTOs;
 using Core.Interfaces.Services;
 using Infrastructure.Services;
@@ -29,14 +30,17 @@ public class SessionsController : Controller
     public async Task<IActionResult> Index()
     {
         var sessions = await _sessionService.GetAllSessionsAsync();
-        var movies = (await _movieService.GetAllMoviesAsync())
-                    .Where(m => m.IsActive);
+        var movies = (await _movieService.GetAllMoviesAsync()).Where(m => m.IsActive);
         var halls = await _hallService.GetAllHallsAsync();
 
-        ViewBag.MovieNames = movies.ToDictionary(m => m.Id, m => m.Title);
-        ViewBag.HallNames = halls.ToDictionary(h => h.Id, h => h.Name);
-        
-        return View(sessions);
+        var model = new SessionsListVM
+        {
+            Sessions = sessions,
+            Movies = movies.ToDictionary(m => m.Id),
+            Halls = halls.ToDictionary(h => h.Id)
+        };
+
+        return View(model);
     }
 
     // GET: /Sessions/Details/{id}
@@ -45,13 +49,14 @@ public class SessionsController : Controller
     {
         var session = await _sessionService.GetSessionAsync(id);
         if (session == null) return NotFound();
-        
+
         var movie = await _movieService.GetMovieAsync(session.MovieId);
         var hall = await _hallService.GetHallAsync(session.HallId);
 
-        ViewBag.MovieName = movie?.Title;
-        ViewBag.HallName = hall?.Name;
-        ViewBag.HallType = hall?.Type;
+        ViewBag.MovieName = movie?.Title ?? "Unknown";
+        ViewBag.PosterUrl = movie?.PosterUrl;
+        ViewBag.HallName = hall?.Name ?? "Unknown";
+        ViewBag.HallType = hall?.Type ?? Core.Enums.HallType.Standard;
 
         return View(session);
     }
@@ -170,18 +175,18 @@ public class SessionsController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Schedule()
     {
-        var sessions = await _sessionService.GetAllSessionsAsync();
+        var allSessions = await _sessionService.GetAllSessionsAsync();
         var movies = await _movieService.GetAllMoviesAsync();
         var halls = await _hallService.GetAllHallsAsync();
 
-        ViewBag.Movies = movies.ToDictionary(m => m.Id);
-        ViewBag.Halls = halls.ToDictionary(h => h.Id);
+        var model = new SessionsListVM
+        {
+            Sessions = allSessions.Where(s => s.StartTime >= DateTime.Today).OrderBy(s => s.StartTime),
+            Movies = movies.ToDictionary(m => m.Id),
+            Halls = halls.ToDictionary(h => h.Id)
+        };
 
-        var futureSessions = sessions
-            .Where(s => s.StartTime >= DateTime.Today)
-            .OrderBy(s => s.StartTime);
-
-        return View(futureSessions);
+        return View(model);
     }
 
     private async Task PopulateDropdowns(int? selectedMovieId = null, int? selectedHallId = null)

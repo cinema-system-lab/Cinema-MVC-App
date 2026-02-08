@@ -8,7 +8,7 @@ namespace Cinema_MVC_App.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly IMovieService _movieService; // Поле для сервиса
+    private readonly IMovieService _movieService;
 
     public HomeController(ILogger<HomeController> logger, IMovieService movieService)
     {
@@ -18,7 +18,6 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        // Получаем все фильмы для отображения на витрине
         var movies = await _movieService.GetAllMoviesAsync();
         return View(movies);
     }

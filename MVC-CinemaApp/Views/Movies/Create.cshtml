@@ -15,20 +15,17 @@
         </div>
         <div class="card-body p-4">
             <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
-                @* Global errors *@
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                 <input type="hidden" asp-for="Id" />
 
                 <div class="row g-4">
                     <div class="col-md-6">
-                        @* Title *@
                         <div class="mb-3">
                             <label asp-for="Title" class="form-label text-muted small fw-bold text-uppercase">Movie Title</label>
                             <input asp-for="Title" class="form-control admin-input" placeholder="e.g. Inception" required maxlength="100" />
                             <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
-                        @* Director *@
                         <div class="mb-3">
                             <label asp-for="Director" class="form-label text-muted small fw-bold text-uppercase">Director</label>
                             <input asp-for="Director" class="form-control admin-input" placeholder="Christopher Nolan" required maxlength="100" />
@@ -36,14 +33,12 @@
                         </div>
 
                         <div class="row">
-                            @* Release Date *@
                             <div class="col-6 mb-3">
                                 <label asp-for="ReleaseDate" class="form-label text-muted small fw-bold text-uppercase">Release Date</label>
                                 <input asp-for="ReleaseDate" type="date" class="form-control admin-input"
                                        required min="1895-01-01" max="@DateTime.Today.AddYears(5).ToString("yyyy-MM-dd")" />
                                 <span asp-validation-for="ReleaseDate" class="text-danger small"></span>
                             </div>
-                            @* Duration *@
                             <div class="col-6 mb-3">
                                 <label asp-for="DurationMinutes" class="form-label text-muted small fw-bold text-uppercase">Duration (Min)</label>
                                 <input asp-for="DurationMinutes" class="form-control admin-input" type="number" min="1" max="600" required />
@@ -51,7 +46,6 @@
                             </div>
                         </div>
 
-                        @* Rating *@
                         <div class="mb-3">
                             <label asp-for="Rating" class="form-label text-muted small fw-bold text-uppercase">IMDB Rating</label>
                             <input asp-for="Rating" class="form-control admin-input" type="number" step="0.1" min="0" max="10" id="ratingInput" />
@@ -60,7 +54,6 @@
                     </div>
 
                     <div class="col-md-6">
-                        @* Genres (Select2) *@
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">Genres</label>
                             <select name="selectedGenres" id="genresSelect" class="form-select" multiple="multiple" required>
@@ -74,14 +67,12 @@
                             <span class="text-danger small" data-valmsg-for="selectedGenres" data-valmsg-replace="true"></span>
                         </div>
 
-                        @* Poster URL *@
                         <div class="mb-3">
                             <label asp-for="PosterUrl" class="form-label text-muted small fw-bold text-uppercase">Poster URL</label>
                             <input asp-for="PosterUrl" class="form-control admin-input" placeholder="https://..." required maxlength="300" />
                             <span asp-validation-for="PosterUrl" class="text-danger small"></span>
                         </div>
 
-                        @* Trailer URL *@
                         <div class="mb-3">
                             <label asp-for="TrailerUrl" class="form-label text-muted small fw-bold text-uppercase">Trailer URL (Youtube)</label>
                             <input asp-for="TrailerUrl" class="form-control admin-input" placeholder="https://youtube.com/..." maxlength="300" />
@@ -89,13 +80,11 @@
                         </div>
 
                         <div class="row">
-                            @* Age Restriction *@
                             <div class="col-6 mb-3">
                                 <label asp-for="AgeRestriction" class="form-label text-muted small fw-bold text-uppercase">Age Limit</label>
                                 <input asp-for="AgeRestriction" class="form-control admin-input" type="number" min="0" max="18" required />
                                 <span asp-validation-for="AgeRestriction" class="text-danger small"></span>
                             </div>
-                            @* Is Active *@
                             <div class="col-6 d-flex align-items-end mb-3">
                                 <div class="form-check form-switch mb-2">
                                     <input class="form-check-input" type="checkbox" asp-for="IsActive" id="activeSwitch">
@@ -106,21 +95,18 @@
                     </div>
                 </div>
 
-                @* Description *@
                 <div class="mb-3 mt-2">
                     <label asp-for="Description" class="form-label text-muted small fw-bold text-uppercase">Synopsis</label>
                     <textarea asp-for="Description" class="form-control admin-input" rows="3" maxlength="1000"></textarea>
                     <span asp-validation-for="Description" class="text-danger small"></span>
                 </div>
 
-                @* Actors *@
                 <div class="mb-4">
                     <label asp-for="Actors" class="form-label text-muted small fw-bold text-uppercase">Cast (Comma separated)</label>
                     <input asp-for="Actors" class="form-control admin-input" placeholder="Actor 1, Actor 2..." required maxlength="1000" />
                     <span asp-validation-for="Actors" class="text-danger small"></span>
                 </div>
 
-                @* Buttons *@
                 <div class="d-flex gap-2 justify-content-end border-top border-secondary pt-4">
                     <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
                     <button type="submit" class="btn btn-danger rounded-pill px-5 fw-bold text-uppercase">
@@ -137,18 +123,15 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Select2 Init
             $('#genresSelect').select2({
                 placeholder: "Select at least one genre",
                 width: '100%'
             });
 
-            // Trigger validation on Select2 change
             $('#genresSelect').on('change', function() {
                 $(this).valid();
             });
 
-            // Rating Formatter
             let rInput = $('#ratingInput');
             function formatRating() {
                 let v = parseFloat(rInput.val());
@@ -158,7 +141,6 @@
             formatRating();
         });
     </script>
-    @* ASP.NET Core Client-side Validation *@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

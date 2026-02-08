@@ -1,16 +1,33 @@
 /* Переменные проекта */
 :root {
-    --mx-red: #FF0000;
-    --mx-red-hover: #CC0000;
-    --bg-black: #000000;
-    --text-gray: #828282;
-    --card-radius: 12px;
+    /* Colors */
+    --color-primary: #E30613;
+    --color-primary-hover: #CC0000;
+    --color-bg-main: #000000;
+    --color-bg-card: #111111;
+    --color-text-main: #FFFFFF;
+    --color-text-muted: #BDBDBD;
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    /* Shadows */
+    --shadow-card: 0 10px 20px rgba(0,0,0,0.5);
+    /* Transitions */
+    --transition-fast: 0.2s;
+    --transition-base: 0.3s;
+    --transition-slow: 0.5s;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 body {
-    background-color: var(--bg-black);
-    color: #fff;
+    background-color: var(--color-bg-main);
+    color: var(--color-text-main);
     font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
 }
 
 /* Шапка (Layout) */
@@ -20,16 +37,22 @@ body {
     border-bottom: 1px solid #222 !important;
 }
 
+@supports not (backdrop-filter: blur(10px)) {
+    .navbar {
+        background: #000 !important;
+    }
+}
+
 .nav-link {
-    color: #aaa !important;
+    color: var(--color-text-muted) !important;
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 1px;
-    transition: 0.3s;
+    transition: var(--transition-base);
 }
 
     .nav-link:hover, .nav-link.active {
-        color: #fff !important;
+        color: var(--color-text-main) !important;
     }
 
 .nav-item .active {
@@ -65,22 +88,23 @@ body {
 .poster-container {
     position: relative;
     aspect-ratio: 2/3;
-    border-radius: var(--card-radius);
+    border-radius: var(--radius-md);
     overflow: hidden;
-    background: #1a1a1a;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    background: var(--color-bg-card);
+    box-shadow: var(--shadow-card);
 }
 
 .poster-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: 0.5s;
+    transition: var(--transition-slow);
+    will-change: transform; /* Оптимизация для браузера */
 }
 
 .movie-item:hover .poster-img {
-    transform: scale(1.1);
-    filter: brightness(0.6);
+    transform: scale(1.08);
+    filter: brightness(0.5) blur(1px);
 }
 
 .poster-overlay {
@@ -90,8 +114,7 @@ body {
     align-items: center;
     justify-content: center;
     opacity: 0;
-    background: rgba(0,0,0,0.4);
-    transition: 0.3s;
+    transition: var(--transition-base);
 }
 
 .movie-item:hover .poster-overlay {
@@ -99,23 +122,38 @@ body {
 }
 
 .btn-buy-card {
-    background: var(--mx-red);
-    color: white;
-    padding: 10px 24px;
+    background-color: var(--color-primary); /* Возвращаем красный */
+    color: white !important;
+    padding: 12px 28px;
     border-radius: 50px;
     font-weight: bold;
     text-transform: uppercase;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     text-decoration: none;
+    box-shadow: 0 4px 15px rgba(227, 6, 19, 0.4); /* Красное свечение */
+    /* Твой эффект появления */
+    transform: translateY(20px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+    .btn-buy-card:hover {
+        background-color: var(--color-primary-hover);
+        transform: scale(1.05); /* Легкий пульс при наведении на саму кнопку */
+    }
+
+.movie-item:hover .btn-buy-card {
+    transform: translateY(0);
 }
 
 .age-tag, .rating-tag {
     position: absolute;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
     padding: 4px 10px;
     font-size: 0.8rem;
     font-weight: bold;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     border-radius: 6px;
 }
 
@@ -157,7 +195,7 @@ body {
 /* 1. Запрещаем зум картинки */
 .grayscale-filter:hover .poster-img {
     transform: none !important;
-    filter: grayscale(1) brightness(0.5) !important;
+    filter: grayscale(1) !important;
 }
 
 /* 2. Скрываем оверлей с кнопкой "Buy Tickets" для архива */
@@ -169,8 +207,7 @@ body {
 .grayscale-filter {
     filter: grayscale(1);
     opacity: 0.6;
-    cursor: default; /* Показываем, что кликать тут нечего */
-    transition: none !important;
+    cursor: default;
 }
 
     /* 4. Чтобы при наведении карточка не становилась ярче */
@@ -185,13 +222,13 @@ body {
 }
 
 /* Улучшение адаптивности для мобильных */
-@media (max-width: 991px) {
-    .navbar-nav .nav-item {
-        padding: 5px 0;
+@media (max-width: 768px) {
+    .movies-grid {
+        gap: 15px; /* Уменьшаем отступы на мобилках */
     }
 
-    .navbar-nav .btn-danger {
-        margin-top: 10px;
+    .section-title {
+        font-size: 1.2rem;
     }
 }
 
@@ -227,29 +264,62 @@ footer {
         color: #fff !important;
     }
 
+/* Липкая панель дат */
+.date-scroll-container {
+    position: sticky;
+    top: 70px; /* Высота навбара */
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(15px);
+    margin: 0 -15px; /* Чтобы фон был на всю ширину на мобилках */
+    padding: 15px;
+}
+
+.skeleton {
+    background: var(--skeleton-bg);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: var(--card-radius);
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
 /* Слот сеанса (кнопка времени) */
 .session-slot {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 8px 15px;
-    background: #111;
+    padding: 10px;
+    background: var(--color-bg-card);
     border: 1px solid #333;
-    text-decoration: none !important;
-    min-width: 90px;
-    transition: 0.2s;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
 }
 
     .session-slot:hover {
-        border-color: var(--mx-red);
+        border-color: var(--color-primary);
         background: #1a1a1a;
+        box-shadow: 0 0 10px rgba(227, 6, 19, 0.2);
     }
 
 .session-time {
     color: #fff;
     font-weight: 800;
     font-size: 1.1rem;
+}
+
+.session-slot.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    border-color: #222;
 }
 
 .session-hall {
@@ -263,6 +333,11 @@ footer {
     color: var(--mx-red);
     font-size: 0.8rem;
     font-weight: bold;
+    transition: 0.3s;
+}
+
+.session-slot:hover .session-price {
+    color: #fff; /* Цена белеет при наведении для акцента */
 }
 
 /* Линия под заголовком */
