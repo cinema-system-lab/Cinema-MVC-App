@@ -32,24 +32,6 @@
     margin: 2rem auto;
 }
 
-.form-control,
-.form-select {
-    border-top-right-radius: 0.5rem !important;
-    border-bottom-right-radius: 0.5rem !important;
-}
-
-.create-card .form-control:focus,
-.create-card .form-select:focus {
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-}
-
-.edit-card .form-control:focus,
-.edit-card .form-select:focus {
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
 .poster-preview-box {
     width: 100%;
     aspect-ratio: 2/3;

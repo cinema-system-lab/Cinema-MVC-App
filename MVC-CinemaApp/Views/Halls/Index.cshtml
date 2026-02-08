@@ -1,45 +1,100 @@
 @using Core.Constants
 @model IEnumerable<Core.DTOs.HallDTO>
-
-<h2>Halls</h2>
-
-@if (User.IsInRole(Roles.Admin))
-{
-    <p>
-        <a asp-action="Create" class="btn btn-primary">Create New Hall</a>
-    </p>
+@{
+    ViewData["Title"] = "Halls Management";
 }
 
-@if (Model == null || !Model.Any())
-{
-    <p>No halls found.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var hall in Model)
-            {
-                <tr>
-                    <td>@hall.Name</td>
-                    <td>@hall.Type</td>
-                    <td>
-                        <a asp-action="Details" asp-route-id="@hall.Id" class="btn btn-info btn-sm">Details</a>
-                        @if (User.IsInRole(Roles.Admin))
-                        {
-                            <a asp-action="Edit" asp-route-id="@hall.Id" class="btn btn-warning btn-sm">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@hall.Id" class="btn btn-danger btn-sm">Delete</a>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-hall.css" asp-append-version="true"/>
+
+<div class="container-fluid py-2">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold m-0 text-white">Cinema Halls</h4>
+            <p class="text-muted small m-0">Manage screening rooms and auditoriums</p>
+        </div>
+
+        @if (User.IsInRole(Roles.Admin)) {
+            <a asp-action="Create" class="btn-action btn-soft-success shadow-sm">
+                <i class="bi bi-plus-circle-fill"></i> Add New Hall
+            </a>
+        }
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text" id="hallSearch" class="search-input" placeholder="Search by hall name or type...">
+        </div>
+        <div class="text-muted small">
+            Showing <span id="visibleCount">@Model.Count()</span> halls
+        </div>
+    </div>
+
+    <div class="hall-card">
+        @if (Model == null || !Model.Any()) {
+            <div class="p-5 text-center text-muted">
+                <i class="bi bi-door-open fs-1 opacity-25 d-block mb-3"></i>
+                <p class="m-0">No cinema halls found in the database.</p>
+            </div>
+        } else {
+            <div class="table-responsive">
+                <table class="table table-admin" id="hallTable">
+                    <thead>
+                    <tr>
+                        <th class="ps-4 sortable" data-column="0">
+                            Hall Name <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="1">
+                            Type <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="text-end pe-4">Actions Management</th>
+                    </tr>
+                    </thead>
+                    <tbody id="hallTableBody">
+                    @foreach (var hall in Model) {
+                        <tr class="hall-row">
+                            <td class="ps-4">
+                                <div class="hall-name">
+                                    <i class="bi bi-door-closed me-2 text-primary"></i>@hall.Name
+                                </div>
+                            </td>
+                            <td>
+                                    <span class="type-badge">
+                                        <i class="bi bi-badge-3d"></i> @hall.Type
+                                    </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Details" asp-route-id="@hall.Id" class="btn-action btn-soft-info">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
+
+                                    @if (User.IsInRole(Roles.Admin)) {
+                                        <a asp-action="Edit" asp-route-id="@hall.Id"
+                                           class="btn-action btn-soft-warning">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@hall.Id"
+                                           class="btn-action btn-soft-danger">
+                                            <i class="bi bi-trash3"></i> Delete
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                <div id="noResults" class="p-5 text-center text-muted d-none">
+                    <i class="bi bi-search fs-2 opacity-25 d-block mb-3"></i>
+                    <p>No matches found for your search.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/hall-search.js" asp-append-version="true"></script>
 }

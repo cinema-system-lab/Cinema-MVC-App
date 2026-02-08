@@ -1,29 +1,108 @@
 @using Core.Enums
 @using Microsoft.AspNetCore.Mvc.Rendering
 @model Core.DTOs.HallDTO
+@{
+    ViewData["Title"] = "Add New Hall";
+}
 
-<h2>Create Hall</h2>
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin-hall.css" asp-append-version="true" />
 
-<form asp-action="Create" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <input type="hidden" asp-for="Id" />
-
-    <div class="form-group mb-3">
-        <label asp-for="Name" class="control-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+<div class="container py-5">
+    <div class="mb-4 d-flex justify-content-between align-items-end">
+        <div>
+            <h2 class="fw-bold m-0 text-white">Add New Cinema Hall</h2>
+            <p class="text-muted small m-0">Register a new screening room in the system</p>
+        </div>
+        <a asp-action="Index" class="back-link">
+            <i class="bi bi-arrow-left"></i> Back to Halls
+        </a>
     </div>
 
-    <div class="form-group mb-3">
-        <label asp-for="Type" class="control-label"></label>
-        <select asp-for="Type" class="form-select" asp-items="new SelectList(Enum.GetValues(typeof(HallType)))"></select>
-        <span asp-validation-for="Type" class="text-danger"></span>
-    </div>
+    <div class="create-card">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+            <input type="hidden" asp-for="Id" />
 
-    <button type="submit" class="btn btn-primary">Create Hall</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-5">
+                    <label class="form-label">Hall Preview</label>
+                    <div class="hall-icon-preview" id="hallPreview">
+                        <i class="bi bi-door-open"></i>
+                        <span class="small">Cinema Hall</span>
+                    </div>
+                    <div class="mt-3 p-3 rounded" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <div class="small text-muted mb-2">
+                            <i class="bi bi-info-circle me-1"></i> Quick Info
+                        </div>
+                        <div class="text-white small">
+                            <div class="mb-1">
+                                <i class="bi bi-tag me-2 text-success"></i>
+                                <span id="previewName" class="text-muted">No name set</span>
+                            </div>
+                            <div>
+                                <i class="bi bi-badge-3d me-2 text-success"></i>
+                                <span id="previewType" class="text-muted">No type selected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 col-md-7">
+                    <h5 class="section-title">
+                        <i class="bi bi-info-circle me-2 text-success"></i>Hall Information
+                    </h5>
+
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label">Hall Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text text-success">
+                                <i class="bi bi-door-closed"></i>
+                            </span>
+                            <input asp-for="Name" class="form-control" placeholder="e.g. Main Hall, VIP Room 1, IMAX Theater..." id="hallNameInput" />
+                        </div>
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Type" class="form-label">Hall Type</label>
+                        <div class="input-group">
+                            <span class="input-group-text text-success">
+                                <i class="bi bi-badge-3d"></i>
+                            </span>
+                            <select asp-for="Type" class="form-control" id="hallTypeSelect">
+                                <option value="" disabled selected>Select hall type...</option>
+                                @foreach (HallType hallType in Enum.GetValues(typeof(HallType)))
+                                {
+                                    <option value="@hallType">@hallType</option>
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="Type" class="text-danger small"></span>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-lightbulb me-2"></i>
+                        <strong>Tip:</strong> Choose the hall type that best matches the screening capabilities and audience experience.
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 mt-4 pt-3" style="border-top: 1px solid var(--admin-border);">
+                <button type="submit" class="btn-action btn-create shadow-sm">
+                    <i class="bi bi-plus-circle"></i> Create Hall
+                </button>
+                <a asp-action="Index" class="btn-action btn-cancel">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
 
 @section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="~/js/hall-form.js" asp-append-version="true"></script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
