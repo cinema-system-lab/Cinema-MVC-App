@@ -825,3 +825,85 @@ footer a:hover {
     color: #60a5fa !important;
     font-weight: bold;
 }
+
+.update-card .select2-container--default .select2-selection--single {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: 8px !important;
+    height: 45px !important;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.update-card .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: white !important;
+    padding-left: 12px !important;
+    line-height: 45px !important;
+}
+
+.update-card .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 43px !important;
+    right: 10px !important;
+}
+
+.update-card .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: var(--admin-text-muted) transparent transparent transparent !important;
+}
+
+.update-card .select2-container--default.select2-container--focus .select2-selection--single,
+.update-card .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.update-card .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--admin-text-muted) !important;
+}
+
+.update-card .select2-dropdown {
+    background-color: #2c3034 !important;
+    border: 1px solid rgba(251, 191, 36, 0.3) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5) !important;
+    overflow: hidden;
+    z-index: 9999 !important;
+}
+
+.update-card .select2-results__option {
+    padding: 10px 15px !important;
+    color: #cbd5e1 !important;
+    background-color: transparent !important;
+    transition: background-color 0.15s ease;
+}
+
+.update-card .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: rgba(251, 191, 36, 0.2) !important;
+    color: #fff !important;
+}
+
+.update-card .select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: rgba(251, 191, 36, 0.12) !important;
+    color: #fbbf24 !important;
+    font-weight: 600;
+}
+
+.update-card .select2-container--default .select2-results__option--highlighted[aria-selected="true"] {
+    background-color: rgba(251, 191, 36, 0.25) !important;
+    color: #fbbf24 !important;
+}
+
+.update-card .select2-search--dropdown .select2-search__field {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--admin-border) !important;
+    color: white !important;
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+.update-card .select2-search--dropdown .select2-search__field:focus {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
+    outline: none;
+}
