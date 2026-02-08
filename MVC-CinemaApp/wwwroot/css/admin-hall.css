@@ -1,4 +1,8 @@
-﻿.hall-name {
+﻿/* ============================================
+   HALL-SPECIFIC BADGES & LABELS
+   ============================================ */
+
+.hall-name {
     font-weight: 600;
     color: #ffffff;
     font-size: 0.95rem;
@@ -16,6 +20,10 @@
     align-items: center;
     gap: 6px;
 }
+
+/* ============================================
+   HALL PREVIEW (CREATE PAGE)
+   ============================================ */
 
 .hall-icon-preview {
     width: 100%;
@@ -42,6 +50,10 @@
     opacity: 0.3;
 }
 
+/* ============================================
+   HALL INFO BOX
+   ============================================ */
+
 .hall-info-box {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
@@ -50,22 +62,18 @@
     border: 1px dashed var(--admin-border);
 }
 
-.occupancy-excellent {
-    color: #34d399;
-}
+/* ============================================
+   OCCUPANCY COLORS
+   ============================================ */
 
-.occupancy-good {
-    color: #60a5fa;
-}
+.occupancy-excellent { color: #34d399; }
+.occupancy-good { color: #60a5fa; }
+.occupancy-fair { color: #fbbf24; }
+.occupancy-low { color: #f87171; }
 
-.occupancy-fair {
-    color: #fbbf24;
-}
-
-.occupancy-low {
-    color: #f87171;
-}
-
+/* ============================================
+   SEAT LAYOUT & GRID
+   ============================================ */
 
 .screen-element {
     background: linear-gradient(
@@ -162,6 +170,10 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* ============================================
+   SESSIONS LIST (DETAILS PAGE)
+   ============================================ */
+
 .session-item {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--admin-border);
@@ -212,6 +224,10 @@
     border-radius: 4px;
 }
 
+/* ============================================
+   HALL-SPECIFIC BUTTONS
+   ============================================ */
+
 .btn-edit-seats {
     background: rgba(251, 191, 36, 0.12);
     color: #fbbf24;
@@ -222,12 +238,21 @@
     color: #fbbf24;
 }
 
+/* ============================================
+   DELETE CONTAINER
+   ============================================ */
+
 .delete-container {
     max-width: 600px;
     margin: 2rem auto;
 }
 
-details-card-dark {
+/* ============================================
+   DETAILS PAGE - DARK THEME
+   ============================================ */
+
+/* Dark Cards */
+.details-card-dark {
     background: #2d3239;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 12px;
@@ -254,6 +279,7 @@ details-card-dark {
     padding: 1.5rem;
 }
 
+/* Detail Groups */
 .detail-group {
     margin-bottom: 1.5rem;
 }
@@ -304,6 +330,7 @@ details-card-dark {
     margin-left: 0.5rem;
 }
 
+/* Purple Type Badge */
 .type-badge-purple {
     background: rgba(139, 92, 246, 0.15);
     color: #a78bfa;
@@ -317,6 +344,7 @@ details-card-dark {
     gap: 6px;
 }
 
+/* Badge Time & Count */
 .badge-time {
     background: rgba(107, 114, 128, 0.2);
     color: #9ca3af;
@@ -335,6 +363,7 @@ details-card-dark {
     font-weight: 700;
 }
 
+/* Stat Rows */
 .stat-row {
     display: flex;
     justify-content: space-between;
@@ -365,6 +394,7 @@ details-card-dark {
     color: #fff;
 }
 
+/* Occupancy Badge */
 .occupancy-badge-low {
     background: rgba(248, 113, 113, 0.15);
     color: #f87171;
@@ -375,6 +405,7 @@ details-card-dark {
     font-weight: 700;
 }
 
+/* Session Cards Modern */
 .sessions-list-modern {
     max-height: 500px;
     overflow-y: auto;
@@ -485,6 +516,7 @@ details-card-dark {
     color: #d1d5db;
 }
 
+/* Empty State Small */
 .empty-state-small {
     text-align: center;
     padding: 2rem 1rem;
