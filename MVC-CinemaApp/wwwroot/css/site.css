@@ -56,7 +56,7 @@ body {
     }
 
 .nav-item .active {
-    border-bottom: 2px solid var(--mx-red);
+    border-bottom: 2px solid var(--color-primary);
 }
 
 /* Сетка и контейнеры */
