@@ -37,8 +37,22 @@ else
             @foreach (var session in Model.Sessions)
             {
                 <tr>
-                    <td>@(ViewBag.MovieNames != null && ViewBag.MovieNames.ContainsKey(session.MovieId) ? ViewBag.MovieNames[session.MovieId] : "Unknown")</td>
-                    <td>@(ViewBag.HallNames != null && ViewBag.HallNames.ContainsKey(session.HallId) ? ViewBag.HallNames[session.HallId] : "Unknown")</td>
+                    <td>
+                        @{
+                            Core.DTOs.MovieDTO movie = null;
+                            var hasMovie = Model.Movies.TryGetValue(session.MovieId, out movie);
+                        }
+                        @(hasMovie? movie.Title: "Unknown Movie")
+                    </td>
+
+                    <td>
+                        @{
+                            Core.DTOs.HallDTO hall = null;
+                            var hasHall = Model.Halls.TryGetValue(session.HallId, out hall);
+                        }
+                        @(hasHall? hall.Name: "Unknown Hall")
+                    </td>
+
                     <td>@session.StartTime.ToString("g")</td>
                     <td>@session.EndTime.ToString("g")</td>
                     <td>@session.BasePrice ₴</td>

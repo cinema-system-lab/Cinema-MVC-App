@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = "Session Info";
     var hallType = ViewBag.HallType is HallType type ? type : HallType.Standard;
-    var posterUrl = ViewBag.PosterUrl; // Получаем постер
+    var posterUrl = ViewBag.PosterUrl;
 
     string badgeClass = hallType switch
     {
@@ -12,6 +12,10 @@
         HallType.VIP => "border-warning text-warning",
         _ => "border-danger text-danger"
     };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/client/session-details.css" asp-append-version="true" />
 }
 
 <div class="session-hero" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), #000), url('@posterUrl');">
@@ -85,34 +89,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    /* Стиль для "Героя" */
-    .session-hero {
-        min-height: 400px;
-        background-size: cover;
-        background-position: center 25%;
-        display: flex;
-        align-items: center;
-        padding-bottom: 60px;
-    }
-
-    .shadow-text {
-        text-shadow: 2px 4px 10px rgba(0,0,0,0.8);
-    }
-
-    .btn-book-seats {
-        background: linear-gradient(45deg, #dc3545, #b02a37);
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-        .btn-book-seats:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
-            color: white;
-        }
-
-    .breadcrumb-item + .breadcrumb-item::before {
-        color: rgba(255,255,255,0.5);
-    }
-</style>

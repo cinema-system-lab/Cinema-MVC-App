@@ -6,6 +6,10 @@
     ViewData["Title"] = Model.Movie.Title;
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/client/movie-details.css" asp-append-version="true" />
+}
+
 <div class="movie-hero" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.4), #000), url('@Model.Movie.PosterUrl'); background-size: cover; background-position: center;">
     <div class="container py-5">
         <div class="row align-items-center">
@@ -69,10 +73,10 @@
 
                                     <div class="col-md-4 col-6">
                                         <a asp-controller="Sessions" asp-action="Details" asp-route-id="@session.Id" class="text-decoration-none">
-                                            <div class="session-time-card p-3 rounded-4 border border-secondary text-center bg-dark text-white shadow-sm transition-all">
+                                            <div class="session-time-card p-3 rounded-4 border border-secondary text-center bg-dark text-white shadow-sm">
                                                 <div class="h4 fw-bold mb-1">@session.StartTime.ToString("HH:mm")</div>
                                                 <div class="small text-muted">@(hallName ?? "Standard Hall")</div>
-                                                <div class="text-danger mt-2 fw-bold">BUY TICKETS</div>
+                                                <div class="text-danger mt-2 fw-bold text-uppercase">Buy Tickets</div>
                                             </div>
                                         </a>
                                     </div>
@@ -99,7 +103,7 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="bg-dark p-4 rounded-4 border border-secondary shadow-sm sticky-top" style="top: 20px;">
+            <div class="bg-dark p-4 rounded-4 border border-secondary shadow-sm sticky-top" style="top: 100px;">
                 <h5 class="fw-bold mb-4">MOVIE DETAILS</h5>
                 <div class="mb-3 d-flex justify-content-between">
                     <span class="text-muted small">Director:</span>
@@ -117,27 +121,11 @@
                 @if (User.IsInRole(Roles.Admin))
                 {
                     <div class="d-grid gap-2 border-top border-secondary pt-4">
-                        <a asp-action="Edit" asp-route-id="@Model.Movie.Id" class="btn btn-warning rounded-pill">EDIT MOVIE</a>
-                        <a asp-action="Delete" asp-route-id="@Model.Movie.Id" class="btn btn-outline-danger rounded-pill">REMOVE</a>
+                        <a asp-action="Edit" asp-route-id="@Model.Movie.Id" class="btn btn-warning rounded-pill fw-bold">EDIT MOVIE</a>
+                        <a asp-action="Delete" asp-route-id="@Model.Movie.Id" class="btn btn-outline-danger rounded-pill fw-bold">REMOVE</a>
                     </div>
                 }
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .nav-pills .nav-link.active {
-        background-color: #dc3545 !important;
-    }
-
-    .session-time-card {
-        transition: 0.3s;
-    }
-
-        .session-time-card:hover {
-            border-color: #dc3545 !important;
-            transform: translateY(-5px);
-            background-color: #1a1a1a !important;
-        }
-</style>

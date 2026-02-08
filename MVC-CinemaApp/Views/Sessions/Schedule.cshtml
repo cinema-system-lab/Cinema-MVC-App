@@ -4,16 +4,17 @@
 @model SessionsListVM
 @{
     ViewData["Title"] = "Movie Schedule";
-
     var groupedByDate = Model.GroupedByDate;
-
     var allGenres = Model.Movies.Values
         .SelectMany(m => m.Genres.ToString().Split(','))
         .Select(g => g.Trim())
         .Distinct()
         .OrderBy(g => g);
-
     var hallTypes = Enum.GetValues(typeof(HallType)).Cast<HallType>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/client/schedule.css" asp-append-version="true" />
 }
 
 <div class="container py-5">
@@ -25,6 +26,11 @@
     <div class="d-flex gap-2 mb-4 overflow-auto pb-3 date-scroll-container">
         @foreach (var dateGroup in groupedByDate)
         {
+            var hasFutureSessions = dateGroup.Any(s =>
+            !(dateGroup.Key == DateTime.Today && s.StartTime.TimeOfDay < DateTime.Now.TimeOfDay));
+
+            if (!hasFutureSessions) continue;
+
             var isToday = dateGroup.Key == DateTime.Today;
             <button class="btn date-card @(isToday ? "active" : "")"
                     onclick="filterDate('@dateGroup.Key.ToString("yyyy-MM-dd")', this)">
@@ -51,7 +57,7 @@
         </div>
         <div class="col-md-3">
             <select class="form-select form-select-sm bg-black text-white border-secondary rounded-pill" id="hallTypeFilter" onchange="applyFilters()">
-                <option value="all">All Experience (Types)</option>
+                <option value="all">All Experience</option>
                 @foreach (var type in hallTypes)
                 {
                     <option value="@((byte)type)">@type.ToString()</option>
@@ -63,30 +69,42 @@
     <div id="schedule-container">
         @foreach (var dateGroup in groupedByDate)
         {
+            var validSessionsInDate = dateGroup
+            .Where(s => !(dateGroup.Key == DateTime.Today && s.StartTime.TimeOfDay < DateTime.Now.TimeOfDay))
+            .ToList();
+
+            if (!validSessionsInDate.Any()) continue;
+
             <div class="date-section @(dateGroup.Key == DateTime.Today ? "" : "d-none")" id="date-@dateGroup.Key.ToString("yyyy-MM-dd")">
-                @foreach (var movieGroup in dateGroup.GroupBy(s => s.MovieId))
+
+                @foreach (var movieGroup in validSessionsInDate.GroupBy(s => s.MovieId))
                 {
                     if (Model.Movies.TryGetValue(movieGroup.Key, out var movie))
                     {
+                        var futureSessions = movieGroup.OrderBy(s => s.StartTime).ToList();
+
                         <div class="movie-row mb-5 pb-4 border-bottom border-secondary border-opacity-25"
                              data-genres="@movie.Genres.ToString().ToLower()">
-
                             <div class="row g-4">
                                 <div class="col-4 col-md-3 col-lg-2">
-                                    <div class="position-relative poster-hover">
-                                        <img src="@movie.PosterUrl" class="img-fluid rounded-3 shadow-lg" alt="@movie.Title">
-                                        <span class="position-absolute top-0 start-0 badge bg-primary m-2">@movie.AgeRestriction+</span>
-                                    </div>
+                                    <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="poster-link">
+                                        <div class="position-relative poster-hover">
+                                            <img src="@movie.PosterUrl" class="img-fluid rounded-3 shadow-lg" alt="@movie.Title">
+                                            <span class="position-absolute top-0 start-0 badge bg-primary m-2">@movie.AgeRestriction+</span>
+                                        </div>
+                                    </a>
                                 </div>
 
                                 <div class="col-8 col-md-9 col-lg-10">
-                                    <h4 class="fw-bold text-white mb-1">@movie.Title.ToUpper()</h4>
+                                    <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="text-decoration-none">
+                                        <h4 class="fw-bold text-white mb-1 hover-danger">@movie.Title.ToUpper()</h4>
+                                    </a>
                                     <p class="text-danger small mb-3 fw-bold">
                                         @movie.Genres.ToString().Replace(",", " •") | @movie.DurationMinutes MIN
                                     </p>
 
                                     <div class="d-flex flex-wrap gap-3">
-                                        @foreach (var session in movieGroup.OrderBy(s => s.StartTime))
+                                        @foreach (var session in futureSessions)
                                         {
                                             Model.Halls.TryGetValue(session.HallId, out var hall);
                                             var hallTypeVal = hall != null ? (byte)hall.Type : (byte)1;
@@ -110,98 +128,6 @@
     </div>
 </div>
 
-<style>
-    .date-card {
-        min-width: 80px;
-        background: #1a1a1a;
-        color: #fff;
-        border: 1px solid #333;
-        border-radius: 12px;
-        transition: 0.3s;
-    }
-
-        .date-card:hover, .date-card.active {
-            background: #dc3545;
-            border-color: #dc3545;
-            color: white;
-            transform: translateY(-3px);
-        }
-
-    .session-box {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        padding: 8px 16px;
-        border-radius: 10px;
-        text-align: center;
-        transition: 0.3s;
-        min-width: 90px;
-    }
-
-        .session-box .time {
-            color: #fff;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .session-box .hall {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .session-box .price {
-            color: #dc3545;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-
-        .session-box:hover {
-            border-color: #dc3545;
-            background: #252525;
-            transform: scale(1.05);
-        }
-
-    .poster-hover:hover img {
-        filter: brightness(1.2);
-        transition: 0.3s;
-    }
-</style>
-
-<script>
-    function filterDate(dateStr, btn) {
-        document.querySelectorAll('.date-card').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.date-section').forEach(s => s.classList.add('d-none'));
-        document.getElementById('date-' + dateStr).classList.remove('d-none');
-        applyFilters();
-    }
-
-    function applyFilters() {
-        const selectedGenre = document.getElementById('genreFilter').value;
-        const selectedHallType = document.getElementById('hallTypeFilter').value;
-        const activeSection = document.querySelector('.date-section:not(.d-none)');
-
-        if (!activeSection) return;
-
-        activeSection.querySelectorAll('.movie-row').forEach(row => {
-            const movieGenres = row.getAttribute('data-genres');
-            let hasVisibleSessions = 0;
-
-            row.querySelectorAll('.session-box').forEach(session => {
-                const sessionType = session.getAttribute('data-hall-type');
-
-                const genreMatch = selectedGenre === 'all' || movieGenres.includes(selectedGenre);
-                const typeMatch = selectedHallType === 'all' || sessionType === selectedHallType;
-
-                if (genreMatch && typeMatch) {
-                    session.style.display = 'block';
-                    hasVisibleSessions++;
-                } else {
-                    session.style.display = 'none';
-                }
-            });
-
-            row.style.display = (hasVisibleSessions > 0) ? 'block' : 'none';
-        });
-    }
-</script>
+@section Scripts {
+    <script src="~/js/client/schedule.js" asp-append-version="true"></script>
+}
