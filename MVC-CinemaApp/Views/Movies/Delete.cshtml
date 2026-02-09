@@ -24,8 +24,8 @@
         <form asp-action="DeleteConfirmed" method="post" class="d-flex align-items-center justify-content-center gap-3">
             <input type="hidden" asp-for="Id" />
             
-            <a asp-action="Index" class="btn-cancel">
-                Cancel
+            <a asp-action="Index" class="btn-action btn-cancel">
+                <i class="bi bi-x-circle"></i> Cancel
             </a>
             
             <button type="submit" class="btn-delete-confirm shadow-sm">

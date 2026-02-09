@@ -100,7 +100,7 @@
 }
 
 .badge-count {
-    background: #3b82f6;
+    background: var(--accent-green);
     color: white;
     padding: 4px 10px;
     border-radius: 6px;
@@ -147,7 +147,7 @@
 }
 
 .occupancy-fair {
-    color: #fbbf24;
+    color: var(--accent-yellow);
 }
 
 .occupancy-low {
@@ -231,7 +231,7 @@
 
 .session-badge-warning {
     background: rgba(251, 191, 36, 0.15);
-    color: #fbbf24;
+    color: var(--accent-yellow);
     border: 1px solid rgba(251, 191, 36, 0.3);
 }
 
@@ -287,7 +287,7 @@
 }
 
 .btn-edit {
-    background: #3b82f6;
+    background: var(--accent-green);
     color: white;
 }
 
@@ -409,7 +409,7 @@
 }
 
 .seat-premium {
-    background: #fbbf24;
+    background: var(--accent-yellow);
     color: #1a1d20;
 }
 
@@ -489,15 +489,10 @@
 
 .btn-edit-seats {
     background: rgba(251, 191, 36, 0.12);
-    color: #fbbf24;
+    color: var(--accent-yellow);
     text-decoration: none;
 }
 
 .btn-edit-seats:hover {
-    color: #fbbf24;
-}
-
-.delete-container {
-    max-width: 600px;
-    margin: 2rem auto;
+    color: var(--accent-yellow);
 }

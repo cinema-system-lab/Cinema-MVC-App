@@ -95,7 +95,7 @@
 
 .badge-finished {
     background: rgba(148, 163, 184, 0.15);
-    color: #94a3b8;
+    color: var(--admin-text-muted);
     border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
@@ -157,7 +157,7 @@
     background: rgba(251, 191, 36, 0.1);
     border: 1px solid rgba(251, 191, 36, 0.2);
     border-radius: 10px;
-    color: #fbbf24;
+    color: var(--accent-yellow);
     font-size: 0.9rem;
 }
 
