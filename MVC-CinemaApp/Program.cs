@@ -54,6 +54,9 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 // DI for OrderService
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+//API
+builder.Services.AddHttpClient<ITmdbService, TmdbService>();
+
 var app = builder.Build();
 await app.SeedDatabaseAsync();
 
