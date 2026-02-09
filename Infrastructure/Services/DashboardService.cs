@@ -66,19 +66,15 @@ public class DashboardService : IDashboardService
 
     private async Task<List<MovieStatsViewModel>> GetTopMoviesAsync()
     {
-        return await _context.Movies
-            .Select(m => new MovieStatsViewModel
+        return await _context.Tickets
+            .Where(t => t.Order.Status == OrderStatus.Paid)
+            .GroupBy(t => t.Session.Movie.Title)
+            .Select(g => new MovieStatsViewModel
             {
-                MovieTitle = m.Title,
-                TicketsSold = _context.Tickets
-                    .Count(t => t.Session.MovieId == m.Id &&
-                                t.Order.Status == OrderStatus.Paid),
-                Revenue = _context.Payments
-                    .Where(p => p.Status == PaymentStatus.Success &&
-                                p.Order.Tickets.Any(t => t.Session.MovieId == m.Id))
-                    .Sum(p => p.Amount)
+                MovieTitle = g.Key,
+                TicketsSold = g.Count(),
+                Revenue = g.Sum(t => t.Order.Payment.Amount)
             })
-            .Where(m => m.TicketsSold > 0)
             .OrderByDescending(m => m.TicketsSold)
             .Take(5)
             .ToListAsync();
@@ -87,11 +83,7 @@ public class DashboardService : IDashboardService
     private async Task<List<RecentOrderViewModel>> GetRecentOrdersAsync()
     {
         return await _context.Orders
-            .Include(o => o.User)
             .Include(o => o.Tickets)
-            .ThenInclude(t => t.Session)
-            .ThenInclude(s => s.Movie)
-            .Include(o => o.Payment)
             .OrderByDescending(o => o.CreatedAt)
             .Take(10)
             .Select(o => new RecentOrderViewModel
@@ -102,9 +94,9 @@ public class DashboardService : IDashboardService
                 TotalAmount = o.Payment != null ? o.Payment.Amount : 0,
                 Status = o.Status.ToString(),
                 TicketsCount = o.Tickets.Count,
-                MovieTitle = o.Tickets.Any()
-                    ? o.Tickets.First().Session.Movie.Title
-                    : "N/A"
+                MovieTitle = o.Tickets
+                    .Select(t => t.Session.Movie.Title)
+                    .FirstOrDefault() ?? "N/A"
             })
             .ToListAsync();
     }
