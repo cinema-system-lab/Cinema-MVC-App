@@ -1,0 +1,220 @@
+﻿.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--admin-border);
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.pagination-info {
+    color: var(--admin-text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pagination-btn {
+    background: var(--input-bg);
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.page-numbers {
+    display: flex;
+    gap: 4px;
+    margin: 0 8px;
+}
+
+.page-number {
+    background: var(--input-bg);
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text-muted);
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-number:hover:not(.active) {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+}
+
+.page-number.active {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
+    font-weight: 700;
+}
+
+.page-number:active {
+    transform: scale(0.95);
+}
+
+.page-ellipsis {
+    color: var(--admin-text-muted);
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    user-select: none;
+}
+
+.pagination-container.compact {
+    padding: 1rem;
+}
+
+.pagination-container.compact .pagination-btn,
+.pagination-container.compact .page-number {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    font-size: 0.8rem;
+}
+
+.pagination-container.large .pagination-btn,
+.pagination-container.large .page-number {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    font-size: 0.9rem;
+}
+
+.pagination-container.gradient-accent .page-number.active {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.15) 100%);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.pagination-container.centered {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-container.centered .pagination-info {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .pagination-info {
+        text-align: center;
+    }
+
+    .page-numbers {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pagination-btn,
+    .page-number {
+        min-width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+
+    .items-per-page-container {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .pagination-btn,
+    .page-number {
+        min-width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+        padding: 0 6px;
+    }
+
+    .pagination-controls {
+        gap: 4px;
+    }
+
+    .page-numbers {
+        gap: 2px;
+        margin: 0 4px;
+    }
+}
+
+.pagination-container.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.pagination-container.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+    border-top-color: #60a5fa;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#paginationContainer:empty,
+#paginationContainer.hidden {
+    display: none;
+}
+
+@media print {
+    .pagination-container {
+        display: none !important;
+    }
+}

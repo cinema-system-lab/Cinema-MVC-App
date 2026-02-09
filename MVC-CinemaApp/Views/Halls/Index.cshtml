@@ -6,6 +6,7 @@
 
 <link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
 <link rel="stylesheet" href="~/css/admin-hall.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true"/>
 
 <div class="container-fluid py-2">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -24,7 +25,12 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="search-container">
             <i class="bi bi-search"></i>
-            <input type="text" id="hallSearch" class="search-input" placeholder="Search by hall name or type...">
+            <input type="text"
+                   id="hallSearch"
+                   class="search-input"
+                   data-search-target="hallTableBody"
+                   data-search-columns=".hall-name, .type-badge"
+                   placeholder="Search by hall name or type...">
         </div>
         <div class="text-muted small">
             Showing <span id="visibleCount">@Model.Count()</span> halls
@@ -33,13 +39,18 @@
 
     <div class="hall-card">
         @if (Model == null || !Model.Any()) {
-            <div class="p-5 text-center text-muted">
-                <i class="bi bi-door-open fs-1 opacity-25 d-block mb-3"></i>
-                <p class="m-0">No cinema halls found in the database.</p>
+            <div class="empty-state">
+                <i class="bi bi-door-open"></i>
+                <h5 class="text-white mb-2">No Halls Found</h5>
+                <p class="text-muted mb-0">No cinema halls found in the database.</p>
             </div>
         } else {
             <div class="table-responsive">
-                <table class="table table-admin" id="hallTable">
+                <table class="table table-admin"
+                       id="hallTable"
+                       data-pagination="true"
+                       data-pagination-items="10"
+                       data-sort-enabled="true">
                     <thead>
                     <tr>
                         <th class="ps-4 sortable" data-column="0">
@@ -86,15 +97,18 @@
                     }
                     </tbody>
                 </table>
-                <div id="noResults" class="p-5 text-center text-muted d-none">
-                    <i class="bi bi-search fs-2 opacity-25 d-block mb-3"></i>
+                <div id="noResults" class="d-none">
+                    <i class="bi bi-search"></i>
                     <p>No matches found for your search.</p>
                 </div>
             </div>
+
+            @await Html.PartialAsync("_Pagination")
         }
     </div>
 </div>
 
 @section Scripts {
-    <script src="~/js/hall-search.js" asp-append-version="true"></script>
+    <script src="~/js/pagination.js" asp-append-version="true"></script>
+    <script src="~/js/search-sort.js" asp-append-version="true"></script>
 }

@@ -6,6 +6,7 @@
 
 <link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
 <link rel="stylesheet" href="~/css/admin-sessions.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true"/>
 
 <div class="container-fluid py-2">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -24,7 +25,12 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="search-container">
             <i class="bi bi-search"></i>
-            <input type="text" id="sessionSearch" class="search-input" placeholder="Search by movie or hall...">
+            <input type="text"
+                   id="sessionSearch"
+                   class="search-input"
+                   data-search-target="sessionTableBody"
+                   data-search-columns=".movie-title, .hall-badge"
+                   placeholder="Search by movie or hall...">
         </div>
         <div class="text-muted small">
             Showing <span id="visibleCount">@Model.Count()</span> sessions
@@ -35,11 +41,16 @@
         @if (Model == null || !Model.Any()) {
             <div class="empty-state">
                 <i class="bi bi-calendar-x"></i>
-                <p>No screening sessions found in the database.</p>
+                <h5 class="text-white mb-2">No Sessions Found</h5>
+                <p class="text-muted mb-0">No screening sessions found in the database.</p>
             </div>
         } else {
             <div class="table-responsive">
-                <table class="table table-admin" id="sessionTable">
+                <table class="table table-admin"
+                       id="sessionTable"
+                       data-pagination="true"
+                       data-pagination-items="10"
+                       data-sort-enabled="true">
                     <thead>
                     <tr>
                         <th class="ps-4 sortable" data-column="0">
@@ -59,7 +70,9 @@
                     </thead>
                     <tbody id="sessionTableBody">
                     @foreach (var session in Model) {
-                        var movieName = ViewBag.MovieNames[session.MovieId] as string;
+                        var movieName = ViewBag.MovieNames.ContainsKey(session.MovieId)
+                            ? ViewBag.MovieNames[session.MovieId] as string
+                            : "Unknown Movie";
                         var hallName = ViewBag.HallNames[session.HallId] as string;
                         var duration = (session.EndTime - session.StartTime).TotalMinutes;
                         var now = DateTime.Now;
@@ -136,10 +149,13 @@
                     <p>No matches found for your search.</p>
                 </div>
             </div>
+
+            @await Html.PartialAsync("_Pagination")
         }
     </div>
 </div>
 
 @section Scripts {
-    <script src="~/js/session-search.js" asp-append-version="true"></script>
+    <script src="~/js/pagination.js" asp-append-version="true"></script>
+    <script src="~/js/search-sort.js" asp-append-version="true"></script>
 }

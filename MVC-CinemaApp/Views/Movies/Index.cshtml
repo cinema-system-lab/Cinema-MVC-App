@@ -4,8 +4,9 @@
     ViewData["Title"] = "Movies Management";
 }
 
-<link rel="stylesheet" href="~/css/admin-movie.css" asp-append-version="true" />
-<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin-movie.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true"/>
 
 <div class="container-fluid py-2">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -14,8 +15,7 @@
             <p class="text-muted small m-0">Manage cinema content catalog</p>
         </div>
 
-        @if (User.IsInRole(Roles.Admin))
-        {
+        @if (User.IsInRole(Roles.Admin)) {
             <a asp-action="Create" class="btn-action btn-soft-success shadow-sm">
                 <i class="bi bi-plus-circle-fill"></i> Add New Movie
             </a>
@@ -25,7 +25,12 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="search-container">
             <i class="bi bi-search"></i>
-            <input type="text" id="movieSearch" class="search-input" placeholder="Search by title or director...">
+            <input type="text"
+                   id="movieSearch"
+                   class="search-input"
+                   data-search-target="movieTableBody"
+                   data-search-columns=".movie-title, .director-badge"
+                   placeholder="Search by title or director...">
         </div>
         <div class="text-muted small">
             Showing <span id="visibleCount">@Model.Count()</span> movies
@@ -33,70 +38,75 @@
     </div>
 
     <div class="movie-card">
-        @if (Model == null || !Model.Any())
-        {
-            <div class="p-5 text-center text-muted">
-                <i class="bi bi-film fs-1 opacity-25 d-block mb-3"></i>
-                <p class="m-0">No movies found in the database.</p>
+        @if (Model == null || !Model.Any()) {
+            <div class="empty-state">
+                <i class="bi bi-film"></i>
+                <h5 class="text-white mb-2">No Movies Found</h5>
+                <p class="text-muted mb-0">No movies found in the database.</p>
             </div>
-        }
-        else
-        {
+        } else {
             <div class="table-responsive">
-                <table class="table table-admin" id="movieTable">
+                <table class="table table-admin"
+                       id="movieTable"
+                       data-pagination="true"
+                       data-pagination-items="10"
+                       data-sort-enabled="true">
                     <thead>
-                        <tr>
-                            <th class="ps-4 sortable" data-column="0">
-                                Title <i class="bi bi-arrow-down-up ms-1"></i>
-                            </th>
-                            <th class="sortable" data-column="1">
-                                Director <i class="bi bi-arrow-down-up ms-1"></i>
-                            </th>
-                            <th class="text-end pe-4">Actions Management</th>
-                        </tr>
+                    <tr>
+                        <th class="ps-4 sortable" data-column="0">
+                            Title <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="1">
+                            Director <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="text-end pe-4">Actions Management</th>
+                    </tr>
                     </thead>
                     <tbody id="movieTableBody">
-                        @foreach (var movie in Model)
-                        {
-                            <tr class="movie-row">
-                                <td class="ps-4">
-                                    <div class="movie-title">@movie.Title</div>
-                                </td>
-                                <td>
-                                    <div class="director-badge">
-                                        <i class="bi bi-person-video2 me-2"></i> @movie.Director
-                                    </div>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <a asp-action="Details" asp-route-id="@movie.Id" class="btn-action btn-soft-info">
-                                            <i class="bi bi-info-circle"></i> Details
-                                        </a>
+                    @foreach (var movie in Model) {
+                        <tr class="movie-row">
+                            <td class="ps-4">
+                                <div class="movie-title">@movie.Title</div>
+                            </td>
+                            <td>
+                                <div class="director-badge">
+                                    <i class="bi bi-person-video2 me-2"></i> @movie.Director
+                                </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Details" asp-route-id="@movie.Id" class="btn-action btn-soft-info">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
 
-                                        @if (User.IsInRole(Roles.Admin))
-                                        {
-                                            <a asp-action="Edit" asp-route-id="@movie.Id" class="btn-action btn-soft-warning">
-                                                <i class="bi bi-pencil-square"></i> Edit
-                                            </a>
-                                            <a asp-action="Delete" asp-route-id="@movie.Id" class="btn-action btn-soft-danger">
-                                                <i class="bi bi-trash3"></i> Delete
-                                            </a>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
+                                    @if (User.IsInRole(Roles.Admin)) {
+                                        <a asp-action="Edit" asp-route-id="@movie.Id"
+                                           class="btn-action btn-soft-warning">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@movie.Id"
+                                           class="btn-action btn-soft-danger">
+                                            <i class="bi bi-trash3"></i> Delete
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
                     </tbody>
                 </table>
-                <div id="noResults" class="p-5 text-center text-muted d-none">
-                    <i class="bi bi-search fs-2 opacity-25 d-block mb-3"></i>
+                <div id="noResults" class="d-none">
+                    <i class="bi bi-search"></i>
                     <p>No matches found for your search.</p>
                 </div>
             </div>
+
+            @await Html.PartialAsync("_Pagination")
         }
     </div>
 </div>
 
 @section Scripts {
-    <script src="~/js/movie-search.js"></script>
+    <script src="~/js/pagination.js" asp-append-version="true"></script>
+    <script src="~/js/search-sort.js" asp-append-version="true"></script>
 }
