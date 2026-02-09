@@ -1,5 +1,5 @@
 ﻿namespace Cinema_MVC_App.Areas.Admin.ViewModels.Dashboard;
-    
+
 public class RecentOrderViewModel
 {
     public Guid OrderId { get; set; }

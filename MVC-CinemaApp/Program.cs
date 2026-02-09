@@ -51,9 +51,11 @@ builder.Services.AddScoped<ITicketService, TicketService>();
 // DI for OrderService
 builder.Services.AddScoped<IOrderService, OrderService>();
 
-// DI for OrderService
+// DI for PaymentService
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+// DI for DashboardService
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 var app = builder.Build();
 await app.SeedDatabaseAsync();
 
