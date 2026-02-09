@@ -5,7 +5,7 @@ using Core.Enums;
 
 namespace Cinema_MVC_App.Controllers;
 
-[Authorize(Policy = "AdminOnly")]
+[Authorize]
 public class PaymentsController : Controller
 {
     private readonly IPaymentService _paymentService;
