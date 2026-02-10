@@ -33,8 +33,8 @@ namespace Core.Validators
                 .WithMessage("Duration must be between 1 and 600 minutes");
 
             RuleFor(x => x.AgeRestriction)
-                .InclusiveBetween((byte)0, (byte)18)
-                .WithMessage("Age restriction should be between 0 and 18");
+                .InclusiveBetween((byte)1, (byte)18)
+                .WithMessage("Age restriction should be between 1 and 18");
 
             RuleFor(x => x.Rating)
                 .InclusiveBetween(0m, 10m)

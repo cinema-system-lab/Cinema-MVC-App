@@ -68,13 +68,13 @@ public class MoviesController : Controller
             Description = tmdbMovie.Overview,
             ReleaseDate = DateTime.TryParse(tmdbMovie.ReleaseDate, out var date) ? date : DateTime.Now,
             DurationMinutes = (short)(tmdbMovie.Runtime ?? 120), 
-            Rating = (decimal)tmdbMovie.VoteAverage,
+            Rating = Math.Round((decimal)tmdbMovie.VoteAverage, 1, MidpointRounding.AwayFromZero),
             PosterUrl = tmdbMovie.FullPosterUrl,
             Genres = mappedGenres, 
 
-            Director = "Unknown",
+            Director = "",
             Actors = "",
-            AgeRestriction = 12,
+            AgeRestriction = 0,
             IsActive = true
         };
 

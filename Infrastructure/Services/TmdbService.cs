@@ -27,18 +27,18 @@ public class TmdbService : ITmdbService
     }
     public async Task<List<TmdbMovieDto>> SearchMoviesAsync(string query)
     {
-        var response = await _httpClient.GetFromJsonAsync<TmdbResponseDto>($"search/movie?query={query}&language=uk-UA");
+        var response = await _httpClient.GetFromJsonAsync<TmdbResponseDto>($"search/movie?query={query}&language=en-US");
         return response?.Results ?? new List<TmdbMovieDto>();
     }
 
     public async Task<List<TmdbMovieDto>> GetPopularMoviesAsync()
     {
-        var response = await _httpClient.GetFromJsonAsync<TmdbResponseDto>("movie/popular?language=uk-UA");
+        var response = await _httpClient.GetFromJsonAsync<TmdbResponseDto>("movie/popular?language=en-US");
         return response?.Results ?? new List<TmdbMovieDto>();
     }
 
     public async Task<TmdbMovieDto?> GetMovieByIdAsync(int tmdbId)
     {
-        return await _httpClient.GetFromJsonAsync<TmdbMovieDto>($"movie/{tmdbId}?language=uk-UA");
+        return await _httpClient.GetFromJsonAsync<TmdbMovieDto>($"movie/{tmdbId}?language=en-US");
     }
 }
