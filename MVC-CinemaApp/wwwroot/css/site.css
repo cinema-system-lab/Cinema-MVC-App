@@ -7,6 +7,7 @@
     --color-bg-card: #111111;
     --color-text-main: #FFFFFF;
     --color-text-muted: #BDBDBD;
+    --mx-red: #E30613;
     /* Radius */
     --radius-sm: 6px;
     --radius-md: 12px;
@@ -57,6 +58,63 @@ body {
 
 .nav-item .active {
     border-bottom: 2px solid var(--color-primary);
+}
+
+.admin-nav-tabs {
+    border-bottom: none;
+    margin-bottom: -1px; /* Чтобы линия активного таба перекрывала нижнюю границу контейнера */
+}
+
+.nav-tab {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--color-text-muted) !important;
+    cursor: pointer;
+    position: relative;
+    padding-bottom: 12px;
+    transition: var(--transition-base);
+    margin: 0;
+}
+
+    .nav-tab:hover {
+        color: var(--color-text-main) !important;
+    }
+
+    /* Активное состояние и красная линия */
+    .nav-tab.active {
+        color: var(--color-primary) !important;
+    }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--color-primary);
+            box-shadow: 0 0 15px rgba(227, 6, 19, 0.4);
+            border-radius: 2px;
+        }
+
+/* Анимация плавного переключения контента */
+.animate-fade {
+    animation: movieFadeIn 0.4s ease-out;
+}
+
+@keyframes movieFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Сетка и контейнеры */
