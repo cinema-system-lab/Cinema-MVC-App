@@ -1,0 +1,97 @@
+@using Core.Constants
+@using Core.Enums
+@model Core.DTOs.MovieDTO
+
+@{
+    ViewData["Title"] = "Movie Details";
+}
+
+<link rel="stylesheet" href="~/css/admin-movie.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
+
+<div class="container py-5">
+    <div class="mb-4">
+        <a asp-action="Index" class="text-decoration-none text-muted small">
+            <i class="bi bi-chevron-left"></i> Back to Movie Library
+        </a>
+    </div>
+
+    <div class="details-card">
+        <div class="row g-5">
+            <div class="col-lg-4 col-md-5">
+                <div class="poster-wrapper">
+                    @if (!string.IsNullOrEmpty(Model.PosterUrl))
+                    {
+                        <img src="@Model.PosterUrl" class="movie-poster" alt="@Model.Title Poster" />
+                    }
+                    else
+                    {
+                        <div class="no-poster d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-camera-video fs-1 mb-2"></i>
+                            <span>No Poster</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-8 col-md-7">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h1 class="fw-bold mb-2">@Model.Title</h1>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rating-pill">
+                                <i class="bi bi-star-fill"></i> @Model.Rating.ToString("F1")
+                            </div>
+                            <span class="age-badge">@Model.AgeRestriction+</span>
+                            <span class="text-muted"><i class="bi bi-clock me-1"></i> @Model.DurationMinutes min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" style="border-color: var(--admin-border)">
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="info-label">Director</div>
+                        <div class="info-value">@Model.Director</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Release Date</div>
+                        <div class="info-value">@Model.ReleaseDate.ToString("MMMM dd, yyyy")</div>
+                    </div>
+                </div>
+
+                <div class="info-label">Genres</div>
+                <div class="info-value">
+                    @foreach (var genre in Enum.GetValues<GenreType>().Where(g => g != GenreType.None && Model.Genres.HasFlag(g)))
+                    {
+                        <span class="genre-badge">@genre</span>
+                    }
+                </div>
+
+                <div class="info-label">Main Cast</div>
+                <div class="info-value text-white-50">@Model.Actors</div>
+
+                <div class="info-label">Description</div>
+                <p class="info-value text-white-50 lh-lg">@Model.Description</p>
+
+                <div class="d-flex flex-wrap gap-3 mt-5">
+                    @if (!string.IsNullOrEmpty(Model.TrailerUrl))
+                    {
+                        <a href="@Model.TrailerUrl" target="_blank" class="btn-action btn-soft-danger">
+                            <i class="bi bi-play-circle-fill"></i> Watch Trailer
+                        </a>
+                    }
+
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-action btn-soft-primary">
+                        <i class="bi bi-pencil-square"></i> Edit Movie
+                    </a>
+                    
+                    <a asp-action="Index" class="btn-action btn-soft-secondary">
+                        <i class="bi bi-list-ul"></i> Library
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,24 +4,53 @@
     ViewData["Title"] = "Create Order";
 }
 
-<h2>Create Order</h2>
+<link rel="stylesheet" href="~/css/admin-order.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
 
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="SessionId" class="form-label"></label>
-        <input asp-for="SessionId" class="form-control" />
-        <span asp-validation-for="SessionId" class="text-danger"></span>
+<div class="container py-5">
+    <div class="mb-4 text-center">
+        <a asp-action="Index" class="back-link">
+            <i class="bi bi-chevron-left"></i> Back to My Orders
+        </a>
     </div>
 
-    <button type="submit" class="btn btn-success">
-        Create Order
-    </button>
+    <div class="order-create-card">
+        <div class="order-icon">
+            <i class="bi bi-receipt-cutoff"></i>
+        </div>
 
-    <a asp-action="Index" class="btn btn-secondary ms-2">
-        Cancel
-    </a>
-</form>
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-white mb-2">Create New Order</h2>
+        </div>
+
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+            <div class="mb-4">
+                <label asp-for="SessionId" class="form-label">
+                    <i class="bi bi-calendar-event me-1"></i> Session ID
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-hash"></i>
+                    </span>
+                    <input asp-for="SessionId" class="form-control border-start-0 rounded-end" placeholder="Enter session ID" type="number" />
+                </div>
+                <span asp-validation-for="SessionId" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex gap-3 mt-4">
+                <button type="submit" class="btn-action btn-create shadow-sm flex-grow-1">
+                    <i class="bi bi-check-circle-fill"></i> Create Order
+                </button>
+                <a asp-action="Index" class="btn-action btn-cancel">
+                    <i class="bi bi-x-lg"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
