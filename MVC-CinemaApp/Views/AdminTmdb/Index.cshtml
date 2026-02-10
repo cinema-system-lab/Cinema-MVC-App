@@ -1,0 +1,54 @@
+﻿@model List<Core.DTOs.TMDB.TmdbMovieDto>
+
+<div class="container mt-4">
+    <h2>TMDB Import</h2>
+
+    <form asp-action="Index" method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="searchQuery" class="form-control"
+                   placeholder="Enter movie name (e.g. Avatar)..."
+                   value="@ViewBag.SearchQuery">
+            <button class="btn btn-primary" type="submit">Search</button>
+            <a asp-action="Index" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    <hr />
+    <h3>@ViewBag.Title</h3>
+
+    <div class="row">
+        @foreach (var movie in Model)
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    @if (!string.IsNullOrEmpty(movie.FullPosterUrl))
+                    {
+                        <img src="@movie.FullPosterUrl" class="card-img-top" alt="@movie.Title" style="height: 350px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center bg-light" style="height: 350px;">
+                            <span>No Image</span>
+                        </div>
+                    }
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@movie.Title</h5>
+                        <p class="card-text text-muted small">
+                            📅 @movie.ReleaseDate <br />
+                            ⭐ @movie.VoteAverage
+                        </p>
+                        <p class="card-text text-truncate">@movie.Overview</p>
+
+                        <a asp-controller="Movies"
+                           asp-action="CreateFromTmdb"
+                           asp-route-tmdbId="@movie.Id"
+                           class="btn btn-success mt-auto w-100">
+                            <i class="bi bi-download"></i> Import This
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

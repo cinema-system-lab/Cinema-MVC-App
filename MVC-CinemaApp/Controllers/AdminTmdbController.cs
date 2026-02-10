@@ -1,65 +1,35 @@
-﻿using Core.DTOs.TMDB;
-using Core.Entities;
-using Core.Enums;
-using Core.Interfaces.Services;
+﻿using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cinema_MVC_App.Controllers;
 
-[Authorize(Roles = "Admin")] 
+[Authorize(Roles = "Admin")]
 public class AdminTmdbController : Controller
 {
     private readonly ITmdbService _tmdbService;
-    private readonly IMovieService _movieService; 
 
-    public AdminTmdbController(ITmdbService tmdbService, IMovieService movieService)
+    public AdminTmdbController(ITmdbService tmdbService)
     {
         _tmdbService = tmdbService;
-        _movieService = movieService;
     }
 
     // GET: /AdminTmdb
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? searchQuery)
     {
-        var movies = await _tmdbService.GetPopularMoviesAsync();
-        return View(movies);
-    }
-
-    // POST: /AdminTmdb/Import/{id}
-    [HttpPost]
-    public async Task<IActionResult> Import(int id)
-    {
-        try
+        if (string.IsNullOrWhiteSpace(searchQuery))
         {
-            var tmdbMovie = await _tmdbService.GetMovieByIdAsync(id);
-            if (tmdbMovie == null) return NotFound();
-
-
-            var movieToCreate = new Core.DTOs.MovieDTO
-            {
-                Title = tmdbMovie.Title,
-                Description = tmdbMovie.Overview,
-                ReleaseDate = DateTime.TryParse(tmdbMovie.ReleaseDate, out var date) ? date : DateTime.Now,
-                DurationMinutes = 120, 
-                Director = "Unknown", 
-                Rating = (decimal)tmdbMovie.VoteAverage,
-                PosterUrl = tmdbMovie.FullPosterUrl,
-                TrailerUrl = "",
-                AgeRestriction = 12,
-                IsActive = true,
-                Genres = GenreType.None 
-            };
-
-            await _movieService.CreateMovieAsync(movieToCreate, new int[0]);
-
-            TempData["SuccessMessage"] = $"Movie '{tmdbMovie.Title}' imported successfully!";
+            var popular = await _tmdbService.GetPopularMoviesAsync();
+            ViewBag.Title = "Popular Movies";
+            return View(popular);
         }
-        catch (Exception ex)
+        else
         {
-            TempData["ErrorMessage"] = $"Import failed: {ex.Message}";
+            // Якщо щось ввели - шукаємо
+            var searchResults = await _tmdbService.SearchMoviesAsync(searchQuery);
+            ViewBag.Title = $"Search results for '{searchQuery}'";
+            ViewBag.SearchQuery = searchQuery; 
+            return View(searchResults);
         }
-
-        return RedirectToAction(nameof(Index));
     }
 }

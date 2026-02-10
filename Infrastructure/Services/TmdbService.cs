@@ -25,6 +25,11 @@ public class TmdbService : ITmdbService
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
     }
+    public async Task<List<TmdbMovieDto>> SearchMoviesAsync(string query)
+    {
+        var response = await _httpClient.GetFromJsonAsync<TmdbResponseDto>($"search/movie?query={query}&language=uk-UA");
+        return response?.Results ?? new List<TmdbMovieDto>();
+    }
 
     public async Task<List<TmdbMovieDto>> GetPopularMoviesAsync()
     {
