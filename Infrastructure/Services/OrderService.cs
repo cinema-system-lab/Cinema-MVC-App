@@ -128,12 +128,6 @@ public class OrderService : IOrderService
     public async Task<List<OrderDTO>> GetOrdersByUserAsync(string userId)
     {
         return await _context.Orders
-            .Include(o => o.Session)
-                .ThenInclude(s => s.Movie)
-            .Include(o => o.Session)
-                .ThenInclude(s => s.Hall)
-            .Include(o => o.Tickets)
-            .OrderByDescending(o => o.CreatedAt)
             .Select(o => new OrderDTO
             {
                 Id = o.Id,
@@ -143,8 +137,9 @@ public class OrderService : IOrderService
                 MovieTitle = o.Session.Movie.Title,
                 HallName = o.Session.Hall.Name,
                 SessionStartTime = o.Session.StartTime,
-                TotalPrice = o.Tickets.Count * o.Session.BasePrice
+                TotalPrice = _context.Tickets.Count(t => t.OrderId == o.Id) * o.Session.BasePrice
             })
+            .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
     }
     
@@ -152,15 +147,18 @@ public class OrderService : IOrderService
     {
         var order = await _context.Orders
             .Include(o => o.Session)
-            .ThenInclude(s => s.Movie)
+                .ThenInclude(s => s.Movie)
             .Include(o => o.Session)
-            .ThenInclude(s => s.Hall)
+                .ThenInclude(s => s.Hall)
             .Include(o => o.Tickets)
-            .ThenInclude(t => t.Seat)
+                .ThenInclude(t => t.Seat)
             .FirstOrDefaultAsync(o => o.Id == id);
-
+    
         if (order == null) return null;
-
+    
+        var ticketCount = await _context.Tickets
+            .CountAsync(t => t.OrderId == id);
+    
         return new OrderDTO
         {
             Id = order.Id,
@@ -170,7 +168,7 @@ public class OrderService : IOrderService
             MovieTitle = order.Session?.Movie?.Title ?? "N/A",
             HallName = order.Session?.Hall?.Name ?? "N/A",
             SessionStartTime = order.Session?.StartTime ?? DateTime.MinValue,
-            TotalPrice = (order.Tickets?.Count ?? 0) * (order.Session?.BasePrice ?? 0),
+            TotalPrice = ticketCount * (order.Session?.BasePrice ?? 0),
             Tickets = order.Tickets?.Select(t => new TicketDTO
             {
                 OrderId = t.OrderId,

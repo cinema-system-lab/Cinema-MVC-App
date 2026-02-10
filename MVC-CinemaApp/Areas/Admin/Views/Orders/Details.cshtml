@@ -25,7 +25,7 @@
                     </p>
                 </div>
                 <div class="price-badge">
-                    <i class="bi bi-currency-dollar"></i> @Model.TotalPrice.ToString("F2") ₴
+                    ₴@Model.TotalPrice.ToString("F2")
                 </div>
             </div>
         </div>
@@ -137,7 +137,7 @@
                                 </td>
                                 <td class="text-end pe-4">
                                     <strong class="text-success" style="font-size: 1.05rem;">
-                                        @ticket.Price.ToString("F2") ₴
+                                        ₴@ticket.Price.ToString("F2")
                                     </strong>
                                 </td>
                             </tr>
@@ -145,7 +145,7 @@
                         <tr style="background: rgba(16, 185, 129, 0.05);">
                             <td colspan="3" class="ps-4 fw-bold text-white">Total</td>
                             <td class="text-end pe-4 fw-bold text-success" style="font-size: 1.1rem;">
-                                @Model.TotalPrice.ToString("F2") ₴
+                                ₴@Model.TotalPrice.ToString("F2")
                             </td>
                         </tr>
                     </tbody>
