@@ -49,7 +49,6 @@ footer a:hover {
     color: var(--text-main);
 }
 
-.hall-card,
 .create-card,
 .edit-card,
 .details-card,
@@ -63,10 +62,15 @@ footer a:hover {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
-.hall-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+.details-card {
+    padding: 2rem;
     overflow: hidden;
+}
+
+.delete-card {
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .create-card,
@@ -77,15 +81,17 @@ footer a:hover {
     padding: 2.5rem;
 }
 
-.delete-card {
-    padding: 2.5rem;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.stats-card {
+.hall-card,
+.movie-card,
+.orders-card,
+.payment-card,
+.ticket-card,
+.session-card {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-border);
     border-radius: 12px;
-    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .form-label {

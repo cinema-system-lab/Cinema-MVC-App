@@ -1,31 +1,4 @@
-﻿.ticket-card,
-.details-card,
-.delete-card {
-    background: var(--admin-card-bg);
-    border: 1px solid var(--admin-border);
-    border-radius: 16px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-}
-
-.ticket-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.details-card {
-    padding: 2rem;
-    overflow: hidden;
-}
-
-.delete-card {
-    padding: 2.5rem;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-
-.ticket-header {
+﻿.ticket-header {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
     border: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: 12px;

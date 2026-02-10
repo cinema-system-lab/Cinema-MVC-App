@@ -1,12 +1,4 @@
-﻿.payment-card {
-    background: var(--admin-card-bg);
-    border: 1px solid var(--admin-border);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.payment-id {
+﻿.payment-id {
     font-family: monospace;
     font-size: 0.8rem;
     color: var(--admin-text-muted);
