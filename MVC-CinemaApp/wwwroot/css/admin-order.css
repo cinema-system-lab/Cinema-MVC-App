@@ -16,14 +16,6 @@
     padding: 2.5rem;
 }
 
-.orders-card {
-    background: var(--admin-card-bg);
-    border: 1px solid var(--admin-border);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
 .order-create-card .form-control:focus {
     border-color: var(--accent-green);
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);

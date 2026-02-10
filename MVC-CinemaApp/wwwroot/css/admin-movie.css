@@ -1,11 +1,4 @@
-﻿
-.movie-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.delete-card {
+﻿.delete-card {
     padding: 2.5rem;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -113,8 +106,4 @@
     padding: 1.5rem;
     margin-bottom: 2rem;
     border: 1px dashed var(--admin-border);
-}
-
-.details-card .btn-action {
-    padding: 10px 20px;
 }
