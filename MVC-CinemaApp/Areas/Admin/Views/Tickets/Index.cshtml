@@ -16,8 +16,7 @@
     }
 
     <div class="mb-4">
-        <h4 class="fw-bold m-0 text-white">My Tickets</h4>
-        <p class="text-muted small m-0">View and manage your cinema bookings</p>
+        <h4 class="fw-bold m-0 text-white">Tickets</h4>
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -104,13 +103,6 @@
                                        asp-route-seatId="@item.SeatId"
                                        class="btn-action btn-soft-info">
                                         <i class="bi bi-info-circle"></i> Details
-                                    </a>
-                                    <a asp-action="Delete"
-                                       asp-route-orderId="@item.OrderId"
-                                       asp-route-sessionId="@item.SessionId"
-                                       asp-route-seatId="@item.SeatId"
-                                       class="btn-action btn-soft-danger">
-                                        <i class="bi bi-x-circle"></i> Cancel
                                     </a>
                                 </div>
                             </td>

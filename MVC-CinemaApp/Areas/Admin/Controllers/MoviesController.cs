@@ -1,8 +1,6 @@
-﻿using Core.Constants;
-using Core.DTOs;
+﻿using Core.DTOs;
 using Core.Enums;
 using Core.Interfaces.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cinema_MVC_App.Areas.Admin.Controllers;

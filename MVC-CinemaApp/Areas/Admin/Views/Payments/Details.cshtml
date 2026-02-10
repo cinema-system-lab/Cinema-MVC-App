@@ -10,7 +10,7 @@
             availableStatuses.Add((Core.Enums.PaymentStatus.Failed, "Failed"));
             break;
         case Core.Enums.PaymentStatus.Success:
-            availableStatuses.Add((Core.Enums.PaymentStatus.Refunded, "Refunded"));
+            availableStatuses.Add((Core.Enums.PaymentStatus.Refunded, "Refund Payment"));
             break;
     }
 }
@@ -115,13 +115,20 @@
                         </h5>
                     </div>
                     <div class="update-body">
-                        <form asp-action="UpdateStatus" method="post">
+                        @if (Model.Status == Core.Enums.PaymentStatus.Success) {
+                            <div class="alert alert-warning mb-3">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <small>Warning: Refunding this payment cannot be undone.</small>
+                            </div>
+                        }
+
+                        <form asp-action="UpdateStatus" method="post" id="updateStatusForm">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@Model.Id"/>
 
                             <div class="mb-3">
                                 <label class="form-label">New Status</label>
-                                <select name="newStatus" class="form-select" required>
+                                <select name="newStatus" class="form-select" required id="statusSelect">
                                     <option value="">-- Select Status --</option>
                                     @foreach (var status in availableStatuses) {
                                         <option value="@((int)status.Status)">@status.DisplayName</option>
@@ -153,14 +160,24 @@
 </div>
 
 @section Scripts {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('select[name="newStatus"]').select2({
                 width: '100%',
                 minimumResultsForSearch: -1,
                 dropdownParent: $('.update-card')
+            });
+
+            $('#updateStatusForm').on('submit', function (e) {
+                var selectedStatus = $('#statusSelect').val();
+                if (selectedStatus === '4') {
+                    if (!confirm('Are you sure you want to refund this payment? This action cannot be undone.')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
             });
         });
     </script>
