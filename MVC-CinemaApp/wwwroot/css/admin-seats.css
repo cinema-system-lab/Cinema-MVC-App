@@ -39,7 +39,7 @@
 }
 
 .seat-grid-layout::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--input-bg);
     border-radius: 4px;
 }
 
@@ -83,7 +83,7 @@
 }
 
 .seat-regular {
-    background: #10b981;
+    background: var(--accent-green);
     color: white;
 }
 

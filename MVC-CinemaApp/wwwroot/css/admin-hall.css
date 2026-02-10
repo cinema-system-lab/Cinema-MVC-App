@@ -372,7 +372,7 @@
 }
 
 .seat-grid::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--input-bg);
     border-radius: 4px;
 }
 
@@ -404,7 +404,7 @@
 }
 
 .seat-regular {
-    background: #10b981;
+    background: var(--accent-green);
     color: white;
 }
 
@@ -448,7 +448,7 @@
 }
 
 .sessions-list::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--input-bg);
     border-radius: 4px;
 }
 
@@ -467,7 +467,7 @@
 }
 
 .session-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--input-bg);
     border-color: rgba(59, 130, 246, 0.3);
     transform: translateY(-2px);
 }
