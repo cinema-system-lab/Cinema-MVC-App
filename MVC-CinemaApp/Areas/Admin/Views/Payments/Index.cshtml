@@ -1,0 +1,138 @@
+﻿@model IEnumerable<Core.DTOs.PaymentDTO>
+@{
+    ViewData["Title"] = "Payments Management";
+}
+
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-payments.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true"/>
+
+<div class="container-fluid py-4">
+    @if (TempData["Success"] != null) {
+        <div class="alert-custom success">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>@TempData["Success"]</span>
+        </div>
+    }
+
+    @if (TempData["Error"] != null) {
+        <div class="alert-custom error">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+
+    <div class="mb-4">
+        <h4 class="fw-bold m-0 text-white">Payments Management</h4>
+        <p class="text-muted small m-0">Track and manage all payment transactions</p>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text" id="paymentSearch" class="search-input" placeholder="Search by payment or order ID...">
+        </div>
+        <div class="text-muted small">
+            Showing <span id="visibleCount">@Model.Count()</span> payments
+        </div>
+    </div>
+
+    <div class="payment-card">
+        @if (Model.Any()) {
+            <div class="table-responsive">
+                <table class="table table-admin" id="paymentTable" data-pagination="true" data-pagination-items="10">
+                    <thead>
+                    <tr>
+                        <th class="ps-4 sortable" data-column="0">
+                            Payment ID <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="1">
+                            Order ID <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="2">
+                            Amount <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="3">
+                            Payment Date <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="paymentTableBody">
+                    @foreach (var payment in Model) {
+                        <tr class="payment-row">
+                            <td class="ps-4">
+                                <div class="payment-id">
+                                    <i class="bi bi-hash me-1"></i>@payment.Id.ToString().Substring(0, 8)...
+                                </div>
+                            </td>
+                            <td>
+                                <div class="payment-id">
+                                    <i class="bi bi-bag me-1"></i>@payment.OrderId.ToString().Substring(0, 8)...
+                                </div>
+                            </td>
+                            <td>
+                                    <span class="amount-display">
+                                        <i class="bi bi-currency-dollar"></i>@payment.Amount.ToString("F2")
+                                    </span>
+                            </td>
+                            <td>
+                                <div class="date-display">
+                                    @payment.PaymentDate.ToString("MMM dd, yyyy HH:mm")
+                                </div>
+                            </td>
+                            <td>
+                                @switch (payment.Status) {
+                                    case Core.Enums.PaymentStatus.Pending:
+                                        <span class="status-badge badge-pending">
+                                                <i class="bi bi-clock"></i> Pending
+                                            </span>
+                                        break;
+                                    case Core.Enums.PaymentStatus.Success:
+                                        <span class="status-badge badge-success-status">
+                                                <i class="bi bi-check-circle-fill"></i> Success
+                                            </span>
+                                        break;
+                                    case Core.Enums.PaymentStatus.Failed:
+                                        <span class="status-badge badge-failed">
+                                                <i class="bi bi-x-circle-fill"></i> Failed
+                                            </span>
+                                        break;
+                                    case Core.Enums.PaymentStatus.Refunded:
+                                        <span class="status-badge badge-refunded">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Refunded
+                                            </span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-action="Details" asp-route-id="@payment.Id" class="btn-action btn-soft-info">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                <div id="noResults" class="d-none">
+                    <i class="bi bi-search"></i>
+                    <p>No matches found for your search.</p>
+                </div>
+            </div>
+
+            @await Html.PartialAsync("_Pagination")
+        } else {
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h5 class="text-white mb-2">No Payments Found</h5>
+                <p class="text-muted mb-0">There are no payment transactions to display.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/pagination.js" asp-append-version="true"></script>
+    <script src="~/js/payment-search.js" asp-append-version="true"></script>
+}

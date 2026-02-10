@@ -5,10 +5,9 @@ using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Cinema_MVC_App.Controllers;
+namespace Cinema_MVC_App.Areas.Admin.Controllers;
 
-[Authorize(Roles = Roles.Admin)]
-public class HallsController : Controller
+public class HallsController : BaseAdminController
 {
     private readonly IHallService _hallService;
     private readonly ISeatService _seatService;

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Cinema_MVC_App.Controllers;
 
-[Authorize(Roles = Roles.Admin)]
+[Authorize]
 public class TicketsController : Controller
 {
     private readonly ITicketService _ticketService;

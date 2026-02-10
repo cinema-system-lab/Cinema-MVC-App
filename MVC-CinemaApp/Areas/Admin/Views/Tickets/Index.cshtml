@@ -1,0 +1,135 @@
+@model IEnumerable<Core.DTOs.TicketDTO>
+@{
+    ViewData["Title"] = "My Tickets";
+}
+
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-ticket.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true"/>
+
+<div class="container-fluid py-4">
+    @if (TempData["SuccessMessage"] != null) {
+        <div class="alert-custom">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <div class="mb-4">
+        <h4 class="fw-bold m-0 text-white">My Tickets</h4>
+        <p class="text-muted small m-0">View and manage your cinema bookings</p>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text"
+                   id="ticketSearch"
+                   class="search-input"
+                   data-search-target="ticketTableBody"
+                   data-search-columns=".movie-title, .hall-badge"
+                   placeholder="Search by movie or hall...">
+        </div>
+        <div class="text-muted small">
+            Showing <span id="visibleCount">@Model.Count()</span> tickets
+        </div>
+    </div>
+
+    <div class="ticket-card">
+        @if (Model == null || !Model.Any()) {
+            <div class="empty-state">
+                <i class="bi bi-ticket-perforated"></i>
+                <h5 class="text-white mb-2">No Tickets Yet</h5>
+                <p class="text-muted mb-0">You haven't purchased any tickets. Browse our sessions to book your first
+                    movie!</p>
+            </div>
+        } else {
+            <div class="table-responsive">
+                <table class="table table-admin"
+                       id="ticketTable"
+                       data-pagination="true"
+                       data-pagination-items="10"
+                       data-sort-enabled="true">
+                    <thead>
+                    <tr>
+                        <th class="ps-4 sortable" data-column="0">
+                            Movie <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="1">
+                            Hall <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="2">
+                            Showtime <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th>Seat</th>
+                        <th>Price</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="ticketTableBody">
+                    @foreach (var item in Model) {
+                        <tr class="ticket-row">
+                            <td class="ps-4">
+                                <div class="movie-title">
+                                    <i class="bi bi-film text-primary"></i>
+                                    @item.MovieTitle
+                                </div>
+                            </td>
+                            <td>
+                                <span class="hall-badge">
+                                    <i class="bi bi-door-closed"></i> @item.HallName
+                                </span>
+                            </td>
+                            <td>
+                                <div class="time-display">
+                                    @item.StartTime.ToString("MMM dd, yyyy HH:mm")
+                                </div>
+                            </td>
+                            <td>
+                                <span class="seat-info">
+                                    <i class="bi bi-grid-3x3-gap"></i>
+                                    Row @item.RowNumber / Seat @item.SeatNumber
+                                </span>
+                            </td>
+                            <td>
+                                <span class="price-display">
+                                    @item.Price.ToString("C")
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Details"
+                                       asp-route-orderId="@item.OrderId"
+                                       asp-route-sessionId="@item.SessionId"
+                                       asp-route-seatId="@item.SeatId"
+                                       class="btn-action btn-soft-info">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
+                                    <a asp-action="Delete"
+                                       asp-route-orderId="@item.OrderId"
+                                       asp-route-sessionId="@item.SessionId"
+                                       asp-route-seatId="@item.SeatId"
+                                       class="btn-action btn-soft-danger">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                <div id="noResults" class="d-none">
+                    <i class="bi bi-search"></i>
+                    <p>No matches found for your search.</p>
+                </div>
+            </div>
+
+            @await Html.PartialAsync("_Pagination")
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/pagination.js" asp-append-version="true"></script>
+    <script src="~/js/search-sort.js" asp-append-version="true"></script>
+}

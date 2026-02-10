@@ -14,6 +14,10 @@
             <h4 class="fw-bold m-0 text-white">Screening Sessions</h4>
             <p class="text-muted small m-0">Manage movie showtime and schedules</p>
         </div>
+
+        <a asp-action="Create" class="btn-action btn-soft-success shadow-sm">
+            <i class="bi bi-plus-circle-fill"></i> Create New Session
+        </a>
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -120,6 +124,15 @@
                                 <div class="d-flex justify-content-end gap-2">
                                     <a asp-action="Details" asp-route-id="@session.Id" class="btn-action btn-soft-info">
                                         <i class="bi bi-info-circle"></i> Details
+                                    </a>
+
+                                    <a asp-action="Edit" asp-route-id="@session.Id"
+                                       class="btn-action btn-soft-warning">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@session.Id"
+                                       class="btn-action btn-soft-danger">
+                                        <i class="bi bi-trash3"></i> Delete
                                     </a>
                                 </div>
                             </td>
