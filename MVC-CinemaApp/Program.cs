@@ -54,6 +54,9 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 // DI for PaymentService
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+//API
+builder.Services.AddHttpClient<ITmdbService, TmdbService>();
+
 // DI for DashboardService
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 var app = builder.Build();

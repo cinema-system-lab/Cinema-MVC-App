@@ -4,47 +4,159 @@
     ViewData["Title"] = "Order Details";
 }
 
-<h2>Order Details</h2>
+<link rel="stylesheet" href="~/css/admin-order.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
 
-<div class="card">
-    <div class="card-body">
-        <p><strong>Movie:</strong> @Model.MovieTitle</p>
-        <p><strong>Hall:</strong> @Model.HallName</p>
-        <p><strong>Session:</strong> @Model.SessionStartTime.ToLocalTime()</p>
-        <p><strong>Status:</strong> @Model.Status</p>
-        <p><strong>Total price:</strong> @Model.TotalPrice ₴</p>
+<div class="container py-5">
+    <div class="mb-4">
+        <a asp-action="Index" class="back-link">
+            <i class="bi bi-chevron-left"></i> Back to My Orders
+        </a>
+    </div>
+
+    <div class="order-details-card">
+        <div class="order-header">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h2 class="fw-bold text-white mb-2">Order Details</h2>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        Created on @Model.CreatedAt.ToLocalTime().ToString("MMMM dd, yyyy 'at' HH:mm")
+                    </p>
+                </div>
+                <div class="price-badge">
+                    <i class="bi bi-currency-dollar"></i> @Model.TotalPrice.ToString("F2") ₴
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="info-label">
+                    <i class="bi bi-film"></i> Movie
+                </div>
+                <div class="info-value">@Model.MovieTitle</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="info-label">
+                    <i class="bi bi-tv"></i> Hall
+                </div>
+                <div class="info-value">@Model.HallName</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="info-label">
+                    <i class="bi bi-clock"></i> Session Time
+                </div>
+                <div class="info-value">
+                    @Model.SessionStartTime.ToLocalTime().ToString("MMMM dd, yyyy - HH:mm")
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="info-label">
+                    <i class="bi bi-info-circle"></i> Status
+                </div>
+                <div class="info-value">
+                    @if (Model.Status.ToString().ToLower() == "pending")
+                    {
+                        <span class="status-badge pending">
+                            <i class="bi bi-hourglass-split"></i> Pending
+                        </span>
+                    }
+                    else if (Model.Status.ToString().ToLower() == "paid")
+                    {
+                        <span class="status-badge paid">
+                            <i class="bi bi-check-circle-fill"></i> Paid
+                        </span>
+                    }
+                    else if (Model.Status.ToString().ToLower() == "cancelled")
+                    {
+                        <span class="status-badge cancelled">
+                            <i class="bi bi-x-circle-fill"></i> Cancelled
+                        </span>
+                    }
+                    else if (Model.Status.ToString().ToLower() == "refunded")
+                    {
+                        <span class="status-badge refunded">
+                            <i class="bi bi-arrow-counterclockwise"></i> Refunded
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="status-badge @Model.Status.ToString().ToLower()">
+                            @Model.Status
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <h5 class="section-title mt-4">
+            <i class="bi bi-ticket-perforated text-primary"></i> 
+            Tickets (@Model.Tickets.Count)
+        </h5>
+
+        @if (!Model.Tickets.Any())
+        {
+            <div class="no-tickets">
+                <i class="bi bi-inbox"></i>
+                <p class="mb-0">No tickets have been added to this order yet.</p>
+            </div>
+        }
+        else
+        {
+            <div class="tickets-table">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">#</th>
+                            <th>Row</th>
+                            <th>Seat</th>
+                            <th class="text-end pe-4">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Tickets.Count; i++)
+                        {
+                            var ticket = Model.Tickets[i];
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="text-muted">@(i + 1)</span>
+                                </td>
+                                <td>
+                                    <span class="seat-badge">
+                                        <i class="bi bi-grid-3x3 me-1"></i> Row @ticket.RowNumber
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="seat-badge">
+                                        <i class="bi bi-disc me-1"></i> Seat @ticket.SeatNumber
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <strong class="text-success" style="font-size: 1.05rem;">
+                                        @ticket.Price.ToString("F2") ₴
+                                    </strong>
+                                </td>
+                            </tr>
+                        }
+                        <tr style="background: rgba(16, 185, 129, 0.05);">
+                            <td colspan="3" class="ps-4 fw-bold text-white">Total</td>
+                            <td class="text-end pe-4 fw-bold text-success" style="font-size: 1.1rem;">
+                                @Model.TotalPrice.ToString("F2") ₴
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div class="mt-4 pt-3 border-top" style="border-color: var(--admin-border) !important;">
+            <a asp-action="Index" class="btn-action btn-soft-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Orders
+            </a>
+        </div>
     </div>
 </div>
-
-<h4 class="mt-4">Tickets</h4>
-
-@if (!Model.Tickets.Any())
-{
-    <p>No tickets yet.</p>
-}
-else
-{
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Row</th>
-                <th>Seat</th>
-                <th>Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var t in Model.Tickets)
-            {
-                <tr>
-                    <td>@t.RowNumber</td>
-                    <td>@t.SeatNumber</td>
-                    <td>@t.Price ₴</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-
-<a asp-action="Index" class="btn btn-secondary mt-3">
-    Back
-</a>
