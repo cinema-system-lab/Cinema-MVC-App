@@ -23,6 +23,9 @@ namespace Cinema_MVC_App.Models
 
         public ILookup<byte, SeatDTO> SeatsByRow =>
             Seats.ToLookup(s => s.RowNumber);
+
+        public decimal GetSeatPrice(SeatDTO seat) =>
+            seat.Type == SeatType.Premium ? BasePrice * 1.5m : BasePrice;
     }
 }
 
