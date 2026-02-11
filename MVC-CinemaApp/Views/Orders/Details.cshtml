@@ -1,3 +1,4 @@
+@using Core.Enums
 @model Core.DTOs.OrderDTO
 
 @{
@@ -12,11 +13,21 @@
             <p class="mb-1 text-white"><strong>Movie:</strong> @Model.MovieTitle</p>
             <p class="mb-1 text-white-50"><strong>Hall:</strong> @Model.HallName</p>
             <p class="mb-1 text-white-50">
-                <strong>Session:</strong> @Model.SessionStartTime.ToLocalTime()
+                <strong>Session:</strong> @Model.SessionStartTime.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
             </p>
             <p class="mb-1">
                 <strong>Status:</strong>
-                <span class="badge bg-secondary">@Model.Status</span>
+                @{
+                    var statusClass = Model.Status switch
+                    {
+                        OrderStatus.Paid => "bg-success",
+                        OrderStatus.Pending => "bg-warning text-dark",
+                        OrderStatus.Cancelled => "bg-danger",
+                        OrderStatus.Refunded => "bg-info",
+                        _ => "bg-secondary"
+                    };
+                }
+                <span class="badge @statusClass">@Model.Status</span>
             </p>
             <p class="mb-0 text-success fw-bold fs-5">
                 Total price: @Model.TotalPrice ₴
@@ -40,6 +51,7 @@
                             <tr>
                                 <th scope="col">Row</th>
                                 <th scope="col">Seat</th>
+                                <th scope="col">Type</th>
                                 <th scope="col">Price</th>
                             </tr>
                         </thead>
@@ -49,6 +61,18 @@
                                 <tr>
                                     <td class="text-white-50">@t.RowNumber</td>
                                     <td class="text-white-50">@t.SeatNumber</td>
+                                    <td>
+                                        @if (t.SeatType == SeatType.Premium)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-star-fill me-1"></i>Premium
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Standard</span>
+                                        }
+                                    </td>
                                     <td class="text-white">@t.Price ₴</td>
                                 </tr>
                             }
@@ -57,9 +81,26 @@
                 </div>
             }
 
-            <a asp-action="Index" class="btn btn-outline-secondary mt-3">
-                Back
-            </a>
+            <div class="d-flex justify-content-between mt-3">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </a>
+                
+                @if (Model.Status == OrderStatus.Pending)
+                {
+                    <div class="d-flex gap-2">
+                        <a asp-controller="Payments" asp-action="Checkout" asp-route-orderId="@Model.Id"
+                           class="btn btn-success">
+                            <i class="bi bi-credit-card me-1"></i> Pay Now
+                        </a>
+                        <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-inline">
+                            <button class="btn btn-danger" onclick="return confirm('Cancel this order?')">
+                                <i class="bi bi-x-circle me-1"></i> Cancel
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
