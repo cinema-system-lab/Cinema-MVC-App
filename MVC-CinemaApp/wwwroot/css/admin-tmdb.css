@@ -93,7 +93,7 @@
 }
 
 .tmdb-hover-rating {
-    background: rgba(251, 191, 36, 0.15); /* Використання жовтого акценту з прозорістю */
+    background: rgba(251, 191, 36, 0.15);
     color: var(--accent-yellow);
     padding: 5px 15px;
     border-radius: 50px;
@@ -140,4 +140,83 @@
 .tmdb-hover-btn:hover {
     background: var(--accent-green);
     color: var(--btn-text-dark);
+}
+
+.admin-modal-content {
+    background-color: var(--admin-card-bg, #1a1d21);
+    border: 1px solid var(--admin-border, #2d3238);
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.custom-input-group {
+    background: var(--input-bg, #0f1114);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--admin-border, #2d3238);
+}
+
+.custom-input-group .form-control {
+    background: transparent !important;
+    border: none !important;
+    color: white !important;
+    padding: 12px;
+}
+
+.custom-input-group .input-group-text {
+    border: none;
+    color: #6c757d;
+}
+
+.tmdb-results-container {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #3d444d;
+    border-radius: 10px;
+}
+
+.tmdb-result-item {
+    background: #24282d;
+    border: 1px solid #2d3238;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 12px;
+    transition: transform 0.2s, border-color 0.2s;
+    text-decoration: none !important;
+}
+
+.tmdb-result-item:hover {
+    background: #2b3036;
+    border-color: var(--accent-green, #10b981);
+    transform: translateX(5px);
+}
+
+.tmdb-result-img {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.tmdb-result-info h6 {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.tmdb-result-info p {
+    color: #a0aec0;
+    font-size: 0.85rem;
+    line-height: 1.4;
 }
