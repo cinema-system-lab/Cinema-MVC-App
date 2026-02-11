@@ -41,19 +41,75 @@ public class MoviesController : BaseAdminController
         if (tmdbMovie == null)
         {
             TempData["ErrorMessage"] = "Movie not found in TMDB.";
-            
             return RedirectToAction("Index", "Tmdb");
         }
+
+        string trailerUrl = "";
+        if (tmdbMovie.Videos?.Results != null)
+        {
+            var video = tmdbMovie.Videos.Results.FirstOrDefault(v => v.Type == "Trailer" && v.Site == "YouTube")
+                     ?? tmdbMovie.Videos.Results.FirstOrDefault(v => v.Type == "Teaser" && v.Site == "YouTube")
+                     ?? tmdbMovie.Videos.Results.FirstOrDefault(v => v.Site == "YouTube");
+
+            if (video != null)
+            {
+                trailerUrl = $"https://www.youtube.com/watch?v={video.Key}";
+            }
+        }
+
+        var genreMap = new Dictionary<int, GenreType>
+        {
+            { 28, GenreType.Action },
+            { 18, GenreType.Drama },
+            { 35, GenreType.Comedy },
+            { 27, GenreType.Horror },
+            { 878, GenreType.SciFi },
+            { 99, GenreType.Documentary },
+            { 53, GenreType.Thriller },
+            { 14, GenreType.Fantasy },
+            { 16, GenreType.Animation },
+            { 12, GenreType.Adventure },
+            { 80, GenreType.Crime },
+            { 10751, GenreType.Family },
+            { 9648, GenreType.Mystery },
+            { 10749, GenreType.Romance },
+            { 37, GenreType.Western },
+            { 10752, GenreType.War },
+            { 36, GenreType.History },
+            { 10402, GenreType.Music }
+
+        };
 
         GenreType mappedGenres = GenreType.None;
         if (tmdbMovie.Genres != null)
         {
             foreach (var g in tmdbMovie.Genres)
             {
-                if (Enum.TryParse<GenreType>(g.Name.Replace(" ", ""), true, out var result))
+                if (genreMap.TryGetValue(g.Id, out var genreValue))
                 {
-                    mappedGenres |= result; 
+                    mappedGenres |= genreValue;
                 }
+            }
+        }
+
+        int ageLimit = 12;
+        if (tmdbMovie.ReleaseDates?.Results != null)
+        {
+            var usCertification = tmdbMovie.ReleaseDates.Results
+                .FirstOrDefault(r => r.CountryCode == "US")?.ReleaseDates
+                .FirstOrDefault(d => !string.IsNullOrEmpty(d.Certification))?.Certification;
+
+            if (!string.IsNullOrEmpty(usCertification))
+            {
+                ageLimit = usCertification.ToUpper() switch
+                {
+                    "G" => 0,
+                    "PG" => 6,
+                    "PG-13" => 12,
+                    "R" => 16,
+                    "NC-17" => 18,
+                    _ => int.TryParse(usCertification, out int val) ? val : 12
+                };
             }
         }
 
@@ -62,18 +118,17 @@ public class MoviesController : BaseAdminController
             Title = tmdbMovie.Title,
             Description = tmdbMovie.Overview,
             ReleaseDate = DateTime.TryParse(tmdbMovie.ReleaseDate, out var date) ? date : DateTime.Now,
-            DurationMinutes = (short)(tmdbMovie.Runtime ?? 120), 
+            DurationMinutes = (short)(tmdbMovie.Runtime ?? 120),
             Rating = Math.Round((decimal)tmdbMovie.VoteAverage, 1, MidpointRounding.AwayFromZero),
             PosterUrl = tmdbMovie.FullPosterUrl,
-            Genres = mappedGenres, 
-
-            Director = "",
-            Actors = "",
-            AgeRestriction = 0,
+            Genres = mappedGenres,
+            TrailerUrl = trailerUrl,
+            Director = tmdbMovie.Credits?.Crew.FirstOrDefault(c => c.Job == "Director")?.Name ?? "Unknown",
+            Actors = string.Join(", ", tmdbMovie.Credits?.Cast.Take(5).Select(c => c.Name) ?? new List<string>()),
+            AgeRestriction = (byte)ageLimit,
             IsActive = true
         };
 
-      
         return View("Create", model);
     }
 
@@ -93,7 +148,7 @@ public class MoviesController : BaseAdminController
     public async Task<IActionResult> Create(MovieDTO movie, int[]? selectedGenres)
     {
         ModelState.Remove(nameof(movie.Genres));
-        
+
         if (selectedGenres != null && selectedGenres.Length > 0)
         {
             movie.Genres = (GenreType)selectedGenres.Sum();
@@ -135,7 +190,7 @@ public class MoviesController : BaseAdminController
     public async Task<IActionResult> Edit(MovieDTO movie, int[]? selectedGenres)
     {
         ModelState.Remove(nameof(movie.Genres));
-        
+
         if (selectedGenres != null && selectedGenres.Length > 0)
         {
             movie.Genres = (GenreType)selectedGenres.Sum();
@@ -192,19 +247,26 @@ public class MoviesController : BaseAdminController
     [HttpGet]
     public async Task<IActionResult> SearchTmdbJson(string query)
     {
-        if (string.IsNullOrWhiteSpace(query)) return Json(new List<object>());
-
-        var results = await _tmdbService.SearchMoviesAsync(query);
-
-        var jsonResult = results.Select(m => new
+        try
         {
-            id = m.Id,
-            title = m.Title,
-            year = string.IsNullOrEmpty(m.ReleaseDate) ? "N/A" : m.ReleaseDate.Substring(0, 4),
-            poster = m.FullPosterUrl,
-            overview = m.Overview
-        });
+            if (string.IsNullOrWhiteSpace(query)) return Json(new List<object>());
 
-        return Json(jsonResult);
+            var results = await _tmdbService.SearchMoviesAsync(query);
+
+            var jsonResult = results.Select(m => new
+            {
+                id = m.Id,
+                title = m.Title,
+                year = string.IsNullOrEmpty(m.ReleaseDate) ? "N/A" : m.ReleaseDate.Substring(0, 4),
+                poster = m.FullPosterUrl,
+                overview = m.Overview
+            });
+
+            return Json(jsonResult);
+        }
+        catch
+        {
+            return Json(new List<object>());
+        }
     }
 }

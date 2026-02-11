@@ -2,7 +2,6 @@
 
 namespace Core.Enums
 {
-    // Той самий бітовий енам, про який казав тімлід
     [Flags]
     public enum GenreType
     {
@@ -15,7 +14,15 @@ namespace Core.Enums
         Documentary = 32,
         Thriller = 64,
         Fantasy = 128,
-        Animation = 256
-        // Можна додавати далі: 512, 1024...
+        Animation = 256,
+        Adventure = 512,
+        Crime = 1024,
+        Family = 2048,
+        Mystery = 4096,
+        Romance = 8192,
+        Western = 16384,
+        War = 32768,
+        History = 65536,
+        Music = 131072
     }
 }

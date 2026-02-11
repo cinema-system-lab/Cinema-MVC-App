@@ -1,7 +1,7 @@
 ﻿using Core.DTOs.TMDB;
 using Core.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
-using System.Net.Http.Headers; 
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace Infrastructure.Services;
@@ -18,6 +18,7 @@ public class TmdbService : ITmdbService
         var bearerToken = config["TMDB:BearerToken"];
 
         _httpClient.BaseAddress = new Uri(baseUrl);
+        _httpClient.Timeout = TimeSpan.FromSeconds(10);
 
         _httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", bearerToken);
@@ -25,9 +26,13 @@ public class TmdbService : ITmdbService
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
     }
+
     public async Task<List<TmdbMovieDto>> SearchMoviesAsync(string query)
     {
-        var response = await _httpClient.GetFromJsonAsync<TmdbResponseDto>($"search/movie?query={query}&language=en-US");
+        var encodedQuery = Uri.EscapeDataString(query);
+        var url = $"search/movie?query={encodedQuery}&language=en-US";
+
+        var response = await _httpClient.GetFromJsonAsync<TmdbResponseDto>(url);
         return response?.Results ?? new List<TmdbMovieDto>();
     }
 
@@ -39,6 +44,7 @@ public class TmdbService : ITmdbService
 
     public async Task<TmdbMovieDto?> GetMovieByIdAsync(int tmdbId)
     {
-        return await _httpClient.GetFromJsonAsync<TmdbMovieDto>($"movie/{tmdbId}?language=en-US");
+        var url = $"movie/{tmdbId}?language=en-US&append_to_response=videos,credits,release_dates";
+        return await _httpClient.GetFromJsonAsync<TmdbMovieDto>(url);
     }
 }

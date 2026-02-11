@@ -81,7 +81,7 @@ ViewData["Title"] = "Add New Movie";
                                     <span class="input-group-text bg-transparent border-end-0 text-warning" style="border-color: var(--admin-border)">
                                         <i class="bi bi-star-fill"></i>
                                     </span>
-                                    <input asp-for="Rating" class="form-control border-start-0 rounded-end" type="number" step="0.1" id="ratingInput" value="0.0" />
+                                    <input asp-for="Rating" class="form-control border-start-0 rounded-end" type="number" step="0.1" id="ratingInput" />
                                 </div>
                                 <span asp-validation-for="Rating" class="text-danger small"></span>
                             </div>
@@ -95,15 +95,23 @@ ViewData["Title"] = "Add New Movie";
                                 <select name="selectedGenres" id="genresSelect" class="form-select" multiple="multiple">
                                     @foreach (GenreType genre in Enum.GetValues(typeof(GenreType)))
                                     {
-                                    if (genre == GenreType.None) continue;
-                                    <option value="@((int)genre)">@genre.ToString()</option>
+                                        if (genre == GenreType.None) continue;
+
+                                        if (Model.Genres.HasFlag(genre))
+                                        {
+                                            <option value="@((int)genre)" selected="selected">@genre.ToString()</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@((int)genre)">@genre.ToString()</option>
+                                        }
                                     }
                                 </select>
                             </div>
 
                             <div class="mb-3">
                                 <label asp-for="AgeRestriction" class="form-label">Age Restriction</label>
-                                <input asp-for="AgeRestriction" type="number" class="form-control" placeholder="12" value="0" />
+                                <input asp-for="AgeRestriction" type="number" class="form-control" placeholder="12" />
                                 <span asp-validation-for="AgeRestriction" class="text-danger small"></span>
                             </div>
 
@@ -250,6 +258,18 @@ ViewData["Title"] = "Add New Movie";
                     }
                 });
             }
+
+        function updatePosterPreview(url) {
+            if (url) {
+                $('#posterPreview').html(`<img src="${url}" class="img-fluid rounded shadow" style="width: 100%; height: auto; display: block;" />`);
+            }
+        }
+
+        updatePosterPreview($('#posterUrlInput').val());
+
+        $('#posterUrlInput').on('input', function() {
+            updatePosterPreview($(this).val());
+        });
         });
     </script>
 @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
