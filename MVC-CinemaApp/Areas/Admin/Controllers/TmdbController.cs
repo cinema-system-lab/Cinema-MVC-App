@@ -2,14 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Cinema_MVC_App.Controllers;
+namespace Cinema_MVC_App.Areas.Admin.Controllers;
 
-[Authorize(Roles = "Admin")]
-public class AdminTmdbController : Controller
+public class TmdbController : BaseAdminController
 {
     private readonly ITmdbService _tmdbService;
 
-    public AdminTmdbController(ITmdbService tmdbService)
+    public TmdbController(ITmdbService tmdbService)
     {
         _tmdbService = tmdbService;
     }

@@ -8,10 +8,12 @@ namespace Cinema_MVC_App.Areas.Admin.Controllers;
 public class MoviesController : BaseAdminController
 {
     private readonly IMovieService _movieService;
+    private readonly ITmdbService _tmdbService;
 
-    public MoviesController(IMovieService movieService)
+    public MoviesController(IMovieService movieService, ITmdbService tmdbService)
     {
         _movieService = movieService;
+        _tmdbService = tmdbService;
     }
 
     // GET: /Movies or /Movies/Index
@@ -29,6 +31,50 @@ public class MoviesController : BaseAdminController
             return NotFound();
 
         return View(movie);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> CreateFromTmdb(int tmdbId)
+    {
+        var tmdbMovie = await _tmdbService.GetMovieByIdAsync(tmdbId);
+
+        if (tmdbMovie == null)
+        {
+            TempData["ErrorMessage"] = "Movie not found in TMDB.";
+            
+            return RedirectToAction("Index", "Tmdb");
+        }
+
+        GenreType mappedGenres = GenreType.None;
+        if (tmdbMovie.Genres != null)
+        {
+            foreach (var g in tmdbMovie.Genres)
+            {
+                if (Enum.TryParse<GenreType>(g.Name.Replace(" ", ""), true, out var result))
+                {
+                    mappedGenres |= result; 
+                }
+            }
+        }
+
+        var model = new MovieDTO
+        {
+            Title = tmdbMovie.Title,
+            Description = tmdbMovie.Overview,
+            ReleaseDate = DateTime.TryParse(tmdbMovie.ReleaseDate, out var date) ? date : DateTime.Now,
+            DurationMinutes = (short)(tmdbMovie.Runtime ?? 120), 
+            Rating = Math.Round((decimal)tmdbMovie.VoteAverage, 1, MidpointRounding.AwayFromZero),
+            PosterUrl = tmdbMovie.FullPosterUrl,
+            Genres = mappedGenres, 
+
+            Director = "",
+            Actors = "",
+            AgeRestriction = 0,
+            IsActive = true
+        };
+
+      
+        return View("Create", model);
     }
 
     // GET: /Movies/Create
@@ -140,5 +186,25 @@ public class MoviesController : BaseAdminController
             TempData["ErrorMessage"] = ex.Message;
         }
         return RedirectToAction(nameof(Index));
+    }
+
+    // GET: /Movies/SearchTmdbJson?query=avatar
+    [HttpGet]
+    public async Task<IActionResult> SearchTmdbJson(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return Json(new List<object>());
+
+        var results = await _tmdbService.SearchMoviesAsync(query);
+
+        var jsonResult = results.Select(m => new
+        {
+            id = m.Id,
+            title = m.Title,
+            year = string.IsNullOrEmpty(m.ReleaseDate) ? "N/A" : m.ReleaseDate.Substring(0, 4),
+            poster = m.FullPosterUrl,
+            overview = m.Overview
+        });
+
+        return Json(jsonResult);
     }
 }
