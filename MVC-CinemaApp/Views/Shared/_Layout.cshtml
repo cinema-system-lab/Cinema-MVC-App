@@ -11,7 +11,7 @@
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
             <div class="container">
@@ -29,9 +29,14 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Sessions" asp-action="Schedule">Schedule</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Orders" asp-action="">My orders</a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Orders" asp-action="Index">
+                                    <i class="bi bi-ticket-perforated-fill me-1"></i>My Orders
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Privacy" ? "active" : "")"
                                asp-area="" asp-controller="Home" asp-action="Privacy">
@@ -80,11 +85,11 @@
         </nav>
     </header>
 
-    <main role="main" class="pb-3">
+    <main role="main" class="pb-3 flex-grow-1">
         @RenderBody()
     </main>
 
-    <footer class="mt-5 py-4 border-top border-secondary">
+    <footer class="mt-auto py-4 border-top border-secondary">
         <div class="container text-center text-muted">
             <p class="small mb-0">&copy; @DateTime.Now.Year Cinema App. All rights reserved.</p>
         </div>
