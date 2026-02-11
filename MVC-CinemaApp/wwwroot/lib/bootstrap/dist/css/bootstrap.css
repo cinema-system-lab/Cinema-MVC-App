@@ -4903,7 +4903,7 @@ textarea.form-control-lg {
 
 .alert-warning {
   color: #664d03;
-  background-color: #fff3cd;
+  background-color: rgba(255, 193, 7, 0.1);
   border-color: #ffecb5;
 }
 .alert-warning .alert-link {

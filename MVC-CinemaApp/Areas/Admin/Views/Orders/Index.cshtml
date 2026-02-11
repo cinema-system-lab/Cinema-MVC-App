@@ -1,0 +1,164 @@
+﻿@model List<Core.DTOs.OrderDTO>
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<link rel="stylesheet" href="~/css/admin-order.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true"/>
+
+<div class="container-fluid py-4">
+    @if (TempData["SuccessMessage"] != null) {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null) {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold m-0 text-white">Orders</h4>
+        </div>
+    </div>
+
+    @if (!Model.Any()) {
+        <div class="orders-card">
+            <div class="empty-state">
+                <i class="bi bi-receipt"></i>
+                <h5 class="text-white mb-2">No Orders Yet</h5>
+                <p class="mb-0">You haven't made any bookings. Start by selecting a movie session!</p>
+            </div>
+        </div>
+    } else {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="search-container">
+                <i class="bi bi-search"></i>
+                <input type="text"
+                       id="orderSearch"
+                       class="search-input"
+                       data-search-target="ordersTableBody"
+                       data-search-columns=".movie-title, .hall-badge"
+                       placeholder="Search by movie or hall...">
+            </div>
+            <div class="text-muted small">
+                Showing <span id="visibleCount">@Model.Count</span> of @Model.Count orders
+            </div>
+        </div>
+
+        <div class="orders-card">
+            <div class="table-responsive">
+                <table class="table table-admin"
+                       id="ordersTable"
+                       data-pagination="true"
+                       data-pagination-items="10"
+                       data-sort-enabled="true">
+                    <thead>
+                    <tr>
+                        <th class="ps-4 sortable" data-column="0">
+                            Movie <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="1">
+                            Hall <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="2">
+                            Session <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="3">
+                            Status <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="text-end">Price</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                    @foreach (var order in Model) {
+                        <tr class="order-row">
+                            <td class="ps-4">
+                                <div class="movie-title">
+                                    <i class="bi bi-film text-primary"></i>
+                                    @order.MovieTitle
+                                </div>
+                            </td>
+                            <td>
+                                <div class="hall-badge">
+                                    <i class="bi bi-tv me-2"></i> @order.HallName
+                                </div>
+                            </td>
+                            <td>
+                        <span class="text-white-50" style="font-size: 0.85rem;">
+                            @order.SessionStartTime.ToLocalTime().ToString("MMM dd, HH:mm")
+                        </span>
+                            </td>
+                            <td>
+                                @if (order.Status.ToString().ToLower() == "pending") {
+                                    <span class="status-badge pending">
+                                <i class="bi bi-hourglass-split"></i> Pending
+                            </span>
+                                } else if (order.Status.ToString().ToLower() == "paid") {
+                                    <span class="status-badge paid">
+                                <i class="bi bi-check-circle-fill"></i> Paid
+                            </span>
+                                } else if (order.Status.ToString().ToLower() == "cancelled") {
+                                    <span class="status-badge cancelled">
+                                <i class="bi bi-x-circle-fill"></i> Cancelled
+                            </span>
+                                } else if (order.Status.ToString().ToLower() == "refunded") {
+                                    <span class="status-badge refunded">
+                                <i class="bi bi-arrow-counterclockwise"></i> Refunded
+                            </span>
+                                } else {
+                                    <span class="status-badge @order.Status.ToString().ToLower()">
+                                @order.Status
+                            </span>
+                                }
+                            </td>
+                            <td class="text-end">
+                        <span class="price-tag">
+                            ₴@order.TotalPrice.ToString("F2")
+                        </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Details" asp-route-id="@order.Id" class="btn-action btn-soft-info">
+                                        <i class="bi bi-eye"></i> Details
+                                    </a>
+
+                                    @if (order.Status == Core.Enums.OrderStatus.Pending) {
+                                        <form asp-action="Cancel" asp-route-id="@order.Id" method="post"
+                                              class="d-inline cancel-form">
+                                            <button type="button" class="btn-action btn-soft-danger cancel-btn">
+                                                <i class="bi bi-x-circle"></i> Cancel
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                <div id="noResults" class="p-5 text-center text-muted d-none">
+                    <i class="bi bi-search fs-2 opacity-25 d-block mb-3"></i>
+                    <p class="mb-0">No matching orders found.</p>
+                </div>
+            </div>
+
+            @await Html.PartialAsync("_Pagination")
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/pagination.js" asp-append-version="true"></script>
+    <script src="~/js/search-sort.js" asp-append-version="true"></script>
+}

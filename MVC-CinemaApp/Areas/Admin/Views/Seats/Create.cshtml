@@ -1,0 +1,88 @@
+﻿@model Core.DTOs.SeatGenerationDTO
+@{
+    ViewData["Title"] = "Generate Seats Layout";
+}
+
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-seats.css" asp-append-version="true"/>
+
+<div class="container py-5">
+    <div class="mb-4 d-flex justify-content-between align-items-end">
+        <div>
+            <h2 class="fw-bold m-0 text-white">Generate Seats Layout</h2>
+            <p class="text-muted small m-0 mt-2">
+                Configure seating arrangement for
+                <span class="hall-badge-seats">
+                    <i class="bi bi-door-closed"></i>@ViewBag.HallName
+                </span>
+            </p>
+        </div>
+        <a asp-controller="Halls" asp-action="Index" class="back-link">
+            <i class="bi bi-arrow-left"></i> Back to Halls
+        </a>
+    </div>
+
+    <div class="warning-box">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div class="warning-box-content">
+            <strong>Warning: This action will reset the hall!</strong>
+            <p>Generating a new seats layout will permanently delete all existing seats in this hall. Any ongoing
+                bookings may be affected.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Form -->
+        <div class="col-lg-5 col-md-6">
+            <div class="generate-card">
+                <h5 class="section-title">
+                    <i class="bi bi-sliders me-2 text-warning"></i>Layout Configuration
+                </h5>
+
+                <form asp-action="Create" id="generateForm">
+                    <input type="hidden" asp-for="HallId"/>
+
+                    <div class="mb-4">
+                        <label asp-for="Rows" class="form-label">Number of Rows</label>
+                        <div class="input-group">
+                            <span class="input-group-text text-warning">
+                                <i class="bi bi-distribute-vertical"></i>
+                            </span>
+                            <input asp-for="Rows" class="form-control" type="number" min="1" max="50" value="10"
+                                   id="rowsInput"/>
+                        </div>
+                        <span asp-validation-for="Rows" class="text-danger small"></span>
+                        <small class="text-muted d-block mt-1">Maximum: 50 rows</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="SeatsPerRow" class="form-label">Seats per Row</label>
+                        <div class="input-group">
+                            <span class="input-group-text text-warning">
+                                <i class="bi bi-distribute-horizontal"></i>
+                            </span>
+                            <input asp-for="SeatsPerRow" class="form-control" type="number" min="1" max="50" value="15"
+                                   id="seatsInput"/>
+                        </div>
+                        <span asp-validation-for="SeatsPerRow" class="text-danger small"></span>
+                        <small class="text-muted d-block mt-1">Maximum: 50 seats</small>
+                    </div>
+
+                    <div class="info-tip">
+                        <i class="bi bi-lightbulb-fill"></i>
+                        <strong>Tip:</strong> Standard cinema halls typically have 10-20 rows with 12-20 seats per row.
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4 pt-3 form-actions">
+                        <button type="submit" class="btn-action btn-generate shadow-sm flex-grow-1">
+                            <i class="bi bi-grid-3x3-gap-fill"></i> Generate Layout
+                        </button>
+                        <a asp-controller="Halls" asp-action="Index" class="btn-action btn-cancel">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

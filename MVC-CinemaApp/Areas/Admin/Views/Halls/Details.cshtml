@@ -1,0 +1,204 @@
+@model Core.DTOs.HallDTO
+@{
+    ViewData["Title"] = "Hall Details";
+    var upcomingSessions = ViewBag.UpcomingSessions as List<Core.DTOs.HallSessionInfoDTO> ?? new List<Core.DTOs.HallSessionInfoDTO>();
+    var statistics = ViewBag.Statistics as Core.DTOs.HallStatisticsDTO;
+}
+
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-hall.css" asp-append-version="true"/>
+
+<div class="container py-4">
+    <div class="mb-4">
+        <a asp-action="Index" class="back-link">
+            <i class="bi bi-chevron-left"></i> Back to Halls List
+        </a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="details-card-dark">
+                <div class="card-header-dark">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span>Basic Information</span>
+                </div>
+
+                <div class="details-content">
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="bi bi-door-closed me-2"></i>HALL NAME
+                        </div>
+                        <div class="detail-value-lg">@Model.Name</div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="bi bi-badge-3d me-2"></i>HALL TYPE
+                        </div>
+                        <div class="detail-value">
+                            <span class="type-badge-purple">
+                                <i class="bi bi-badge-3d"></i> @Model.Type
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="bi bi-grid-3x3-gap me-2"></i>TOTAL SEATS
+                        </div>
+                        <div class="detail-value-number">@ViewBag.SeatsCount</div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="bi bi-bookmark-check me-2"></i>BOOKED SEATS
+                        </div>
+                        <div class="detail-value-number">
+                            @ViewBag.BookedSeatsCount
+                            @if (ViewBag.SeatsCount > 0) {
+                                var bookedPercentage = Math.Round((double)ViewBag.BookedSeatsCount / ViewBag.SeatsCount * 100, 1);
+                                <span class="detail-percentage">(@bookedPercentage% of total)</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="detail-group mb-0">
+                        <div class="detail-label">
+                            <i class="bi bi-calendar-event me-2"></i>ACTIVE SESSIONS
+                        </div>
+                        <div class="detail-value-number">
+                            @ViewBag.ActiveSessionsCount
+                            @if (ViewBag.ActiveSessionsCount > 0) {
+                                <span class="detail-note">(No active sessions)</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (statistics != null) {
+                <div class="details-card-dark mt-3">
+                    <div class="card-header-dark">
+                        <i class="bi bi-bar-chart me-2"></i>
+                        <span>Performance Statistics</span>
+                        <span class="badge-time ms-auto">Last 30 Days</span>
+                    </div>
+
+                    <div class="details-content">
+                        @if (statistics.TotalSessions > 0) {
+                            <div class="stat-row">
+                                <div class="stat-row-label">
+                                    <i class="bi bi-calendar-event me-2"></i>Total Sessions Held
+                                </div>
+                                <div class="stat-row-value">@statistics.TotalSessions</div>
+                            </div>
+
+                            <div class="stat-row">
+                                <div class="stat-row-label">
+                                    <i class="bi bi-ticket-perforated me-2"></i>Tickets Sold
+                                </div>
+                                <div class="stat-row-value">@statistics.TotalTicketsSold</div>
+                            </div>
+
+                            <div class="stat-row">
+                                <div class="stat-row-label">
+                                    <i class="bi bi-percent me-2"></i>Average Occupancy
+                                </div>
+                                <div class="stat-row-value">
+                                    <span class="@(statistics.AverageOccupancyRate >= 80 ? "occupancy-excellent" :
+                                                 statistics.AverageOccupancyRate >= 60 ? "occupancy-good" :
+                                                 statistics.AverageOccupancyRate >= 40 ? "occupancy-fair" : "occupancy-low")">
+                                        @statistics.AverageOccupancyRate%
+                                    </span>
+                                    @if (statistics.AverageOccupancyRate >= 40) {
+                                        <span class="occupancy-badge-low ms-2">Low</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="stat-row mb-0">
+                                <div class="stat-row-label">
+                                    <i class="bi bi-cash-stack me-2"></i>Total Revenue
+                                </div>
+                                <div class="stat-row-value text-success">@statistics.TotalRevenue.ToString("C")</div>
+                            </div>
+                        } else {
+                            <div class="empty-state-small">
+                                <i class="bi bi-graph-up d-block mb-2"></i>
+                                <p class="mb-0 small">No historical data yet. Statistics will appear after sessions are
+                                    completed.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-6">
+            <div class="details-card-dark">
+                <div class="card-header-dark">
+                    <i class="bi bi-calendar-week me-2"></i>
+                    <span>Upcoming Sessions</span>
+                    @if (upcomingSessions.Count > 0) {
+                        <span class="badge-count ms-auto">@upcomingSessions.Count</span>
+                    }
+                </div>
+
+                <div class="details-content">
+                    @if (upcomingSessions.Count == 0) {
+                        <div class="empty-state-small">
+                            <i class="bi bi-calendar-x d-block mb-2"></i>
+                            <p class="mb-0 small">No upcoming sessions scheduled for this hall.</p>
+                        </div>
+                    } else {
+                        <div class="sessions-list-modern">
+                            @foreach (var session in upcomingSessions) {
+                                <div class="session-card-modern">
+                                    <div class="session-header">
+                                        <div class="session-title-modern">@session.MovieName</div>
+                                        @if (session.IsOngoing) {
+                                            <span class="session-badge session-badge-success">
+                                                <i class="bi bi-play-fill"></i> Ongoing
+                                            </span>
+                                        } else if (session.IsStartingSoon) {
+                                            <span class="session-badge session-badge-warning">
+                                                <i class="bi bi-hourglass-split"></i> Starting Soon
+                                            </span>
+                                        } else {
+                                            <span class="session-badge session-badge-scheduled">
+                                                <i class="bi bi-calendar-check"></i> Scheduled
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="session-info">
+                                        <span class="session-time">
+                                            <i class="bi bi-clock me-1"></i>
+                                            @session.StartTime.ToString("MMM dd, HH:mm") - @session.EndTime.ToString("HH:mm")
+                                        </span>
+                                        <span class="session-price">
+                                            <i class="bi bi-cash me-1"></i>
+                                            @session.BasePrice.ToString("C")
+                                        </span>
+                                        <a asp-controller="Sessions" asp-action="Details"
+                                           asp-route-id="@session.SessionId" class="session-view-btn">
+                                            <i class="bi bi-eye me-1"></i> View
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-3 mt-4">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-action btn-edit">
+            <i class="bi bi-pencil-square"></i> Edit Hall
+        </a>
+        <a asp-action="Index" class="btn-action btn-back">
+            <i class="bi bi-list-ul"></i> Back to List
+        </a>
+    </div>
+</div>

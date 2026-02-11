@@ -8,18 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-    public class OrderService : IOrderService
-    {
-        private readonly CinemaAppDbContext _context;
-        private readonly ITicketService _ticketService;
+public class OrderService : IOrderService
+{
+    private readonly CinemaAppDbContext _context;
+    private readonly ITicketService _ticketService;
 
-        public OrderService(
-            CinemaAppDbContext context,
-            ITicketService ticketService)
-        {
-            _context = context;
-            _ticketService = ticketService;
-        }
+    public OrderService(
+        CinemaAppDbContext context,
+        ITicketService ticketService)
+    {
+        _context = context;
+        _ticketService = ticketService;
+    }
 
     public async Task<Guid> CreateOrderAsync(string userId, CreateOrderRequest request)
     {
@@ -171,8 +171,7 @@ namespace Infrastructure.Services;
             };
         }).ToList();
     }
-
-
+    
     public async Task<OrderDTO?> GetOrderByIdAsync(Guid id)
     {
         var order = await _context.Orders

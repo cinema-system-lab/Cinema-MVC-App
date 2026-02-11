@@ -1,0 +1,129 @@
+﻿.payment-id {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--admin-text-muted);
+}
+
+.amount-display {
+    color: #34d399;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.date-display {
+    color: var(--admin-text-muted);
+    font-size: 0.85rem;
+}
+
+.badge-pending {
+    background: rgba(251, 191, 36, 0.15);
+    color: var(--accent-yellow);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.badge-success-status {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-failed {
+    background: rgba(248, 113, 113, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.badge-refunded {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.stats-box {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #93c5fd;
+    font-size: 0.9rem;
+}
+
+.payment-header {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.payment-icon {
+    font-size: 3rem;
+    color: #34d399;
+    margin-bottom: 1rem;
+}
+
+.payment-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #34d399;
+}
+
+.update-card {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.update-header {
+    background: rgba(251, 191, 36, 0.1);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+    padding: 1.25rem;
+    color: var(--accent-yellow);
+}
+
+.update-body {
+    padding: 1.5rem;
+}
+
+.btn-update {
+    background: var(--accent-yellow);
+    color: #1a1d20;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-update:hover {
+    background: #f59e0b;
+    color: #1a1d20;
+}
+
+.final-status-box {
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.final-status-box i {
+    font-size: 2.5rem;
+    color: var(--admin-text-muted);
+    margin-bottom: 1rem;
+}
+
+#noResults {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--admin-text-muted);
+}
+
+#noResults i {
+    font-size: 2rem;
+    opacity: 0.25;
+}
