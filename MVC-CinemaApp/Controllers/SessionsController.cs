@@ -22,7 +22,6 @@ public class SessionsController : Controller
     }
 
     // GET: /Sessions
-    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var sessions = await _sessionService.GetAllSessionsAsync();
@@ -40,7 +39,6 @@ public class SessionsController : Controller
     }
 
     // GET: /Sessions/Details/{id}
-    [AllowAnonymous]
     public async Task<IActionResult> Details(int id)
     {
         var session = await _sessionService.GetSessionAsync(id);
@@ -58,7 +56,6 @@ public class SessionsController : Controller
     }
 
     // GET: /Sessions/Schedule
-    [AllowAnonymous]
     public async Task<IActionResult> Schedule()
     {
         var allSessions = await _sessionService.GetAllSessionsAsync();
