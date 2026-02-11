@@ -1,50 +1,66 @@
-﻿@model Core.DTOs.OrderDTO
+@model Core.DTOs.OrderDTO
 
 @{
     ViewData["Title"] = "Order Details";
 }
 
-<h2>Order Details</h2>
+<div class="container py-4">
+    <div class="card bg-dark border-secondary shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="mb-4 text-white">Order Details</h2>
 
-<div class="card">
-    <div class="card-body">
-        <p><strong>Movie:</strong> @Model.MovieTitle</p>
-        <p><strong>Hall:</strong> @Model.HallName</p>
-        <p><strong>Session:</strong> @Model.SessionStartTime.ToLocalTime()</p>
-        <p><strong>Status:</strong> @Model.Status</p>
-        <p><strong>Total price:</strong> @Model.TotalPrice ₴</p>
+            <p class="mb-1 text-white"><strong>Movie:</strong> @Model.MovieTitle</p>
+            <p class="mb-1 text-white-50"><strong>Hall:</strong> @Model.HallName</p>
+            <p class="mb-1 text-white-50">
+                <strong>Session:</strong> @Model.SessionStartTime.ToLocalTime()
+            </p>
+            <p class="mb-1">
+                <strong>Status:</strong>
+                <span class="badge bg-secondary">@Model.Status</span>
+            </p>
+            <p class="mb-0 text-success fw-bold fs-5">
+                Total price: @Model.TotalPrice ₴
+            </p>
+        </div>
+    </div>
+
+    <div class="card bg-dark border-secondary shadow-sm">
+        <div class="card-body">
+            <h4 class="mb-3 text-white">Tickets</h4>
+
+            @if (!Model.Tickets.Any())
+            {
+                <p class="text-muted">No tickets yet.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Row</th>
+                                <th scope="col">Seat</th>
+                                <th scope="col">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in Model.Tickets)
+                            {
+                                <tr>
+                                    <td class="text-white-50">@t.RowNumber</td>
+                                    <td class="text-white-50">@t.SeatNumber</td>
+                                    <td class="text-white">@t.Price ₴</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <a asp-action="Index" class="btn btn-outline-secondary mt-3">
+                Back
+            </a>
+        </div>
     </div>
 </div>
 
-<h4 class="mt-4">Tickets</h4>
-
-@if (!Model.Tickets.Any())
-{
-    <p>No tickets yet.</p>
-}
-else
-{
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Row</th>
-                <th>Seat</th>
-                <th>Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var t in Model.Tickets)
-            {
-                <tr>
-                    <td>@t.RowNumber</td>
-                    <td>@t.SeatNumber</td>
-                    <td>@t.Price ₴</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-
-<a asp-action="Index" class="btn btn-secondary mt-3">
-    Back
-</a>

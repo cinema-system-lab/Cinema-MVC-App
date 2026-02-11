@@ -48,6 +48,12 @@
 
                                         @if (order.Status == Core.Enums.OrderStatus.Pending)
                                         {
+                                            <a asp-action="Checkout"
+                                               asp-route-id="@order.Id"
+                                               class="btn btn-sm btn-success me-1">
+                                                Pay
+                                            </a>
+
                                             <form asp-action="Cancel"
                                                   asp-route-id="@order.Id"
                                                   method="post"

@@ -1,0 +1,71 @@
+@model Core.DTOs.OrderDTO
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-4 text-white">Checkout</h2>
+
+                    @if (TempData["ErrorMessage"] is string errorMsg)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @errorMsg
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <h5 class="text-muted text-uppercase small mb-2">Order summary</h5>
+                        <p class="mb-1 text-white"><strong>Movie:</strong> @Model.MovieTitle</p>
+                        <p class="mb-1 text-white-50"><strong>Hall:</strong> @Model.HallName</p>
+                        <p class="mb-1 text-white-50">
+                            <strong>Session:</strong> @Model.SessionStartTime.ToLocalTime()
+                        </p>
+                        <p class="mb-1 text-white-50">
+                            <strong>Tickets:</strong> @Model.Tickets.Count
+                        </p>
+                        <p class="mb-0 text-success fw-bold fs-5">
+                            Total: @Model.TotalPrice ₴
+                        </p>
+                    </div>
+
+                    @if (Model.Tickets.Any())
+                    {
+                        <div class="mb-4">
+                            <h6 class="text-muted text-uppercase small mb-2">Seats</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var t in Model.Tickets)
+                                {
+                                    <span class="badge bg-secondary">
+                                        Row @t.RowNumber, Seat @t.SeatNumber
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <form asp-action="Pay" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.Id" />
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                Back to orders
+                            </a>
+
+                            <button type="submit" class="btn btn-success px-4 fw-bold">
+                                Pay now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
