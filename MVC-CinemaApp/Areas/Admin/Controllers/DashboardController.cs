@@ -1,12 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Core.Interfaces.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Cinema_MVC_App.Areas.Admin.Controllers
 {
-    public class DashboardController : BaseAdminController // Наслідуємось від Base!
+    public class DashboardController : BaseAdminController
     {
-        public IActionResult Index()
+        private readonly IDashboardService _dashboardService;
+
+        public DashboardController(IDashboardService dashboardService)
         {
-            return View();
+            _dashboardService = dashboardService;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var model = await _dashboardService.GetDashboardDataAsync();
+            return View(model);
         }
     }
 }
