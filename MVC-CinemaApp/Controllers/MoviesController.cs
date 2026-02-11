@@ -22,7 +22,6 @@ public class MoviesController : Controller
     }
 
     // GET: /Movies
-    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var movies = await _movieService.GetAllMoviesAsync();
@@ -30,7 +29,6 @@ public class MoviesController : Controller
     }
 
     // GET: /Movies/Details/{id}
-    [AllowAnonymous]
     public async Task<IActionResult> Details(int id)
     {
         var movie = await _movieService.GetMovieAsync(id);
