@@ -1,10 +1,7 @@
 ﻿using Cinema_MVC_App.Models;
-using Core.Constants;
-using Core.DTOs;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Cinema_MVC_App.Controllers;
 
@@ -60,117 +57,7 @@ public class SessionsController : Controller
         return View(session);
     }
 
-    // GET: /Sessions/Create
-    [Authorize(Roles = Roles.Admin)]
-    public async Task<IActionResult> Create()
-    {
-        await PopulateDropdowns();
-        var session = new SessionDTO
-        {
-            StartTime = DateTime.Now.AddHours(1),
-            EndTime = DateTime.Now.AddHours(3)
-        };
-        return View(session);
-    }
-
-    // POST: /Sessions/Create
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    [Authorize(Roles = Roles.Admin)]
-    public async Task<IActionResult> Create(SessionDTO session)
-    {
-        if (!ModelState.IsValid)
-        {
-            await PopulateDropdowns(session.MovieId, session.HallId);
-            return View(session);
-        }
-
-        try
-        {
-            await _sessionService.CreateSessionAsync(session);
-            TempData["SuccessMessage"] = "Session successfully created!";
-            return RedirectToAction(nameof(Index));
-        }
-        catch (Exception ex)
-        {
-            ModelState.AddModelError(string.Empty, ex.Message);
-            await PopulateDropdowns(session.MovieId, session.HallId);
-            return View(session);
-        }
-    }
-
-    // GET: /Sessions/Edit/{id}
-    [Authorize(Roles = Roles.Admin)]
-    public async Task<IActionResult> Edit(int id)
-    {
-        var session = await _sessionService.GetSessionAsync(id);
-        if (session == null) return NotFound();
-
-        await PopulateDropdowns(session.MovieId, session.HallId);
-        return View(session);
-    }
-
-    // POST: /Sessions/Edit
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    [Authorize(Roles = Roles.Admin)]
-    public async Task<IActionResult> Edit(SessionDTO session)
-    {
-        if (!ModelState.IsValid)
-        {
-            await PopulateDropdowns(session.MovieId, session.HallId);
-            return View(session);
-        }
-
-        try
-        {
-            await _sessionService.UpdateSessionAsync(session);
-            TempData["SuccessMessage"] = "Session successfully updated!";
-            return RedirectToAction(nameof(Index));
-        }
-        catch (Exception ex)
-        {
-            ModelState.AddModelError(string.Empty, ex.Message);
-            await PopulateDropdowns(session.MovieId, session.HallId);
-            return View(session);
-        }
-    }
-
-    // GET: /Sessions/Delete/{id}
-    [Authorize(Roles = Roles.Admin)]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var session = await _sessionService.GetSessionAsync(id);
-        if (session == null) return NotFound();
-        
-        var movie = await _movieService.GetMovieAsync(session.MovieId);
-        var hall = await _hallService.GetHallAsync(session.HallId);
-
-        ViewBag.MovieName = movie?.Title ?? "Unknown";
-        ViewBag.HallName = hall?.Name ?? "Unknown";
-        
-        return View(session);
-    }
-
-    // POST: /Sessions/DeleteConfirmed
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    [Authorize(Roles = Roles.Admin)]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        try
-        {
-            await _sessionService.DeleteSessionAsync(id);
-            TempData["SuccessMessage"] = "Session deleted!";
-            return RedirectToAction(nameof(Index));
-        }
-        catch (Exception ex)
-        {
-            ModelState.AddModelError(string.Empty, ex.Message);
-            return RedirectToAction(nameof(Delete), new { id });
-        }
-    }
-
+    // GET: /Sessions/Schedule
     [AllowAnonymous]
     public async Task<IActionResult> Schedule()
     {
@@ -186,15 +73,5 @@ public class SessionsController : Controller
         };
 
         return View(model);
-    }
-
-    private async Task PopulateDropdowns(int? selectedMovieId = null, int? selectedHallId = null)
-    {
-        var movies = (await _movieService.GetAllMoviesAsync())
-                    .Where(m => m.IsActive);
-        var halls = await _hallService.GetAllHallsAsync();
-
-        ViewBag.Movies = new SelectList(movies, "Id", "Title", selectedMovieId);
-        ViewBag.Halls = new SelectList(halls, "Id", "Name", selectedHallId);
     }
 }

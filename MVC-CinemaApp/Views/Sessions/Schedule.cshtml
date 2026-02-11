@@ -1,15 +1,19 @@
 ﻿@using Core.DTOs
 @using Core.Enums
 @using Cinema_MVC_App.Models;
+@using System.Linq
 @model SessionsListVM
+
 @{
     ViewData["Title"] = "Movie Schedule";
     var groupedByDate = Model.GroupedByDate;
+
     var allGenres = Model.Movies.Values
         .SelectMany(m => m.Genres.ToString().Split(','))
         .Select(g => g.Trim())
         .Distinct()
         .OrderBy(g => g);
+
     var hallTypes = Enum.GetValues(typeof(HallType)).Cast<HallType>();
 }
 
@@ -18,9 +22,9 @@
 }
 
 <div class="container py-5">
-    <header class="mb-4">
-        <h1 class="display-5 fw-bold text-white text-uppercase">Movie Schedule</h1>
-        <div class="bg-danger" style="height: 4px; width: 60px;"></div>
+    <header class="mb-5">
+        <h1 class="display-5 fw-bold text-white text-uppercase tracking-wider">Movie Schedule</h1>
+        <div class="bg-danger" style="height: 4px; width: 80px;"></div>
     </header>
 
     <div class="d-flex gap-2 mb-4 overflow-auto pb-3 date-scroll-container">
@@ -41,10 +45,10 @@
         }
     </div>
 
-    <div class="row g-3 mb-5 align-items-center bg-dark p-3 rounded-4 border border-secondary shadow">
+    <div class="row g-3 mb-5 align-items-center bg-dark p-3 rounded-4 border border-secondary shadow-sm mx-0">
         <div class="col-md-auto">
             <i class="bi bi-funnel text-danger"></i>
-            <span class="text-muted small text-uppercase fw-bold ms-2">Filters:</span>
+            <span class="text-muted small text-uppercase fw-bold ms-2">Quick Filters:</span>
         </div>
         <div class="col-md-3">
             <select class="form-select form-select-sm bg-black text-white border-secondary rounded-pill" id="genreFilter" onchange="applyFilters()">
@@ -57,7 +61,7 @@
         </div>
         <div class="col-md-3">
             <select class="form-select form-select-sm bg-black text-white border-secondary rounded-pill" id="hallTypeFilter" onchange="applyFilters()">
-                <option value="all">All Experience</option>
+                <option value="all">All Experiences</option>
                 @foreach (var type in hallTypes)
                 {
                     <option value="@((byte)type)">@type.ToString()</option>
@@ -90,7 +94,7 @@
                                     <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="poster-link">
                                         <div class="position-relative poster-hover">
                                             <img src="@movie.PosterUrl" class="img-fluid rounded-3 shadow-lg" alt="@movie.Title">
-                                            <span class="position-absolute top-0 start-0 badge bg-primary m-2">@movie.AgeRestriction+</span>
+                                            <span class="position-absolute top-0 start-0 badge bg-primary m-2 shadow">@movie.AgeRestriction+</span>
                                         </div>
                                     </a>
                                 </div>
@@ -100,7 +104,7 @@
                                         <h4 class="fw-bold text-white mb-1 hover-danger">@movie.Title.ToUpper()</h4>
                                     </a>
                                     <p class="text-danger small mb-3 fw-bold">
-                                        @movie.Genres.ToString().Replace(",", " •") | @movie.DurationMinutes MIN
+                                        @movie.Genres.ToString().Replace(",", " •") | <i class="bi bi-clock-history me-1"></i> @movie.DurationMinutes MIN
                                     </p>
 
                                     <div class="d-flex flex-wrap gap-3">

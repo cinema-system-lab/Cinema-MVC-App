@@ -120,14 +120,7 @@
                     <span class="text-muted small">Release Date:</span>
                     <span class="text-white fw-bold">@Model.Movie.ReleaseDate.ToString("MMMM dd, yyyy")</span>
                 </div>
-
-                @if (User.IsInRole(Roles.Admin))
-                {
-                    <div class="d-grid gap-2 border-top border-secondary pt-4">
-                        <a asp-action="Edit" asp-route-id="@Model.Movie.Id" class="btn btn-warning rounded-pill fw-bold">EDIT MOVIE</a>
-                        <a asp-action="Delete" asp-route-id="@Model.Movie.Id" class="btn btn-outline-danger rounded-pill fw-bold">REMOVE</a>
-                    </div>
-                }
+                @* АДМИН-БЛОК УДАЛЕН *@
             </div>
         </div>
     </div>

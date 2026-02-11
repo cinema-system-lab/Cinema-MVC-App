@@ -1,162 +1,69 @@
 ﻿@model Core.DTOs.PaymentDTO
 
 @{
-    ViewData["Title"] = "Payment Details";
-    
-    var availableStatuses = new List<(Core.Enums.PaymentStatus Status, string DisplayName)>();
-    
-    switch (Model.Status)
-    {
-        case Core.Enums.PaymentStatus.Pending:
-            availableStatuses.Add((Core.Enums.PaymentStatus.Success, "Success"));
-            availableStatuses.Add((Core.Enums.PaymentStatus.Failed, "Failed"));
-            break;
-        case Core.Enums.PaymentStatus.Success:
-            availableStatuses.Add((Core.Enums.PaymentStatus.Refunded, "Refunded"));
-            break;
-    }
+    ViewData["Title"] = "Payment Status";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>
-            <i class="bi bi-receipt"></i> Payment Details
-        </h2>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Back to List
-        </a>
-    </div>
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle"></i> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Payment Information</h5>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-header bg-transparent border-secondary text-center py-4">
+                    <h2 class="text-white mb-0">
+                        <i class="bi bi-receipt text-danger me-2"></i>Payment Receipt
+                    </h2>
                 </div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-4">Payment ID:</dt>
-                        <dd class="col-sm-8">
-                            <code>@Model.Id</code>
-                        </dd>
-
-                        <dt class="col-sm-4">Order ID:</dt>
-                        <dd class="col-sm-8">
-                            <code>@Model.OrderId</code>
-                        </dd>
-
-                        <dt class="col-sm-4">Amount:</dt>
-                        <dd class="col-sm-8">
-                            <h4 class="text-success mb-0">
-                                <i class="bi bi-currency-dollar"></i>@Model.Amount.ToString("F2")
-                            </h4>
-                        </dd>
-
-                        <dt class="col-sm-4">Payment Date:</dt>
-                        <dd class="col-sm-8">
-                            <i class="bi bi-calendar-event"></i> 
-                            @Model.PaymentDate.ToString("dddd, dd MMMM yyyy")
-                            <br>
-                            <i class="bi bi-clock"></i> 
-                            @Model.PaymentDate.ToString("HH:mm:ss")
-                        </dd>
-
-                        <dt class="col-sm-4">Status:</dt>
-                        <dd class="col-sm-8">
-                            @switch (Model.Status)
-                            {
-                                case Core.Enums.PaymentStatus.Pending:
-                                    <span class="badge bg-warning text-dark fs-6">
-                                        <i class="bi bi-clock"></i> Pending
-                                    </span>
-                                    break;
-                                case Core.Enums.PaymentStatus.Success:
-                                    <span class="badge bg-success fs-6">
-                                        <i class="bi bi-check-circle"></i> Success
-                                    </span>
-                                    break;
-                                case Core.Enums.PaymentStatus.Failed:
-                                    <span class="badge bg-danger fs-6">
-                                        <i class="bi bi-x-circle"></i> Failed
-                                    </span>
-                                    break;
-                                case Core.Enums.PaymentStatus.Refunded:
-                                    <span class="badge bg-info fs-6">
-                                        <i class="bi bi-arrow-counterclockwise"></i> Refunded
-                                    </span>
-                                    break;
-                            }
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            @if (availableStatuses.Any())
-            {
-                <div class="card shadow-sm">
-                    <div class="card-header bg-warning">
-                        <h5 class="mb-0">Update Status</h5>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h1 class="text-success display-4 fw-bold">@Model.Amount ₴</h1>
+                        <p class="text-muted text-uppercase small">Total Amount Paid</p>
                     </div>
-                    <div class="card-body">
-                        <form asp-action="UpdateStatus" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">New Status:</label>
-                                <select name="newStatus" class="form-select" required>
-                                    <option value="">-- Select Status --</option>
-                                    @foreach (var status in availableStatuses)
-                                    {
-                                        <option value="@((int)status.Status)">@status.DisplayName</option>
-                                    }
-                                </select>
-                            </div>
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-arrow-repeat"></i> Update Status
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="card shadow-sm">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">Status Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-secondary mb-0">
-                            <i class="bi bi-lock"></i> 
-                            <strong>Final Status</strong>
-                            <p class="mb-0 mt-2">
-                                This payment has reached a final status and cannot be modified.
-                            </p>
+                    <div class="list-group list-group-flush border-top border-secondary">
+                        <div class="list-group-item bg-transparent text-white d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted">Payment ID</span>
+                            <span class="font-monospace small">@Model.Id</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-white d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted">Order Reference</span>
+                            <span class="font-monospace">#@Model.OrderId</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-white d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted">Date & Time</span>
+                            <span>@Model.PaymentDate.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-white d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted">Status</span>
+                            <span>
+                                @switch (Model.Status)
+                                {
+                                    case Core.Enums.PaymentStatus.Success:
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Completed</span>
+                                        break;
+                                    case Core.Enums.PaymentStatus.Pending:
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> Processing</span>
+                                        break;
+                                    case Core.Enums.PaymentStatus.Failed:
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Declined</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@Model.Status</span>
+                                        break;
+                                }
+                            </span>
                         </div>
                     </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-light rounded-pill">
+                            <i class="bi bi-ticket-detailed me-2"></i>My Tickets
+                        </a>
+                        <button onclick="window.print()" class="btn btn-link text-muted btn-sm text-decoration-none">
+                            <i class="bi bi-printer me-1"></i> Print Receipt
+                        </button>
+                    </div>
                 </div>
-            }
+            </div>
         </div>
     </div>
 </div>

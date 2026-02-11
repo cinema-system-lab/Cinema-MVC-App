@@ -17,14 +17,14 @@
                     @if (TempData["ErrorMessage"] is string errorMsg)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            @errorMsg
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>@errorMsg
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     }
 
                     <div class="mb-4">
                         <h5 class="text-muted text-uppercase small mb-3">Order Summary</h5>
-                        
+
                         <div class="bg-black rounded p-3 mb-3">
                             <div class="row">
                                 <div class="col-md-6">
@@ -55,7 +55,7 @@
                                 {
                                     var badgeClass = t.SeatType == SeatType.Premium ? "bg-warning text-dark" : "bg-secondary";
                                     <span class="badge @badgeClass">
-                                        Row @t.RowNumber, Seat @t.SeatNumber 
+                                        Row @t.RowNumber, Seat @t.SeatNumber
                                         (@(t.SeatType == SeatType.Premium ? "Premium" : "Standard") - @t.Price ₴)
                                     </span>
                                 }
@@ -65,7 +65,7 @@
 
                     <hr class="border-secondary" />
 
-                    <form asp-action="Pay" method="post">
+                    <form asp-controller="Payments" asp-action="Pay" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="orderId" value="@Model.Id" />
 

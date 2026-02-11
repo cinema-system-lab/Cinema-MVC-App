@@ -1,51 +1,110 @@
-@model IEnumerable<Core.DTOs.TicketDTO>
+﻿@model IEnumerable<Core.DTOs.TicketDTO>
 
-<h2>Tickets</h2>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+@{
+    ViewData["Title"] = "My Tickets";
 }
 
-@if (Model == null || !Model.Any())
-{
-    <p>No tickets found.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Movie</th>
-                <th>Hall</th>
-                <th>Time</th>
-                <th>Row/Seat</th>
-                <th>Price</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white fw-bold mb-0">
+            <i class="bi bi-ticket-detailed text-danger me-2"></i> My Tickets
+        </h2>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show bg-success text-white border-0 rounded-4 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5 bg-dark rounded-4 border border-secondary border-opacity-25 shadow-sm">
+            <i class="bi bi-ticket-perforated text-muted display-1"></i>
+            <p class="lead text-muted mt-3">You don't have any tickets yet.</p>
+            <a asp-controller="Sessions" asp-action="Schedule" class="btn btn-danger rounded-pill px-4 mt-2">
+                Browse Movies
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model.OrderByDescending(t => t.StartTime))
             {
-                <tr>
-                    <td>@item.MovieTitle</td>
-                    <td>@item.HallName</td>
-                    <td>@item.StartTime.ToString("g")</td>
-                    <td>R: @item.RowNumber / S: @item.SeatNumber</td>
-                    <td>@item.Price.ToString("C")</td>
-                    <td>
-                        <a asp-action="Details"
-                           asp-route-orderId="@item.OrderId"
-                           asp-route-sessionId="@item.SessionId"
-                           asp-route-seatId="@item.SeatId">Details</a> |
+                var isExpired = item.StartTime < DateTime.Now;
 
-                        <a asp-action="Delete"
-                           asp-route-orderId="@item.OrderId"
-                           asp-route-sessionId="@item.SessionId"
-                           asp-route-seatId="@item.SeatId">Cancel</a>
-                    </td>
-                </tr>
+                <div class="col-md-6 col-xl-4">
+                    <div class="card h-100 bg-dark border-secondary shadow-sm rounded-4 overflow-hidden @(isExpired ? "opacity-75" : "")">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title text-white fw-bold mb-0 text-truncate" style="max-width: 70%;">
+                                    @item.MovieTitle
+                                </h5>
+                                @if (isExpired)
+                                {
+                                    <span class="badge bg-secondary">Passed</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="text-danger small fw-bold text-uppercase opacity-75">Time & Venue</div>
+                                <div class="text-white">
+                                    <i class="bi bi-calendar3 me-2"></i> @item.StartTime.ToString("dd MMM yyyy, HH:mm")
+                                </div>
+                                <div class="text-white-50 small">
+                                    <i class="bi bi-geo-alt me-2"></i> @item.HallName
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-4">
+                                <div class="col-6">
+                                    <div class="p-2 bg-black rounded-3 text-center border border-secondary border-opacity-25">
+                                        <div class="small text-muted">Row</div>
+                                        <div class="fw-bold text-white">@item.RowNumber</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2 bg-black rounded-3 text-center border border-secondary border-opacity-25">
+                                        <div class="small text-muted">Seat</div>
+                                        <div class="fw-bold text-white">@item.SeatNumber</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="fw-bold text-success fs-5">@item.Price ₴</span>
+                                <div class="btn-group">
+                                    <a asp-action="Details"
+                                       asp-route-orderId="@item.OrderId"
+                                       asp-route-sessionId="@item.SessionId"
+                                       asp-route-seatId="@item.SeatId"
+                                       class="btn btn-sm btn-outline-info rounded-pill px-3 me-2">
+                                        Details
+                                    </a>
+
+                                    @if (!isExpired)
+                                    {
+                                        <a asp-action="Delete"
+                                           asp-route-orderId="@item.OrderId"
+                                           asp-route-sessionId="@item.SessionId"
+                                           asp-route-seatId="@item.SeatId"
+                                           class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                            Cancel
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
-}
+        </div>
+    }
+</div>
