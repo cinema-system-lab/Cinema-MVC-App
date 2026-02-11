@@ -1,4 +1,6 @@
-﻿namespace Core.DTOs;
+﻿using Core.Enums;
+
+namespace Core.DTOs;
 
 public class TicketDTO
 {
@@ -10,5 +12,6 @@ public class TicketDTO
     public DateTime StartTime { get; set; }
     public byte RowNumber { get; set; }
     public byte SeatNumber { get; set; }
+    public SeatType SeatType { get; set; }
     public decimal Price { get; set; }
 }
