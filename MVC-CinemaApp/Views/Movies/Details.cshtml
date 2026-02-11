@@ -72,7 +72,10 @@
                                     Model.HallNames.TryGetValue(session.HallId, out var hallName);
 
                                     <div class="col-md-4 col-6">
-                                        <a asp-controller="Sessions" asp-action="Details" asp-route-id="@session.Id" class="text-decoration-none">
+                                        <a asp-controller="Tickets"
+                                           asp-action="Book"
+                                           asp-route-sessionId="@session.Id"
+                                           class="text-decoration-none">
                                             <div class="session-time-card p-3 rounded-4 border border-secondary text-center bg-dark text-white shadow-sm">
                                                 <div class="h4 fw-bold mb-1">@session.StartTime.ToString("HH:mm")</div>
                                                 <div class="small text-muted">@(hallName ?? "Standard Hall")</div>

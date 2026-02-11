@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Core.DTOs;
 using Core.Entities;
 using Core.Enums;
@@ -126,5 +126,16 @@ public class TicketService : ITicketService
 
         _context.Tickets.Remove(ticket);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<int>> GetOccupiedSeatIdsAsync(int sessionId)
+    {
+        return await _context.Tickets
+            .Where(t => t.SessionId == sessionId
+                        && t.Order.Status != OrderStatus.Cancelled
+                        && t.Order.Status != OrderStatus.Refunded)
+            .Select(t => t.SeatId)
+            .Distinct()
+            .ToListAsync();
     }
 }

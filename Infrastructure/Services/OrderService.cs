@@ -1,4 +1,4 @@
-﻿using Core.DTOs;
+using Core.DTOs;
 using Core.Entities;
 using Core.Enums;
 using Core.Constants;
@@ -8,18 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public class OrderService : IOrderService
-{
-    private readonly CinemaAppDbContext _context;
-    private readonly ITicketService _ticketService;
-
-    public OrderService(
-        CinemaAppDbContext context,
-        ITicketService ticketService)
+    public class OrderService : IOrderService
     {
-        _context = context;
-        _ticketService = ticketService;
-    }
+        private readonly CinemaAppDbContext _context;
+        private readonly ITicketService _ticketService;
+
+        public OrderService(
+            CinemaAppDbContext context,
+            ITicketService ticketService)
+        {
+            _context = context;
+            _ticketService = ticketService;
+        }
 
     public async Task<Guid> CreateOrderAsync(string userId, CreateOrderRequest request)
     {
@@ -127,32 +127,90 @@ public class OrderService : IOrderService
 
     public async Task<List<OrderDTO>> GetOrdersByUserAsync(string userId)
     {
-        return await _context.Orders
+        var orders = await _context.Orders
             .Where(o => o.UserId == userId)
+            .Include(o => o.Session).ThenInclude(s => s.Movie)
+            .Include(o => o.Session).ThenInclude(s => s.Hall)
+            .Include(o => o.Tickets).ThenInclude(t => t.Seat)
             .OrderByDescending(o => o.CreatedAt)
-            .Select(o => new OrderDTO
+            .ToListAsync();
+
+        return orders.Select(o =>
+        {
+            var session = o.Session;
+            var movie = session.Movie;
+            var hall = session.Hall;
+
+            var tickets = o.Tickets.Select(t => new TicketDTO
+            {
+                OrderId = t.OrderId,
+                SessionId = t.SessionId,
+                SeatId = t.SeatId,
+                MovieTitle = movie.Title,
+                HallName = hall.Name,
+                StartTime = session.StartTime,
+                RowNumber = t.Seat.RowNumber,
+                SeatNumber = t.Seat.SeatNumber,
+                Price = session.BasePrice
+            }).ToList();
+
+            return new OrderDTO
             {
                 Id = o.Id,
-                SessionId = o.SessionId,
+                CreatedAt = o.CreatedAt,
                 Status = o.Status,
-                CreatedAt = o.CreatedAt
-            })
-            .ToListAsync();
+                SessionId = o.SessionId,
+                MovieTitle = movie.Title,
+                HallName = hall.Name,
+                SessionStartTime = session.StartTime,
+                TotalPrice = tickets.Sum(t => t.Price),
+                Tickets = tickets
+            };
+        }).ToList();
     }
 
 
     public async Task<OrderDTO?> GetOrderByIdAsync(Guid id)
     {
-        return await _context.Orders
+        var order = await _context.Orders
             .Where(o => o.Id == id)
-            .Select(o => new OrderDTO
-            {
-                Id = o.Id,
-                SessionId = o.SessionId,
-                Status = o.Status,
-                CreatedAt = o.CreatedAt
-            })
+            .Include(o => o.Session).ThenInclude(s => s.Movie)
+            .Include(o => o.Session).ThenInclude(s => s.Hall)
+            .Include(o => o.Tickets).ThenInclude(t => t.Seat)
             .FirstOrDefaultAsync();
+
+        if (order == null)
+            return null;
+
+        var session = order.Session;
+        var movie = session.Movie;
+        var hall = session.Hall;
+
+        var tickets = order.Tickets.Select(t => new TicketDTO
+        {
+            OrderId = t.OrderId,
+            SessionId = t.SessionId,
+            SeatId = t.SeatId,
+            MovieTitle = movie.Title,
+            HallName = hall.Name,
+            StartTime = session.StartTime,
+            RowNumber = t.Seat.RowNumber,
+            SeatNumber = t.Seat.SeatNumber,
+            Price = session.BasePrice
+        }).ToList();
+
+        return new OrderDTO
+        {
+            Id = order.Id,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            SessionId = order.SessionId,
+            MovieTitle = movie.Title,
+            HallName = hall.Name,
+            SessionStartTime = session.StartTime,
+            TotalPrice = tickets.Sum(t => t.Price),
+            Tickets = tickets
+        };
     }
 
 }

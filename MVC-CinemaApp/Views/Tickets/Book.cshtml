@@ -1,0 +1,187 @@
+@model Cinema_MVC_App.Models.SeatSelectionVM
+
+@{
+    ViewData["Title"] = "Choose seats";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card bg-dark text-white border-secondary shadow-sm">
+                <div class="card-body">
+                    <div class="mb-3 text-center">
+                        @if (!string.IsNullOrEmpty(Model.PosterUrl))
+                        {
+                            <img src="@Model.PosterUrl" alt="@Model.MovieTitle" class="img-fluid rounded-3 mb-3" />
+                        }
+                        <h3 class="fw-bold text-uppercase">@Model.MovieTitle</h3>
+                        <p class="mb-1 text-muted">
+                            <i class="bi bi-calendar-event me-1"></i>
+                            @Model.StartTime.ToString("dd MMM yyyy, HH:mm")
+                        </p>
+                        <p class="mb-1 text-muted">
+                            <i class="bi bi-geo-alt-fill me-1"></i>
+                            @Model.HallName (@Model.HallType)
+                        </p>
+                        <p class="mb-0 text-success fw-semibold">
+                            <i class="bi bi-ticket-perforated-fill me-1"></i>
+                            Base price: @Model.BasePrice ₴
+                        </p>
+                    </div>
+
+                    <hr class="border-secondary" />
+
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-3">Legend</h6>
+                        <div class="d-flex flex-column gap-2 small">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="seat-box bg-success"></span> Available
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="seat-box bg-secondary"></span> Taken
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="seat-box border border-success"></span> Selected
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card bg-dark text-white border-secondary shadow-sm">
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] is string errorMsg)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @errorMsg
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <h4 class="fw-bold mb-3 text-uppercase">Choose your seats</h4>
+                    <p class="text-muted small mb-4">
+                        Click on available seats to add them to your order.
+                    </p>
+
+                    <div class="screen mb-4 text-center text-muted">
+                        <span class="px-5 py-2 border border-secondary rounded-pill bg-black-50 d-inline-block">
+                            SCREEN
+                        </span>
+                    </div>
+
+                    <form asp-controller="Orders" asp-action="Create" method="post" id="seat-selection-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="SessionId" name="SessionId" />
+
+                        <div class="seats-grid mb-4">
+                            @foreach (var rowGroup in Model.SeatsByRow.OrderBy(g => g.Key))
+                            {
+                                <div class="d-flex align-items-center mb-2 flex-wrap gap-2">
+                                    <div class="me-2 fw-semibold">
+                                        Row @rowGroup.Key
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var seat in rowGroup.OrderBy(s => s.SeatNumber))
+                                        {
+                                            var isOccupied = Model.OccupiedSeatIds.Contains(seat.Id);
+
+                                            if (isOccupied)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-sm btn-secondary seat-btn"
+                                                        disabled
+                                                        title="Seat taken">
+                                                    @seat.SeatNumber
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <label class="btn btn-sm btn-success seat-btn mb-0">
+                                                    <input type="checkbox"
+                                                           name="SeatIds"
+                                                           value="@seat.Id"
+                                                           autocomplete="off"
+                                                           class="d-none seat-checkbox" />
+                                                    <span>@seat.SeatNumber</span>
+                                                </label>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-controller="Sessions"
+                               asp-action="Details"
+                               asp-route-id="@Model.SessionId"
+                               class="btn btn-outline-secondary">
+                                Back to session
+                            </a>
+
+                            <button type="submit" class="btn btn-danger px-4 fw-bold" id="submit-order-btn">
+                                Continue to order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .seat-box {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .seat-btn {
+        min-width: 38px;
+        text-align: center;
+        transition: all 0.15s ease-in-out;
+    }
+
+    .seat-btn.selected {
+        background-color: transparent;
+        color: #00ff7f;
+        border: 2px solid #00ff7f;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        (function () {
+            const form = document.getElementById('seat-selection-form');
+            const errorMessage = '@(TempData["ErrorMessage"] as string ?? string.Empty)';
+
+            document.querySelectorAll('.seat-checkbox').forEach(cb => {
+                cb.addEventListener('change', function () {
+                    const label = this.closest('.seat-btn');
+                    if (!label) return;
+
+                    if (this.checked) {
+                        label.classList.add('selected');
+                    } else {
+                        label.classList.remove('selected');
+                    }
+                });
+            });
+
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    const anyChecked = form.querySelectorAll('.seat-checkbox:checked').length > 0;
+                    if (!anyChecked) {
+                        e.preventDefault();
+                        alert('Please select at least one seat.');
+                    }
+                });
+            }
+        })();
+    </script>
+}
+

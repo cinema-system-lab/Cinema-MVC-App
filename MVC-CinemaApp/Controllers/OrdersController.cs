@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Core.Interfaces.Services;
@@ -36,29 +36,39 @@ public class OrdersController : Controller
             return NotFound();
         }
 
-        // можна додати перевірку, чи належить замовлення поточному юзеру
-        // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        // if (order.UserId != userId) return Forbid();
-
         return View(order);
     }
 
     // POST: /Orders/Create
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateOrderRequest request)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (request.SeatIds == null || !request.SeatIds.Any())
+        {
+            TempData["ErrorMessage"] = "You must select at least one seat.";
+            return RedirectToAction("Book", "Tickets", new { sessionId = request.SessionId });
+        }
+
+        if (!ModelState.IsValid)
+        {
+            TempData["ErrorMessage"] = "Invalid order data.";
+            return RedirectToAction("Book", "Tickets", new { sessionId = request.SessionId });
+        }
 
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             await _orderService.CreateOrderAsync(userId, request);
 
+            TempData["SuccessMessage"] = "Order created successfully.";
             return RedirectToAction(nameof(Index));
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(ex.Message);
+            // Наприклад: "This seat is already booked and active." або "Cannot create order for started session"
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction("Book", "Tickets", new { sessionId = request.SessionId });
         }
     }
 
