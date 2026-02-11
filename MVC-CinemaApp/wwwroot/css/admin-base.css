@@ -15,6 +15,9 @@
     --input-bg: rgba(255, 255, 255, 0.05);
     --text-main: #f8fafc;
     --danger-soft: rgba(239, 68, 68, 0.1);
+    --overlay-bg: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
+    --card-hover-border: rgba(16, 185, 129, 0.3);
+    --btn-text-dark: #000000;
 }
 
 body {
@@ -177,6 +180,7 @@ footer a:hover {
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     border: none;
     text-decoration: none;
@@ -587,7 +591,7 @@ footer a:hover {
 
 .search-container {
     position: relative;
-    max-width: 400px;
+    max-width: 100%;
 }
 
 .search-container i {
@@ -602,7 +606,7 @@ footer a:hover {
     background: var(--input-bg);
     border: 1px solid var(--admin-border);
     color: white;
-    padding: 8px 12px 8px 35px;
+    padding: 11px 12px 11px 35px;
     border-radius: 8px;
     width: 100%;
     transition: all 0.2s ease;
