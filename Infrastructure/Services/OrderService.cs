@@ -151,7 +151,10 @@ namespace Infrastructure.Services;
                 StartTime = session.StartTime,
                 RowNumber = t.Seat.RowNumber,
                 SeatNumber = t.Seat.SeatNumber,
-                Price = session.BasePrice
+                SeatType = t.Seat.Type,
+                Price = t.Seat.Type == SeatType.Premium 
+                    ? session.BasePrice * 1.5m 
+                    : session.BasePrice
             }).ToList();
 
             return new OrderDTO
@@ -196,7 +199,10 @@ namespace Infrastructure.Services;
             StartTime = session.StartTime,
             RowNumber = t.Seat.RowNumber,
             SeatNumber = t.Seat.SeatNumber,
-            Price = session.BasePrice
+            SeatType = t.Seat.Type,
+            Price = t.Seat.Type == SeatType.Premium 
+                ? session.BasePrice * 1.5m 
+                : session.BasePrice
         }).ToList();
 
         return new OrderDTO
