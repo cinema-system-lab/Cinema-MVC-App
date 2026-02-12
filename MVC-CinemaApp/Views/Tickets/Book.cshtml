@@ -58,7 +58,15 @@
                     <hr class="border-secondary"/>
 
                     <div id="selection-summary">
-                        <h6 class="text-uppercase text-muted mb-2">Your Selection</h6>
+                        <div class="d-flex align-items-start justify-content-between gap-3">
+                            <h6 class="text-uppercase text-muted mb-2">Your Selection</h6>
+
+                            <div class="hold-timer text-end" aria-live="polite">
+                                <div class="hold-timer__label">Time left</div>
+                                <div class="hold-timer__value" id="hold-timer-value">15:00</div>
+                            </div>
+                        </div>
+
                         <div id="selected-seats-list" class="small text-white-50 mb-2">No seats selected</div>
                         <div class="fw-bold text-success fs-5">Total: <span id="total-price">0</span> ₴</div>
                     </div>
@@ -237,6 +245,82 @@
         (function () {
             const form = document.getElementById('seat-selection-form');
 
+            const sessionId = @Model.SessionId;
+
+            const TIMER_SECONDS = 15 * 60;
+
+            const STORAGE_KEY = `seatSelectionTimerExpiresAtMs:${sessionId}`;
+
+            const timerValueEl = document.getElementById('hold-timer-value');
+            const timerBox = timerValueEl?.closest('.hold-timer');
+
+            const token = form?.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            function formatMMSS(totalSeconds) {
+                const m = Math.floor(totalSeconds / 60);
+                const s = totalSeconds % 60;
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }
+
+            function getExpiresAtMs() {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                const ms = raw ? parseInt(raw, 10) : NaN;
+                return Number.isFinite(ms) ? ms : null;
+            }
+
+            function setExpiresAtMs(ms) {
+                localStorage.setItem(STORAGE_KEY, String(ms));
+            }
+
+            function clearTimer() {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+
+            function tick() {
+                if (!timerValueEl) return;
+
+                const expiresAtMs = getExpiresAtMs();
+                const now = Date.now();
+
+                if (!expiresAtMs || expiresAtMs <= now) {
+                    timerValueEl.textContent = '15:00';
+                    timerBox?.classList.remove('hold-timer--danger');
+                    return;
+                }
+
+                const remainingSec = Math.max(0, Math.floor((expiresAtMs - now) / 1000));
+                timerValueEl.textContent = formatMMSS(remainingSec);
+
+                if (timerBox) {
+                    if (remainingSec <= 60) timerBox.classList.add('hold-timer--danger');
+                    else timerBox.classList.remove('hold-timer--danger');
+                }
+
+                if (remainingSec <= 0) {
+                    clearTimer();
+                }
+            }
+
+            async function postJson(url, payload) {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'RequestVerificationToken': token } : {})
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const text = await res.text().catch(() => '');
+                    throw new Error(text || `HTTP ${res.status}`);
+                }
+
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) return await res.json();
+                return null;
+            }
+
             function updateSummary() {
                 const checkboxes = document.querySelectorAll('.seat-checkbox:checked');
                 const listEl = document.getElementById('selected-seats-list');
@@ -265,20 +349,74 @@
                 totalEl.textContent = total.toFixed(2);
             }
 
+            async function holdSeat(cb) {
+                const seatId = parseInt(cb.value, 10);
+
+                const data = await postJson('/Tickets/HoldSeats', {
+                    sessionId: sessionId,
+                    seatIds: [seatId]
+                });
+
+                if (!data || data.success !== true) {
+                    return { ok: false, rejected: data?.rejectedSeatIds || [seatId] };
+                }
+
+                if (data.expiresAtUtc) {
+                    const ms = Date.parse(data.expiresAtUtc);
+                    if (!Number.isNaN(ms)) setExpiresAtMs(ms);
+                } else {
+                    setExpiresAtMs(Date.now() + TIMER_SECONDS * 1000);
+                }
+
+                return { ok: true };
+            }
+
+            async function releaseSeat(cb) {
+                const seatId = parseInt(cb.value, 10);
+                await postJson('/Tickets/ReleaseSeats', {
+                    sessionId: sessionId,
+                    seatIds: [seatId]
+                });
+
+                const anyChecked = document.querySelectorAll('.seat-checkbox:checked').length > 0;
+                if (!anyChecked) clearTimer();
+            }
+
             document.querySelectorAll('.seat-checkbox').forEach(cb => {
-                cb.addEventListener('change', function () {
+                cb.addEventListener('change', async function () {
                     const label = this.closest('.seat-btn');
                     if (!label) return;
 
                     if (this.checked) {
                         label.classList.add('selected');
+                        try {
+                            const result = await holdSeat(this);
+                            if (!result.ok) {
+                                this.checked = false;
+                                label.classList.remove('selected');
+                                alert('Seat is already reserved by another user. Please choose another seat.');
+                            }
+                        } catch (e) {
+                            this.checked = false;
+                            label.classList.remove('selected');
+                            alert('Failed to reserve seat. Please try again.');
+                        }
                     } else {
                         label.classList.remove('selected');
+                        try {
+                            await releaseSeat(this);
+                        } catch (e) {
+                            alert('Failed to release seat. Please refresh the page.');
+                        }
                     }
 
                     updateSummary();
+                    tick();
                 });
             });
+
+            tick();
+            setInterval(tick, 250);
 
             if (form) {
                 form.addEventListener('submit', function (e) {

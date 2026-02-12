@@ -128,6 +128,14 @@ public class OrdersController : Controller
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId) ||
+                !SeatHoldStore.IsHeldByUser(userId, request.SessionId, request.SeatIds))
+            {
+                TempData["ErrorMessage"] = "Selected seats are no longer reserved for you. Please choose seats again.";
+                return RedirectToAction("Book", "Tickets", new { sessionId = request.SessionId });
+            }
+
             var orderId = await _orderService.CreateOrderAsync(userId, request);
 
             TempData["SuccessMessage"] = "Order created successfully.";
@@ -159,4 +167,6 @@ public class OrdersController : Controller
         }
         return RedirectToAction(nameof(Index));
     }
+    
+    
 }
