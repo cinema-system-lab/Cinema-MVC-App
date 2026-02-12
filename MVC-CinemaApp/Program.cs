@@ -33,6 +33,9 @@ builder.Services.AddIdentityConfiguration();
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MovieProfile).Assembly);
 
+// DI for UserService
+builder.Services.AddScoped<IUserService, UserService>();
+
 // DI for MovieService
 builder.Services.AddScoped<IMovieService, MovieService>();
 
