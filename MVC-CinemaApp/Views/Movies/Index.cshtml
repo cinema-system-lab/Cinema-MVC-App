@@ -7,7 +7,7 @@
 
     var nowShowing = Model.Where(m => m.IsActive && m.ReleaseDate <= today).OrderByDescending(m => m.ReleaseDate);
     var comingSoon = Model.Where(m => m.IsActive && m.ReleaseDate > today).OrderBy(m => m.ReleaseDate);
-    var archived = Model.Where(m => !m.IsActive).OrderByDescending(m => m.ReleaseDate);
+    // var archived = Model.Where(m => !m.IsActive).OrderByDescending(m => m.ReleaseDate);
 }
 
 <div class="container py-5">
@@ -15,7 +15,7 @@
         <div class="d-flex gap-4 gap-md-5 admin-nav-tabs">
             <h1 class="nav-tab active" onclick="showSection('now', this)">Now Showing</h1>
             <h1 class="nav-tab" onclick="showSection('soon', this)">Coming Soon</h1>
-            <h1 class="nav-tab" onclick="showSection('archive', this)">Archive</h1>
+            @* <h1 class="nav-tab" onclick="showSection('archive', this)">Archive</h1> *@
         </div>
     </div>
 
@@ -62,23 +62,23 @@
         }
     </div>
 
-    <div id="section-archive" class="movie-section d-none animate-fade">
-        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-            @if (archived.Any())
-            {
-                @foreach (var movie in archived)
-                {
-                    <div class="col grayscale-filter">
-                        @await Html.PartialAsync("_MovieCard", movie)
-                    </div>
-                }
-            }
-            else
-            {
-                <div class="col-12 text-center py-5 text-muted">Archive is empty.</div>
-            }
-        </div>
-    </div>
+    @* <div id="section-archive" class="movie-section d-none animate-fade"> *@
+    @*     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4"> *@
+    @*         @if (archived.Any()) *@
+    @*         { *@
+    @*             @foreach (var movie in archived) *@
+    @*             { *@
+    @*                 <div class="col grayscale-filter"> *@
+    @*                     @await Html.PartialAsync("_MovieCard", movie) *@
+    @*                 </div> *@
+    @*             } *@
+    @*         } *@
+    @*         else *@
+    @*         { *@
+    @*             <div class="col-12 text-center py-5 text-muted">Archive is empty.</div> *@
+    @*         } *@
+    @*     </div> *@
+    @* </div> *@
 </div>
 
 @section Scripts {

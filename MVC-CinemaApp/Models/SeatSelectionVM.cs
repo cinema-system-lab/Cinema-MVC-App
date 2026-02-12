@@ -8,6 +8,7 @@ namespace Cinema_MVC_App.Models
     public class SeatSelectionVM
     {
         public int SessionId { get; set; }
+        public int MovieId { get; set; }
         public string MovieTitle { get; set; } = string.Empty;
         public string PosterUrl { get; set; } = string.Empty;
         public DateTime StartTime { get; set; }

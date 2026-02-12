@@ -46,6 +46,7 @@ public class TicketsController : Controller
         var viewModel = new SeatSelectionVM
         {
             SessionId = session.Id,
+			MovieId = movie.Id,
             MovieTitle = movie.Title,
             PosterUrl = movie.PosterUrl ?? string.Empty,
             StartTime = session.StartTime,

@@ -113,7 +113,7 @@
                                             Model.Halls.TryGetValue(session.HallId, out var hall);
                                             var hallTypeVal = hall != null ? (byte)hall.Type : (byte)1;
 
-                                            <a asp-controller="Sessions" asp-action="Details" asp-route-id="@session.Id"
+                                            <a asp-controller="Tickets" asp-action="Book" asp-route-sessionId="@session.Id"
                                                class="session-box text-decoration-none"
                                                data-hall-type="@hallTypeVal">
                                                 <div class="time">@session.StartTime.ToString("HH:mm")</div>
