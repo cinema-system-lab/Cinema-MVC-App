@@ -147,8 +147,11 @@ public class HallsController : BaseAdminController
         }
         catch (InvalidOperationException ex)
         {
-            TempData["ErrorMessage"] = ex.Message;
-            return RedirectToAction(nameof(Delete), new { id });
+            var hall = await _hallService.GetHallAsync(id);
+            if (hall == null) return NotFound();
+
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View("Delete", hall);
         }
     }
 }

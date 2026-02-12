@@ -243,7 +243,7 @@ public class MoviesController : BaseAdminController
         try
         {
             await _movieService.DeleteMovieAsync(id);
-            TempData["SuccessMessage"] = "Movie deleted!"; // Тут редирект, TempData уместен
+            TempData["SuccessMessage"] = "Movie deleted!";
             return RedirectToAction(nameof(Index));
         }
         catch (InvalidOperationException ex)
@@ -251,8 +251,6 @@ public class MoviesController : BaseAdminController
             var movie = await _movieService.GetMovieAsync(id);
             if (movie == null) return NotFound();
 
-            // Важно: Не пишем в TempData здесь! 
-            // Вместо этого используем ModelState, который живет только в рамках этого запроса.
             ModelState.AddModelError(string.Empty, ex.Message);
 
             return View("Delete", movie);

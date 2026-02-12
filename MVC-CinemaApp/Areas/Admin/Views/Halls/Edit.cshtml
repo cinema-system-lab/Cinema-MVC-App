@@ -27,10 +27,22 @@
                     <i class="bi bi-info-circle me-2 text-primary"></i>Hall Information
                 </h5>
 
-                <form asp-action="Edit" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
-                    <input type="hidden" asp-for="Id"/>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger shadow-sm mb-4 border-0 text-start">
+                        <div asp-validation-summary="ModelOnly" class="small fw-bold"></div>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger shadow-sm mb-4 border-0 text-start small">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
 
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
                     <div class="mb-3">
                         <label asp-for="Name" class="form-label">Hall Name</label>
                         <div class="input-group">
