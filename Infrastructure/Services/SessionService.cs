@@ -31,14 +31,31 @@ public class SessionService : ISessionService
 
     public async Task CreateSessionAsync(SessionDTO session)
     {
+        if ((session.EndTime - session.StartTime).TotalMinutes > 300)
+        {
+            throw new InvalidOperationException("The session duration cannot exceed 5 hours.");
+        }
+
+        var duration = (session.EndTime - session.StartTime).TotalMinutes;
+
+        if (duration > 300)
+        {
+            throw new InvalidOperationException("The session duration cannot exceed 5 hours (300 minutes).");
+        }
+
+        if (duration <= 0)
+        {
+            throw new InvalidOperationException("End time must be after start time.");
+        }
+
         var overlapExists = await _context.Sessions.AnyAsync(s =>
             s.HallId == session.HallId &&
             session.StartTime < s.EndTime &&
             session.EndTime > s.StartTime);
-        
+
         if (overlapExists)
             throw new InvalidOperationException("Session overlaps with another session in the same hall");
-        
+
         var entity = _mapper.Map<Session>(session);
         _context.Sessions.Add(entity);
         await _context.SaveChangesAsync();
@@ -49,8 +66,24 @@ public class SessionService : ISessionService
         var entity = await _context.Sessions.FindAsync(session.Id);
         if (entity == null) return;
 
-        var now = DateTime.Now;
+        if ((session.EndTime - session.StartTime).TotalMinutes > 300)
+        {
+            throw new InvalidOperationException("The session duration cannot exceed 5 hours.");
+        }
 
+        var duration = (session.EndTime - session.StartTime).TotalMinutes;
+
+        if (duration > 300)
+        {
+            throw new InvalidOperationException("The session duration cannot exceed 5 hours (300 minutes).");
+        }
+
+        if (duration <= 0)
+        {
+            throw new InvalidOperationException("End time must be after start time.");
+        }
+
+        var now = DateTime.Now;
         if (entity.StartTime <= now)
         {
             throw new InvalidOperationException("Cannot update a session that has already started.");
@@ -61,18 +94,17 @@ public class SessionService : ISessionService
             s.HallId == session.HallId &&
             session.StartTime < s.EndTime &&
             session.EndTime > s.StartTime);
-        
+
         if (overlapExists)
             throw new InvalidOperationException("Session overlaps with another session in the same hall");
-        
+
         var hasTickets = await _context.Tickets.AnyAsync(t => t.SessionId == session.Id);
         if (hasTickets)
             throw new InvalidOperationException("Cannot update session with sold tickets");
-        
+
         _mapper.Map(session, entity);
         await _context.SaveChangesAsync();
     }
-
     public async Task DeleteSessionAsync(int id)
     {
         var entity = await _context.Sessions.FindAsync(id);
