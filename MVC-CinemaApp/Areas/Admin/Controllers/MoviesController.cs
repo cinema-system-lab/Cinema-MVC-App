@@ -244,12 +244,17 @@ public class MoviesController : BaseAdminController
         {
             await _movieService.DeleteMovieAsync(id);
             TempData["SuccessMessage"] = "Movie deleted!";
+            return RedirectToAction(nameof(Index));
         }
         catch (InvalidOperationException ex)
         {
-            TempData["ErrorMessage"] = ex.Message;
+            var movie = await _movieService.GetMovieAsync(id);
+            if (movie == null) return NotFound();
+
+            ModelState.AddModelError(string.Empty, ex.Message);
+
+            return View("Delete", movie);
         }
-        return RedirectToAction(nameof(Index));
     }
 
     // GET: /Movies/SearchTmdbJson?query=avatar

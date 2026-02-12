@@ -71,6 +71,33 @@
 
     <div class="container main-content">
         <main role="main" class="pb-5">
+            <div class="container mt-4">
+                @if (TempData["SuccessMessage"] != null || TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show bg-dark border-success text-success shadow-lg mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                            <div>
+                                <strong>Success!</strong> @(TempData["SuccessMessage"] ?? TempData["Success"])
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null || TempData["Error"] != null || !ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show bg-dark border-danger text-danger shadow-lg mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                            <div>
+                                <strong>Attention!</strong> @(TempData["ErrorMessage"] ?? TempData["Error"])
+                                <div asp-validation-summary="All" class="small mt-1 text-white-50"></div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            </div>
             @RenderBody()
         </main>
     </div>

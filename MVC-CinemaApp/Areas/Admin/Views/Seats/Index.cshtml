@@ -11,19 +11,6 @@
 <link rel="stylesheet" href="~/css/admin-seats.css" asp-append-version="true"/>
 
 <div class="container-fluid py-4">
-    @if (TempData["SuccessMessage"] != null) {
-        <div class="alert-custom">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>@TempData["SuccessMessage"]</span>
-        </div>
-    }
-    @if (TempData["ErrorMessage"] != null) {
-        <div class="alert-custom error">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>@TempData["ErrorMessage"]</span>
-        </div>
-    }
-
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold m-0 text-white">Seat Layout Management</h2>

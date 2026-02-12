@@ -15,12 +15,11 @@ public class OrdersController : BaseAdminController
         _userService = userService;
     }
 
-    // GET: /Orders
+    // GET: /Admin/Orders
     public async Task<IActionResult> Index()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var orders = await _orderService.GetOrdersByUserAsync(userId);
-        
+        var orders = await _orderService.GetAllOrdersAsync();
+
         var userEmails = new Dictionary<string, string>();
         foreach (var order in orders)
         {
@@ -30,7 +29,7 @@ public class OrdersController : BaseAdminController
                 userEmails[order.UserId] = user?.Email ?? "Unknown";
             }
         }
-        
+
         ViewBag.UserEmails = userEmails;
         return View(orders);
     }
