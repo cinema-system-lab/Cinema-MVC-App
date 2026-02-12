@@ -22,9 +22,12 @@ public class TicketService : ITicketService
     public async Task<List<TicketDTO>> GetAllTicketsAsync()
     {
         var tickets = await _context.Tickets
+            .Include(t => t.Order)
             .Include(t => t.Session).ThenInclude(s => s.Movie)
             .Include(t => t.Session).ThenInclude(s => s.Hall)
             .Include(t => t.Seat)
+            .Where(t => t.Order.Status == OrderStatus.Pending || 
+                        t.Order.Status == OrderStatus.Paid)
             .AsNoTracking()
             .ToListAsync();
 
@@ -35,9 +38,12 @@ public class TicketService : ITicketService
     {
         var tickets = await _context.Tickets
             .Where(t => t.OrderId == orderId)
+            .Include(t => t.Order)
             .Include(t => t.Session).ThenInclude(s => s.Movie)
             .Include(t => t.Session).ThenInclude(s => s.Hall)
             .Include(t => t.Seat)
+            .Where(t => t.Order.Status == OrderStatus.Pending || 
+                        t.Order.Status == OrderStatus.Paid)
             .AsNoTracking()
             .ToListAsync();
 
