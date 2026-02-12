@@ -21,8 +21,7 @@
         </a>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Create Movie</h2>
+    <div class="d-flex justify-content-end align-items-center mb-3">
         <button type="button" class="btn-action btn-save shadow-sm" data-bs-toggle="modal" data-bs-target="#tmdbModal">
             <i class="bi bi-cloud-download"></i> Import from TMDB
         </button>
@@ -172,23 +171,22 @@
 <div class="modal fade" id="tmdbModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content admin-modal-content">
-            <div class="modal-header border-0 pb-0">
+            <div class="modal-header border-0 p-4 pb-0 d-flex justify-content-between align-items-start">
                 <div>
                     <h4 class="modal-title fw-bold text-white">Import from TMDB</h4>
                     <p class="text-muted small mb-0">Search millions of movies to auto-fill your form</p>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white m-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="tmdb-search-wrapper mb-4">
                     <div class="input-group custom-input-group shadow-sm">
-                        <span class="input-group-text bg-transparent border-end-0">
-                            <i class="bi bi-search text-success"></i>
+                        <span class="input-group-text bg-transparent border-0">
+                            <i class="bi bi-search"></i>
                         </span>
-                        <input type="text" id="tmdbSearchInput" class="form-control border-start-0"
+                        <input type="text" id="tmdbSearchInput" class="form-control border-0"
                                placeholder="Search movie title (e.g. Interstellar)...">
-                        <button class="btn btn-save px-4" type="button" id="btnSearchTmdb">
+                        <button class="btn-action btn-create px-4" type="button" id="btnSearchTmdb">
                             Search
                         </button>
                     </div>
@@ -214,19 +212,10 @@
     <script src="~/js/movie-form.js"></script>
     <script>
         $(document).ready(function () {
-            $('#genresSelect').select2({
-                placeholder: "Select at least one genre",
-                width: '100%'
-            });
-            $('#genresSelect').on('change', function () {
-                $(this).valid();
-            });
-
-            let ratingInput = $('#ratingInput');
             $('#btnSearchTmdb').click(function () {
                 performTmdbSearch();
             });
-
+            
             $('#tmdbSearchInput').keypress(function (e) {
                 if (e.which == 13) {
                     performTmdbSearch();

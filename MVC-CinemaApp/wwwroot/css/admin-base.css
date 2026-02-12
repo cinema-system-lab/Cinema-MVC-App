@@ -612,13 +612,6 @@ footer a:hover {
     transition: all 0.2s ease;
 }
 
-.search-input:focus {
-    background: var(--admin-border);
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-    outline: none;
-}
-
 .search-input::placeholder {
     color: var(--admin-text-muted);
 }
@@ -641,6 +634,13 @@ footer a:hover {
 
 .details-card .empty-state i {
     font-size: 2.5rem;
+}
+
+.admin-modal-content {
+    background-color: #1a1d21;
+    border: 1px solid #2d3238;
+    border-radius: 16px;
+    padding: 10px;
 }
 
 .modal-dark {
@@ -950,11 +950,6 @@ footer a:hover {
     padding: 8px 12px;
 }
 
-.update-card .select2-search--dropdown .select2-search__field:focus {
-    border-color: var(--accent-yellow) !important;
-    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
-    outline: none;
-}
 
 .alert-warning {
     background: var(--admin-warning-bg);
