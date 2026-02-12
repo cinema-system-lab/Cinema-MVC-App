@@ -981,8 +981,8 @@ footer a:hover {
 }
 
 .status-inactive {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
