@@ -51,6 +51,9 @@ footer a {
 footer a:hover {
     color: var(--text-main);
 }
+.admin-text-muted {
+    color: var(--admin-text-muted);
+}
 
 .create-card,
 .edit-card,
