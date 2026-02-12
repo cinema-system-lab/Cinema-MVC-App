@@ -138,6 +138,8 @@ public class OrdersController : Controller
 
             var orderId = await _orderService.CreateOrderAsync(userId, request);
 
+            SeatHoldStore.Release(userId, request.SessionId, request.SeatIds);
+
             TempData["SuccessMessage"] = "Order created successfully.";
             return RedirectToAction(nameof(Checkout), new { id = orderId });
         }
