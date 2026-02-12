@@ -8,20 +8,6 @@
 <link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true"/>
 
 <div class="container-fluid py-4">
-    @if (TempData["Success"] != null) {
-        <div class="alert-custom success">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>@TempData["Success"]</span>
-        </div>
-    }
-
-    @if (TempData["Error"] != null) {
-        <div class="alert-custom error">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>@TempData["Error"]</span>
-        </div>
-    }
-
     <div class="mb-4">
         <h4 class="fw-bold m-0 text-white">Payments Management</h4>
         <p class="text-muted small m-0">Track and manage all payment transactions</p>

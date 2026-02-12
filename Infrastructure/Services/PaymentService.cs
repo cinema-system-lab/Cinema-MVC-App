@@ -25,6 +25,8 @@ public class PaymentService : IPaymentService
     {
         return await _context.Payments
             .Include(p => p.Order)
+            .ThenInclude(o => o.Session)
+            .Include(p => p.Order)
             .ThenInclude(o => o.User)
             .OrderByDescending(p => p.PaymentDate)
             .Select(p => new PaymentDTO
@@ -35,7 +37,8 @@ public class PaymentService : IPaymentService
                 UserEmail = p.Order.User.Email,
                 Amount = p.Amount,
                 PaymentDate = p.PaymentDate,
-                Status = p.Status
+                Status = p.Status,
+                SessionStartTime = p.Order.Session.StartTime
             })
             .ToListAsync();
     }
@@ -43,16 +46,25 @@ public class PaymentService : IPaymentService
     public async Task<PaymentDTO> GetPaymentByIdAsync(Guid id)
     {
         var payment = await _context.Payments
+            .Include(p => p.Order)
+            .ThenInclude(o => o.Session)
             .FirstOrDefaultAsync(p => p.Id == id);
-            
-        return _mapper.Map<PaymentDTO>(payment);
+
+        var dto = _mapper.Map<PaymentDTO>(payment);
+
+        if (payment?.Order?.Session != null)
+        {
+            dto.SessionStartTime = payment.Order.Session.StartTime;
+        }
+
+        return dto;
     }
 
     public async Task<PaymentDTO> GetPaymentByOrderIdAsync(Guid orderId)
     {
         var payment = await _context.Payments
             .FirstOrDefaultAsync(p => p.OrderId == orderId);
-            
+
         return _mapper.Map<PaymentDTO>(payment);
     }
 
@@ -62,7 +74,7 @@ public class PaymentService : IPaymentService
             throw new ArgumentException("Amount must be greater than 0", nameof(createPaymentDto.Amount));
 
         using var transaction = await _context.Database.BeginTransactionAsync();
-        
+
         try
         {
             var order = await _context.Orders.FindAsync(createPaymentDto.OrderId);
@@ -74,7 +86,7 @@ public class PaymentService : IPaymentService
 
             var existingPayment = await _context.Payments
                 .AnyAsync(p => p.OrderId == createPaymentDto.OrderId);
-                
+
             if (existingPayment)
                 throw new InvalidOperationException("Payment already exists for this order");
 
@@ -84,7 +96,7 @@ public class PaymentService : IPaymentService
                 OrderId = createPaymentDto.OrderId,
                 Amount = createPaymentDto.Amount,
                 Status = PaymentStatus.Pending,
-                PaymentDate = DateTime.UtcNow
+                PaymentDate = DateTime.Now
             };
 
             _context.Payments.Add(payment);
@@ -108,13 +120,31 @@ public class PaymentService : IPaymentService
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (payment == null)
-            throw new KeyNotFoundException($"Payment with ID {id} not found");
+            throw new KeyNotFoundException("Payment not found");
 
         if (payment.Status == newStatus)
             return;
 
-        if (payment.Order?.Session != null && payment.Order.Session.StartTime <= DateTime.UtcNow)
-            throw new InvalidOperationException("Cannot update payment status after session has started");
+        var isFinalStatus = payment.Status == PaymentStatus.Refunded ||
+                            payment.Status == PaymentStatus.Failed;
+
+        if (isFinalStatus)
+        {
+            throw new InvalidOperationException(
+                $"Cannot modify payment in final status: {payment.Status}");
+        }
+
+        if (payment.Order?.Session == null)
+        {
+            throw new InvalidOperationException(
+                "Session information is not available.");
+        }
+
+        if (payment.Order.Session.StartTime <= DateTime.Now)
+        {
+            throw new InvalidOperationException(
+                $"Modification forbidden: session already started at {payment.Order.Session.StartTime:yyyy-MM-dd HH:mm}.");
+        }
 
         var isValidTransition = (payment.Status, newStatus) switch
         {
@@ -128,20 +158,20 @@ public class PaymentService : IPaymentService
             throw new InvalidOperationException(
                 $"Invalid status transition from {payment.Status} to {newStatus}");
 
-        payment.Status = newStatus;
-        await _context.SaveChangesAsync();
-
-        if (payment.Order != null)
+        var newOrderStatus = newStatus switch
         {
-            var newOrderStatus = newStatus switch
-            {
-                PaymentStatus.Success => OrderStatus.Paid,
-                PaymentStatus.Failed => OrderStatus.Cancelled,
-                PaymentStatus.Refunded => OrderStatus.Refunded,
-                _ => payment.Order.Status
-            };
+            PaymentStatus.Success => OrderStatus.Paid,
+            PaymentStatus.Failed => OrderStatus.Cancelled,
+            PaymentStatus.Refunded => OrderStatus.Refunded,
+            _ => payment.Order.Status
+        };
 
+        if (payment.Order != null && newOrderStatus != payment.Order.Status)
+        {
             await _orderService.UpdateStatusAsync(payment.OrderId, newOrderStatus);
         }
+
+        payment.Status = newStatus;
+        await _context.SaveChangesAsync();
     }
 }

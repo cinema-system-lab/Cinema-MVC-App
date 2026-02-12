@@ -35,37 +35,16 @@ public class PaymentsController : BaseAdminController
         return View(payment);
     }
 
-    // POST: /Payments/UpdateStatus todo
+    // POST: /Payments/UpdateStatus
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(Guid id, PaymentStatus newStatus)
     {
         try
         {
-            var payment = await _paymentService.GetPaymentByIdAsync(id);
-            if (payment == null)
-            {
-                TempData["ErrorMessage"] = "Payment not found.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var isValidTransition = (payment.Status, newStatus) switch
-            {
-                (PaymentStatus.Pending, PaymentStatus.Success) => true,
-                (PaymentStatus.Pending, PaymentStatus.Failed) => true,
-                (PaymentStatus.Success, PaymentStatus.Refunded) => true,
-                _ => false
-            };
-
-            if (!isValidTransition)
-            {
-                TempData["ErrorMessage"] = $"Cannot change status from {payment.Status} to {newStatus}. Invalid transition.";
-                return RedirectToAction(nameof(Details), new { id });
-            }
-
             await _paymentService.UpdatePaymentStatusAsync(id, newStatus);
 
-            TempData["SuccessMessage"] = newStatus switch
+            TempData["Success"] = newStatus switch
             {
                 PaymentStatus.Success => "Payment marked as successful.",
                 PaymentStatus.Failed => "Payment marked as failed.",
@@ -73,17 +52,17 @@ public class PaymentsController : BaseAdminController
                 _ => "Payment status updated successfully."
             };
         }
-        catch (InvalidOperationException ex)
-        {
-            TempData["ErrorMessage"] = ex.Message;
-        }
         catch (KeyNotFoundException ex)
         {
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["Error"] = ex.Message;
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["Error"] = ex.Message;
         }
         catch (Exception ex)
         {
-            TempData["ErrorMessage"] = $"Error updating payment: {ex.Message}";
+            TempData["Error"] = $"Error updating payment: {ex.Message}";
         }
 
         return RedirectToAction(nameof(Details), new { id });

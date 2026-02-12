@@ -1,186 +1,199 @@
-﻿@model Core.DTOs.PaymentDTO
-@{
-    ViewData["Title"] = "Payment Details";
+﻿    @model Core.DTOs.PaymentDTO
+    @{
+        ViewData["Title"] = "Payment Details";
 
-    var availableStatuses = new List<(Core.Enums.PaymentStatus Status, string DisplayName)>();
+        bool isSessionStarted = Model.SessionStartTime <= DateTime.Now;
+        bool isFinalStatus = Model.Status == Core.Enums.PaymentStatus.Refunded ||
+                             Model.Status == Core.Enums.PaymentStatus.Failed;
+    
+        bool canUpdateStatus = !isFinalStatus && !isSessionStarted;
+    
+        var availableStatuses = new List<(Core.Enums.PaymentStatus Status, string DisplayName)>();
 
-    switch (Model.Status) {
-        case Core.Enums.PaymentStatus.Pending:
-            availableStatuses.Add((Core.Enums.PaymentStatus.Success, "Success"));
-            availableStatuses.Add((Core.Enums.PaymentStatus.Failed, "Failed"));
-            break;
-        case Core.Enums.PaymentStatus.Success:
-            availableStatuses.Add((Core.Enums.PaymentStatus.Refunded, "Refund Payment"));
-            break;
-    }
-}
-
-<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
-<link rel="stylesheet" href="~/css/admin-payments.css" asp-append-version="true"/>
-
-<div class="container py-5">
-    <div class="mb-4">
-        <a asp-action="Index" class="back-link">
-            <i class="bi bi-arrow-left"></i> Back to Payments
-        </a>
-    </div>
-
-    @if (TempData["Success"] != null) {
-        <div class="alert-custom success">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>@TempData["Success"]</span>
-        </div>
+        if (canUpdateStatus)
+        {
+            switch (Model.Status) {
+                case Core.Enums.PaymentStatus.Pending:
+                    availableStatuses.Add((Core.Enums.PaymentStatus.Success, "Success"));
+                    availableStatuses.Add((Core.Enums.PaymentStatus.Failed, "Failed"));
+                    break;
+                case Core.Enums.PaymentStatus.Success:
+                    availableStatuses.Add((Core.Enums.PaymentStatus.Refunded, "Refund Payment"));
+                    break;
+            }
+        }
     }
 
-    @if (TempData["Error"] != null) {
-        <div class="alert-custom error">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>@TempData["Error"]</span>
+    <link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/admin-payments.css" asp-append-version="true"/>
+    
+    <div class="container py-5">
+        <div class="mb-4">
+            <a asp-action="Index" class="back-link">
+                <i class="bi bi-arrow-left"></i> Back to Payments
+            </a>
         </div>
-    }
-
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="details-card">
-                <div class="payment-header">
-                    <i class="bi bi-receipt payment-icon"></i>
-                    <div class="payment-amount">
-                        ₴@Model.Amount.ToString("F2")
+        
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="details-card">
+                    <div class="payment-header">
+                        <i class="bi bi-receipt payment-icon"></i>
+                        <div class="payment-amount">
+                            ₴@Model.Amount.ToString("F2")
+                        </div>
+                        <p class="text-muted mb-0 mt-2">Payment Transaction</p>
                     </div>
-                    <p class="text-muted mb-0 mt-2">Payment Transaction</p>
-                </div>
 
-                <div class="info-label">
-                    <i class="bi bi-hash me-1"></i> Payment ID
-                </div>
-                <div class="info-value" style="font-family: monospace; font-size: 0.9rem;">
-                    @Model.Id
-                </div>
-
-                <div class="info-label">
-                    <i class="bi bi-bag me-1"></i> Order ID
-                </div>
-                <div class="info-value" style="font-family: monospace; font-size: 0.9rem;">
-                    <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId" class="back-link">
-                        <i class="bi bi-eye me-1"></i> @Model.OrderId
-                    </a>
-                </div>
-
-                <div class="info-label">
-                    <i class="bi bi-calendar-event me-1"></i> Payment Date & Time
-                </div>
-                <div class="info-value">
-                    <div class="mb-1">
-                        <i class="bi bi-calendar3"></i> @Model.PaymentDate.ToString("dddd, MMMM dd, yyyy")
+                    <div class="info-label">
+                        <i class="bi bi-hash me-1"></i> Payment ID
                     </div>
-                    <div class="text-muted small">
-                        <i class="bi bi-clock"></i> @Model.PaymentDate.ToString("HH:mm:ss")
+                    <div class="info-value" style="font-family: monospace; font-size: 0.9rem;">
+                        @Model.Id
                     </div>
-                </div>
 
-                <div class="info-label">
-                    <i class="bi bi-info-circle me-1"></i> Status
-                </div>
-                <div class="info-value">
-                    @switch (Model.Status) {
-                        case Core.Enums.PaymentStatus.Pending:
-                            <span class="status-badge badge-pending">
-                                <i class="bi bi-clock"></i> Pending
-                            </span>
-                            break;
-                        case Core.Enums.PaymentStatus.Success:
-                            <span class="status-badge badge-success-status">
-                                <i class="bi bi-check-circle-fill"></i> Success
-                            </span>
-                            break;
-                        case Core.Enums.PaymentStatus.Failed:
-                            <span class="status-badge badge-failed">
-                                <i class="bi bi-x-circle-fill"></i> Failed
-                            </span>
-                            break;
-                        case Core.Enums.PaymentStatus.Refunded:
-                            <span class="status-badge badge-refunded">
-                                <i class="bi bi-arrow-counterclockwise"></i> Refunded
-                            </span>
-                            break;
-                    }
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            @if (availableStatuses.Any()) {
-                <div class="update-card">
-                    <div class="update-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-arrow-repeat me-2"></i>Update Status
-                        </h5>
+                    <div class="info-label">
+                        <i class="bi bi-bag me-1"></i> Order ID
                     </div>
-                    <div class="update-body">
-                        @if (Model.Status == Core.Enums.PaymentStatus.Success) {
-                            <div class="alert alert-warning mb-3">
-                                <i class="bi bi-exclamation-triangle me-2"></i>
-                                <small>Warning: Refunding this payment cannot be undone.</small>
-                            </div>
-                        }
-
-                        <form asp-action="UpdateStatus" method="post" id="updateStatusForm">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.Id"/>
-
-                            <div class="mb-3">
-                                <label class="form-label">New Status</label>
-                                <select name="newStatus" class="form-select" required id="statusSelect">
-                                    <option value="">-- Select Status --</option>
-                                    @foreach (var status in availableStatuses) {
-                                        <option value="@((int)status.Status)">@status.DisplayName</option>
-                                    }
-                                </select>
-                            </div>
-
-                            <button type="submit" class="btn-action btn-update">
-                                <i class="bi bi-check-circle"></i> Update Status
-                            </button>
-                        </form>
+                    <div class="info-value" style="font-family: monospace; font-size: 0.9rem;">
+                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId" class="back-link">
+                            <i class="bi bi-eye me-1"></i> @Model.OrderId
+                        </a>
                     </div>
-                </div>
-            } else {
-                <div class="update-card">
-                    <div class="update-body">
-                        <div class="final-status-box">
-                            <i class="bi bi-lock-fill"></i>
-                            <h6 class="text-white mb-2">Final Status</h6>
-                            <p class="text-muted small mb-0">
-                                This payment has reached a final status and cannot be modified.
-                            </p>
+
+                    <div class="info-label">
+                        <i class="bi bi-clock-history me-1"></i> Session Starts
+                    </div>
+                    <div class="info-value @(isSessionStarted ? "text-danger" : "")">
+                        @Model.SessionStartTime.ToString("MMM dd, HH:mm")
+                    </div>
+
+                    <div class="info-label">
+                        <i class="bi bi-calendar-event me-1"></i> Payment Date & Time
+                    </div>
+                    <div class="info-value">
+                        <div class="mb-1">
+                            <i class="bi bi-calendar3"></i> @Model.PaymentDate.ToString("dddd, MMMM dd, yyyy")
+                        </div>
+                        <div class="text-muted small">
+                            <i class="bi bi-clock"></i> @Model.PaymentDate.ToString("HH:mm:ss")
                         </div>
                     </div>
+
+                    <div class="info-label">
+                        <i class="bi bi-info-circle me-1"></i> Status
+                    </div>
+                    <div class="info-value">
+                        @switch (Model.Status) {
+                            case Core.Enums.PaymentStatus.Pending:
+                                <span class="status-badge badge-pending">
+                                    <i class="bi bi-clock"></i> Pending
+                                </span>
+                                break;
+                            case Core.Enums.PaymentStatus.Success:
+                                <span class="status-badge badge-success-status">
+                                    <i class="bi bi-check-circle-fill"></i> Success
+                                </span>
+                                break;
+                            case Core.Enums.PaymentStatus.Failed:
+                                <span class="status-badge badge-failed">
+                                    <i class="bi bi-x-circle-fill"></i> Failed
+                                </span>
+                                break;
+                            case Core.Enums.PaymentStatus.Refunded:
+                                <span class="status-badge badge-refunded">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Refunded
+                                </span>
+                                break;
+                        }
+                    </div>
                 </div>
-            }
+            </div>
+
+
+            <div class="col-lg-4">
+                @if (canUpdateStatus && availableStatuses.Any()) {
+                    <div class="update-card">
+                        <div class="update-header">
+                            <h5 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>Update Status</h5>
+                        </div>
+                        <div class="update-body">
+                            @if (Model.Status == Core.Enums.PaymentStatus.Success) {
+                                <div class="alert alert-warning mb-3">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <small>Warning: Refunding this payment cannot be undone.</small>
+                                </div>
+                            }
+                            <form asp-action="UpdateStatus" method="post" id="updateStatusForm">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Id"/>
+                                <div class="mb-3">
+                                    <label class="form-label">New Status</label>
+                                    <select name="newStatus" class="form-select" required id="statusSelect">
+                                        <option value="">-- Select Status --</option>
+                                        @foreach (var status in availableStatuses) {
+                                            <option value="@((int)status.Status)">@status.DisplayName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn-action btn-update">
+                                    <i class="bi bi-check-circle"></i> Update Status
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                } else {
+                    <div class="update-card">
+                        <div class="update-body">
+                            @if (isFinalStatus) {
+                                @* Синій блок для завершених операцій *@
+                                <div class="final-status-box"
+                                     style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
+                                    <i class="bi bi-lock-fill" style="color: #60a5fa;"></i>
+                                    <h6 class="text-white mb-2">Immutable Record</h6>
+                                    <p class="admin-text-muted small mb-0">
+                                        This transaction is in a final state (@Model.Status) and cannot be modified.
+                                    </p>
+                                </div>
+                            } else if (isSessionStarted) {
+                                @* Червоний блок, якщо сесія вже почалася *@
+                                <div class="final-status-box"
+                                     style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444;">
+                                    <i class="bi bi-exclamation-octagon-fill" style="color: #ef4444;"></i>
+                                    <h6 class="text-white mb-2">Modification Locked</h6>
+                                    <p class="admin-text-muted small mb-0">
+                                        The session started at <strong>@Model.SessionStartTime.ToString("HH:mm")</strong>.
+                                        Manual status updates are disabled for security.
+                                    </p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('select[name="newStatus"]').select2({
-                width: '100%',
-                minimumResultsForSearch: -1,
-                dropdownParent: $('.update-card')
-            });
+    @section Scripts {
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('select[name="newStatus"]').select2({
+                    width: '100%',
+                    minimumResultsForSearch: -1,
+                    dropdownParent: $('.update-card')
+                });
 
-            $('#updateStatusForm').on('submit', function (e) {
-                var selectedStatus = $('#statusSelect').val();
-                if (selectedStatus === '4') {
-                    if (!confirm('Are you sure you want to refund this payment? This action cannot be undone.')) {
-                        e.preventDefault();
-                        return false;
+                $('#updateStatusForm').on('submit', function (e) {
+                    var selectedStatus = $('#statusSelect').val();
+                    if (selectedStatus === '4') {
+                        if (!confirm('Are you sure you want to refund this payment? This action cannot be undone.')) {
+                            e.preventDefault();
+                            return false;
+                        }
                     }
-                }
+                });
             });
-        });
-    </script>
-}
+        </script>
+    }
