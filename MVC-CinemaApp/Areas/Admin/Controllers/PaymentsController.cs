@@ -45,7 +45,7 @@ public class PaymentsController : BaseAdminController
             var payment = await _paymentService.GetPaymentByIdAsync(id);
             if (payment == null)
             {
-                TempData["Error"] = "Payment not found.";
+                TempData["ErrorMessage"] = "Payment not found.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -59,13 +59,13 @@ public class PaymentsController : BaseAdminController
 
             if (!isValidTransition)
             {
-                TempData["Error"] = $"Cannot change status from {payment.Status} to {newStatus}. Invalid transition.";
+                TempData["ErrorMessage"] = $"Cannot change status from {payment.Status} to {newStatus}. Invalid transition.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
             await _paymentService.UpdatePaymentStatusAsync(id, newStatus);
 
-            TempData["Success"] = newStatus switch
+            TempData["SuccessMessage"] = newStatus switch
             {
                 PaymentStatus.Success => "Payment marked as successful.",
                 PaymentStatus.Failed => "Payment marked as failed.",
@@ -75,15 +75,15 @@ public class PaymentsController : BaseAdminController
         }
         catch (InvalidOperationException ex)
         {
-            TempData["Error"] = ex.Message;
+            TempData["ErrorMessage"] = ex.Message;
         }
         catch (KeyNotFoundException ex)
         {
-            TempData["Error"] = ex.Message;
+            TempData["ErrorMessage"] = ex.Message;
         }
         catch (Exception ex)
         {
-            TempData["Error"] = $"Error updating payment: {ex.Message}";
+            TempData["ErrorMessage"] = $"Error updating payment: {ex.Message}";
         }
 
         return RedirectToAction(nameof(Details), new { id });

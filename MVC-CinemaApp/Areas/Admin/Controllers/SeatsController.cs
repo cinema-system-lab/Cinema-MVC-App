@@ -56,7 +56,12 @@ public class SeatsController : BaseAdminController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(SeatGenerationDTO generationDto)
     {
-        if (!ModelState.IsValid) return View(generationDto);
+        if (!ModelState.IsValid)
+        {
+            var hall = await _hallService.GetHallAsync(generationDto.HallId);
+            ViewBag.HallName = hall?.Name;
+            return View(generationDto);
+        }
 
         try
         {
