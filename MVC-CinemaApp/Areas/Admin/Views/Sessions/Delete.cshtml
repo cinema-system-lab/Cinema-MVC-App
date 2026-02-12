@@ -8,6 +8,13 @@
 
 <div class="container delete-container">
     <div class="delete-card">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger border-0 shadow-sm mb-4 text-start">
+                <div asp-validation-summary="ModelOnly" class="small fw-bold"></div>
+            </div>
+        }
+
         <div class="warning-icon">
             <i class="bi bi-exclamation-triangle-fill"></i>
         </div>

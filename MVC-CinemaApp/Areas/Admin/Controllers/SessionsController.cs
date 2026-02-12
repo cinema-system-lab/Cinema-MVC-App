@@ -164,12 +164,22 @@ public class SessionsController : BaseAdminController
         }
         catch (Exception ex)
         {
+            var session = await _sessionService.GetSessionAsync(id);
+            if (session == null) return NotFound();
+
+            var movie = await _movieService.GetMovieAsync(session.MovieId);
+            var hall = await _hallService.GetHallAsync(session.HallId);
+
+            ViewBag.MovieName = movie?.Title ?? "Unknown";
+            ViewBag.HallName = hall?.Name ?? "Unknown";
+
             ModelState.AddModelError(string.Empty, ex.Message);
-            return RedirectToAction(nameof(Delete), new { id });
+
+            return View("Delete", session);
         }
     }
 
-    
+
     private async Task PopulateDropdowns(int? selectedMovieId = null, int? selectedHallId = null)
     {
         var movies = (await _movieService.GetAllMoviesAsync())

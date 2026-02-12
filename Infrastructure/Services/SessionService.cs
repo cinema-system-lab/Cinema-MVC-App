@@ -48,7 +48,14 @@ public class SessionService : ISessionService
     {
         var entity = await _context.Sessions.FindAsync(session.Id);
         if (entity == null) return;
-        
+
+        var now = DateTime.Now;
+
+        if (entity.StartTime <= now)
+        {
+            throw new InvalidOperationException("Cannot update a session that has already started.");
+        }
+
         var overlapExists = await _context.Sessions.AnyAsync(s =>
             s.Id != session.Id &&
             s.HallId == session.HallId &&
@@ -70,10 +77,24 @@ public class SessionService : ISessionService
     {
         var entity = await _context.Sessions.FindAsync(id);
         if (entity == null) return;
-        
+
+        var now = DateTime.Now;
+
+        if (entity.EndTime < now)
+        {
+            throw new InvalidOperationException("Cannot delete a completed session. It must remain in history.");
+        }
+
+        if (entity.StartTime <= now && entity.EndTime >= now)
+        {
+            throw new InvalidOperationException("Cannot delete an ongoing session.");
+        }
+
         var hasTickets = await _context.Tickets.AnyAsync(t => t.SessionId == id);
         if (hasTickets)
-            throw new InvalidOperationException("Cannot delete session with sold tickets");
+        {
+            throw new InvalidOperationException("Cannot delete session with sold tickets. Please refund or cancel orders first.");
+        }
 
         _context.Sessions.Remove(entity);
         await _context.SaveChangesAsync();
