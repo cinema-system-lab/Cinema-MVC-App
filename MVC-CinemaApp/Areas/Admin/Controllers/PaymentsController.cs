@@ -7,13 +7,23 @@ namespace Cinema_MVC_App.Areas.Admin.Controllers;
 public class PaymentsController : BaseAdminController
 {
     private readonly IPaymentService _paymentService;
-
-    public PaymentsController(IPaymentService paymentService)
-        => _paymentService = paymentService;
+    private readonly IUserService _userService;
+    
+    public PaymentsController(IPaymentService paymentService, IUserService userService)
+    {
+        _paymentService = paymentService;
+        _userService = userService;
+    }
 
     // GET: /Payments
     public async Task<IActionResult> Index()
-        => View(await _paymentService.GetAllPaymentsAsync());
+    {
+        var payments = await _paymentService.GetAllPaymentsAsync();
+        var allUsers = await _userService.GetAllUsersAsync();
+        ViewBag.UserEmails = allUsers.ToDictionary(u => u.Id, u => u.Email);
+
+        return View(payments);
+    }
 
     // GET: /Payments/Details/{id}
     public async Task<IActionResult> Details(Guid id)
