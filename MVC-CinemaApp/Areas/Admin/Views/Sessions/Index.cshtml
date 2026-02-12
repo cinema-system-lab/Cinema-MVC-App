@@ -1,6 +1,7 @@
 @model IEnumerable<Core.DTOs.SessionDTO>
 @{
     ViewData["Title"] = "Sessions Management";
+    var currentStatus = ViewData["CurrentStatus"]?.ToString() ?? "active";
 }
 
 <link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
@@ -19,7 +20,7 @@
         </a>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-3 flex-wrap">
         <div class="search-container">
             <i class="bi bi-search"></i>
             <input type="text"
@@ -29,8 +30,44 @@
                    data-search-columns=".movie-title, .hall-badge"
                    placeholder="Search by movie or hall...">
         </div>
-        <div class="text-muted small">
-            Showing <span id="visibleCount">@Model.Count()</span> sessions
+
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <div class="btn-group status-filter-group" role="group" aria-label="Status filter">
+                <a asp-action="Index"
+                   asp-route-status="active"
+                   class="btn-filter @(currentStatus == "active" ? "active" : "")"
+                   title="Ongoing and Upcoming sessions">
+                    <i class="bi bi-play-circle-fill"></i> Active
+                </a>
+                <a asp-action="Index"
+                   asp-route-status="ongoing"
+                   class="btn-filter @(currentStatus == "ongoing" ? "active" : "")"
+                   title="Currently playing">
+                    <i class="bi bi-broadcast"></i> Ongoing
+                </a>
+                <a asp-action="Index"
+                   asp-route-status="upcoming"
+                   class="btn-filter @(currentStatus == "upcoming" ? "active" : "")"
+                   title="Future sessions">
+                    <i class="bi bi-calendar-event"></i> Upcoming
+                </a>
+                <a asp-action="Index"
+                   asp-route-status="finished"
+                   class="btn-filter @(currentStatus == "finished" ? "active" : "")"
+                   title="Completed sessions">
+                    <i class="bi bi-check-circle-fill"></i> Finished
+                </a>
+                <a asp-action="Index"
+                   asp-route-status="all"
+                   class="btn-filter @(currentStatus == "all" ? "active" : "")"
+                   title="All sessions">
+                    <i class="bi bi-collection-fill"></i> All
+                </a>
+            </div>
+
+            <div class="text-muted small">
+                Showing <span id="visibleCount">@Model.Count()</span> sessions
+            </div>
         </div>
     </div>
 
@@ -39,7 +76,19 @@
             <div class="empty-state">
                 <i class="bi bi-calendar-x"></i>
                 <h5 class="text-white mb-2">No Sessions Found</h5>
-                <p class="text-muted mb-0">No screening sessions found in the database.</p>
+                <p class="text-muted mb-0">
+                    @if (currentStatus == "active") {
+                        <text>No active or upcoming sessions found.</text>
+                    } else if (currentStatus == "ongoing") {
+                        <text>No ongoing sessions at the moment.</text>
+                    } else if (currentStatus == "upcoming") {
+                        <text>No upcoming sessions scheduled.</text>
+                    } else if (currentStatus == "finished") {
+                        <text>No finished sessions found.</text>
+                    } else {
+                        <text>No screening sessions found in the database.</text>
+                    }
+                </p>
             </div>
         } else {
             <div class="table-responsive">

@@ -24,19 +24,31 @@ public class SessionsController : BaseAdminController
     }
 
     // GET: /Sessions
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string status = "active")
     {
         var sessions = await _sessionService.GetAllSessionsAsync();
         var movies = (await _movieService.GetAllMoviesAsync())
-                    .Where(m => m.IsActive);
+            .Where(m => m.IsActive);
         var halls = await _hallService.GetAllHallsAsync();
+
+        var now = DateTime.Now;
+        
+        sessions = status switch
+        {
+            "ongoing" => sessions.Where(s => s.StartTime <= now && s.EndTime >= now).ToList(), 
+            "upcoming" => sessions.Where(s => s.StartTime > now).ToList(), 
+            "finished" => sessions.Where(s => s.EndTime < now).ToList(),
+            "active" => sessions.Where(s => s.EndTime >= now).ToList(), 
+            _ => sessions
+        };
 
         ViewBag.MovieNames = movies.ToDictionary(m => m.Id, m => m.Title);
         ViewBag.HallNames = halls.ToDictionary(h => h.Id, h => h.Name);
+        ViewData["CurrentStatus"] = status;
         
         return View(sessions);
     }
-
+    
     // GET: /Sessions/Details/{id}
     public async Task<IActionResult> Details(int id)
     {
