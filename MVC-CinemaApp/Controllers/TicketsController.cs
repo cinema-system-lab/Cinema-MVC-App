@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Security.Claims;
 using Cinema_MVC_App.Models;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +16,8 @@ public class TicketsController : Controller
     private readonly ISeatService _seatService;
     private readonly ITicketService _ticketService;
 
+    private const int HoldMinutes = 15;
+
     public TicketsController(
         ISessionService sessionService,
         IMovieService movieService,
@@ -28,7 +32,6 @@ public class TicketsController : Controller
         _ticketService = ticketService;
     }
 
-   
     [HttpGet]
     public async Task<IActionResult> Book(int sessionId)
     {
@@ -43,10 +46,14 @@ public class TicketsController : Controller
         var seats = await _seatService.GetSeatsByHallIdAsync(hall.Id);
         var occupiedSeatIds = await _ticketService.GetOccupiedSeatIdsAsync(sessionId);
 
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+
+        var heldByOthers = SeatHoldStore.GetHeldSeatIdsByOthers(sessionId, userId);
+
         var viewModel = new SeatSelectionVM
         {
             SessionId = session.Id,
-			MovieId = movie.Id,
+            MovieId = movie.Id,
             MovieTitle = movie.Title,
             PosterUrl = movie.PosterUrl ?? string.Empty,
             StartTime = session.StartTime,
@@ -55,9 +62,172 @@ public class TicketsController : Controller
             HallName = hall.Name,
             HallType = hall.Type,
             Seats = seats,
-            OccupiedSeatIds = occupiedSeatIds.ToHashSet()
+            OccupiedSeatIds = occupiedSeatIds
+                .Concat(heldByOthers)
+                .ToHashSet()
         };
 
         return View(viewModel);
+    }
+    
+    public sealed record HoldSeatsRequest(int SessionId, int[] SeatIds);
+    public sealed record HoldSeatsResponse(bool Success, int[] HeldSeatIds, int[] RejectedSeatIds, DateTime? ExpiresAtUtc);
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult HoldSeats([FromBody] HoldSeatsRequest request)
+    {
+        if (request.SeatIds == null || request.SeatIds.Length == 0)
+            return BadRequest("SeatIds is required.");
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        var (held, rejected, expiresAtUtc) = SeatHoldStore.TryHold(
+            userId: userId,
+            sessionId: request.SessionId,
+            seatIds: request.SeatIds,
+            holdFor: TimeSpan.FromMinutes(HoldMinutes));
+
+        var success = rejected.Length == 0;
+
+        return Ok(new HoldSeatsResponse(
+            Success: success,
+            HeldSeatIds: held,
+            RejectedSeatIds: rejected,
+            ExpiresAtUtc: expiresAtUtc));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult ReleaseSeats([FromBody] HoldSeatsRequest request)
+    {
+        if (request.SeatIds == null || request.SeatIds.Length == 0)
+            return BadRequest("SeatIds is required.");
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        SeatHoldStore.Release(userId, request.SessionId, request.SeatIds);
+        return Ok();
+    }
+}
+
+public static class SeatHoldStore
+{
+    private sealed class HoldEntry
+    {
+        public required string UserId { get; init; }
+        public required DateTime ExpiresAtUtc { get; set; }
+    }
+
+    private static readonly ConcurrentDictionary<(int SessionId, int SeatId), HoldEntry> Holds = new();
+
+    private static void PurgeExpired()
+    {
+        var now = DateTime.UtcNow;
+        foreach (var kv in Holds)
+        {
+            if (kv.Value.ExpiresAtUtc <= now)
+                Holds.TryRemove(kv.Key, out _);
+        }
+    }
+
+    public static int[] GetHeldSeatIdsByOthers(int sessionId, string currentUserId)
+    {
+        PurgeExpired();
+
+        return Holds
+            .Where(kv => kv.Key.SessionId == sessionId && kv.Value.UserId != currentUserId)
+            .Select(kv => kv.Key.SeatId)
+            .Distinct()
+            .ToArray();
+    }
+
+    public static bool IsHeldByUser(string userId, int sessionId, IEnumerable<int> seatIds)
+    {
+        PurgeExpired();
+
+        foreach (var seatId in seatIds)
+        {
+            if (!Holds.TryGetValue((sessionId, seatId), out var entry)) return false;
+            if (!string.Equals(entry.UserId, userId, StringComparison.Ordinal)) return false;
+            if (entry.ExpiresAtUtc <= DateTime.UtcNow) return false;
+        }
+
+        return true;
+    }
+
+    public static (int[] Held, int[] Rejected, DateTime? ExpiresAtUtc) TryHold(
+        string userId,
+        int sessionId,
+        IEnumerable<int> seatIds,
+        TimeSpan holdFor)
+    {
+        PurgeExpired();
+
+        var now = DateTime.UtcNow;
+        var newExpiry = now.Add(holdFor);
+
+        var held = new List<int>();
+        var rejected = new List<int>();
+
+        foreach (var seatId in seatIds.Distinct())
+        {
+            var key = (sessionId, seatId);
+
+            var ok = Holds.AddOrUpdate(
+                key,
+                addValueFactory: _ => new HoldEntry { UserId = userId, ExpiresAtUtc = newExpiry },
+                updateValueFactory: (_, existing) =>
+                {
+                    if (existing.ExpiresAtUtc <= now)
+                        return new HoldEntry { UserId = userId, ExpiresAtUtc = newExpiry };
+
+                    if (string.Equals(existing.UserId, userId, StringComparison.Ordinal))
+                    {
+                        existing.ExpiresAtUtc = newExpiry;
+                        return existing;
+                    }
+
+                    return existing;
+                });
+
+            if (string.Equals(ok.UserId, userId, StringComparison.Ordinal) && ok.ExpiresAtUtc == newExpiry)
+                held.Add(seatId);
+            else if (string.Equals(ok.UserId, userId, StringComparison.Ordinal) && ok.ExpiresAtUtc > now)
+                held.Add(seatId);
+            else
+                rejected.Add(seatId);
+        }
+
+        DateTime? expiresAtUtc = null;
+        var myEntries = Holds
+            .Where(kv => kv.Key.SessionId == sessionId && kv.Value.UserId == userId)
+            .Select(kv => kv.Value.ExpiresAtUtc)
+            .ToArray();
+
+        if (myEntries.Length > 0)
+            expiresAtUtc = myEntries.Min();
+
+        return (held.ToArray(), rejected.ToArray(), expiresAtUtc);
+    }
+
+    public static void Release(string userId, int sessionId, IEnumerable<int> seatIds)
+    {
+        PurgeExpired();
+
+        foreach (var seatId in seatIds.Distinct())
+        {
+            var key = (sessionId, seatId);
+
+            if (Holds.TryGetValue(key, out var entry) &&
+                string.Equals(entry.UserId, userId, StringComparison.Ordinal))
+            {
+                Holds.TryRemove(key, out _);
+            }
+        }
     }
 }
