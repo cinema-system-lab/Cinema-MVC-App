@@ -12,6 +12,21 @@
             <i class="bi bi-exclamation-octagon"></i>
         </div>
 
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger shadow-sm mb-4 text-start">
+                <div asp-validation-summary="ModelOnly" class="small"></div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger shadow-sm mb-4 text-start small">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
         <h3 class="fw-bold text-white mb-2">Confirm Deletion</h3>
         <p class="text-muted mb-4">You are about to permanently remove this record. This action cannot be undone.</p>
 
