@@ -128,7 +128,6 @@ public class OrderService : IOrderService
     public async Task<List<OrderDTO>> GetOrdersByUserAsync(string userId)
     {
         var orders = await _context.Orders
-            .Where(o => o.UserId == userId)
             .Include(o => o.Session).ThenInclude(s => s.Movie)
             .Include(o => o.Session).ThenInclude(s => s.Hall)
             .Include(o => o.Tickets).ThenInclude(t => t.Seat)
@@ -160,6 +159,7 @@ public class OrderService : IOrderService
             return new OrderDTO
             {
                 Id = o.Id,
+                UserId = o.UserId,
                 CreatedAt = o.CreatedAt,
                 Status = o.Status,
                 SessionId = o.SessionId,
@@ -207,6 +207,7 @@ public class OrderService : IOrderService
         return new OrderDTO
         {
             Id = order.Id,
+            UserId = order.UserId,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
             SessionId = order.SessionId,

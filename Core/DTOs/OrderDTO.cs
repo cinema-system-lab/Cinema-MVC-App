@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Core.Enums;
+﻿using Core.Enums;
 
 namespace Core.DTOs;
 
 public class OrderDTO
 {
     public Guid Id { get; set; }
+    public required string UserId { get; set; } 
     public DateTime CreatedAt { get; set; }
     public OrderStatus Status { get; set; }
     public int SessionId { get; set; }
