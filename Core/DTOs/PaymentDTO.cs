@@ -11,5 +11,6 @@ public class PaymentDTO
     public decimal Amount { get; set; }
     public DateTime PaymentDate { get; set; }
     public PaymentStatus Status { get; set; }
+    public DateTime SessionStartTime { get; set; }
 }
 
