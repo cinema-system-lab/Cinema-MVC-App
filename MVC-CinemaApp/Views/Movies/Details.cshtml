@@ -75,6 +75,7 @@
                                         <a asp-controller="Tickets"
                                            asp-action="Book"
                                            asp-route-sessionId="@session.Id"
+                                           asp-route-reset="true"
                                            class="text-decoration-none">
                                             <div class="session-time-card p-3 rounded-4 border border-secondary text-center bg-dark text-white shadow-sm">
                                                 <div class="h4 fw-bold mb-1">@session.StartTime.ToString("HH:mm")</div>

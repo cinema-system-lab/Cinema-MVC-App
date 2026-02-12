@@ -42,6 +42,11 @@ namespace Infrastructure.Services
                 movieDto.Genres = GenreType.None;
             }
 
+            if (movieDto.DurationMinutes > 300)
+            {
+                throw new InvalidOperationException("Movie duration cannot exceed 5 hours.");
+            }
+
             var entity = _mapper.Map<Movie>(movieDto);
             _context.Movies.Add(entity);
             await _context.SaveChangesAsync();
@@ -59,6 +64,11 @@ namespace Infrastructure.Services
             else
             {
                 movieDto.Genres = GenreType.None;
+            }
+
+            if (movieDto.DurationMinutes > 300)
+            {
+                throw new InvalidOperationException("Movie duration cannot exceed 5 hours.");
             }
 
             _mapper.Map(movieDto, entity);

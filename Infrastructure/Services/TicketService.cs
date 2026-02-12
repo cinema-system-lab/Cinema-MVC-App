@@ -89,12 +89,12 @@ public class TicketService : ITicketService
         if (order.Status != OrderStatus.Pending)
             throw new InvalidOperationException("Tickets can be added only to pending orders.");
 
+        // Only check against PAID orders - Pending orders use SeatHoldStore for temporary reservation
         var isOccupied = await _context.Tickets.AnyAsync(t => t.SessionId == ticketDto.SessionId
                    && t.SeatId == ticketDto.SeatId
-                   && t.Order.Status != OrderStatus.Cancelled
-                   && t.Order.Status != OrderStatus.Refunded);
+                   && t.Order.Status == OrderStatus.Paid);
 
-        if (isOccupied) throw new InvalidOperationException("This seat is already booked and active.");
+        if (isOccupied) throw new InvalidOperationException("This seat is already booked.");
 
         var ticket = _mapper.Map<Ticket>(ticketDto);
         _context.Tickets.Add(ticket);
@@ -136,10 +136,11 @@ public class TicketService : ITicketService
 
     public async Task<List<int>> GetOccupiedSeatIdsAsync(int sessionId)
     {
+        // Only seats from PAID orders are considered permanently occupied
+        // Pending orders rely on the SeatHoldStore for temporary reservation
         return await _context.Tickets
             .Where(t => t.SessionId == sessionId
-                        && t.Order.Status != OrderStatus.Cancelled
-                        && t.Order.Status != OrderStatus.Refunded)
+                        && t.Order.Status == OrderStatus.Paid)
             .Select(t => t.SeatId)
             .Distinct()
             .ToListAsync();

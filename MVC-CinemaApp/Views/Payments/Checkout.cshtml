@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Checkout";
+    var paymentExpiresAtUtc = ViewBag.PaymentExpiresAtUtc as DateTime?;
 }
 
 <div class="container py-4">
@@ -10,9 +11,19 @@
         <div class="col-lg-8">
             <div class="card bg-dark border-secondary shadow-sm">
                 <div class="card-body">
-                    <h2 class="mb-4 text-white">
-                        <i class="bi bi-credit-card me-2"></i>Complete Your Payment
-                    </h2>
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <h2 class="text-white mb-0">
+                            <i class="bi bi-credit-card me-2"></i>Complete Your Payment
+                        </h2>
+                        
+                        @if (paymentExpiresAtUtc.HasValue)
+                        {
+                            <div class="hold-timer text-end" aria-live="polite">
+                                <div class="small text-muted">Payment time</div>
+                                <div class="fs-4 fw-bold text-warning" id="checkout-timer">--:--</div>
+                            </div>
+                        }
+                    </div>
 
                     @if (TempData["ErrorMessage"] is string errorMsg)
                     {
@@ -65,7 +76,7 @@
 
                     <hr class="border-secondary" />
 
-                    <form asp-controller="Payments" asp-action="Pay" method="post">
+                    <form asp-controller="Payments" asp-action="Pay" method="post" id="paymentForm">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="orderId" value="@Model.Id" />
 
@@ -74,13 +85,94 @@
                                 <i class="bi bi-arrow-left me-1"></i> Back to orders
                             </a>
 
-                            <button type="submit" class="btn btn-success btn-lg px-5 fw-bold">
+                            <button type="submit" class="btn btn-success btn-lg px-5 fw-bold" id="payButton">
                                 <i class="bi bi-credit-card me-2"></i>Pay @Model.TotalPrice ₴
                             </button>
                         </div>
+                    </form>
+                    
+                    <!-- Hidden form for expiration cancellation -->
+                    <form asp-controller="Payments" asp-action="CancelExpired" method="post" id="cancelExpiredForm" class="d-none">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.Id" />
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Timer expired modal -->
+<div class="modal fade" id="expiredModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-danger">
+            <div class="modal-body text-center py-5">
+                <i class="bi bi-clock-history text-danger display-1 mb-3"></i>
+                <h4 class="text-white mb-3">Time Expired!</h4>
+                <p class="text-muted mb-4">
+                    Your seat reservation has expired. You will be redirected to select your seats again.
+                </p>
+                <button type="button" class="btn btn-danger px-4" id="redirectBtn">
+                    <i class="bi bi-arrow-repeat me-2"></i>Select Seats Again
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            const paymentExpiresAtUtcStr = '@(paymentExpiresAtUtc?.ToString("o") ?? "")';
+            if (!paymentExpiresAtUtcStr) return;
+            
+            const expiresAt = new Date(paymentExpiresAtUtcStr);
+            const timerEl = document.getElementById('checkout-timer');
+            const payButton = document.getElementById('payButton');
+            const cancelForm = document.getElementById('cancelExpiredForm');
+            const expiredModal = new bootstrap.Modal(document.getElementById('expiredModal'));
+            const redirectBtn = document.getElementById('redirectBtn');
+            
+            function updateTimer() {
+                const now = new Date();
+                const diff = expiresAt - now;
+                
+                if (diff <= 0) {
+                    timerEl.textContent = '00:00';
+                    timerEl.classList.remove('text-warning');
+                    timerEl.classList.add('text-danger');
+                    payButton.disabled = true;
+                    payButton.classList.remove('btn-success');
+                    payButton.classList.add('btn-secondary');
+                    
+                    // Show modal
+                    expiredModal.show();
+                    return;
+                }
+                
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                // Warning colors
+                if (diff <= 60000) { // Last minute
+                    timerEl.classList.remove('text-warning');
+                    timerEl.classList.add('text-danger');
+                } else if (diff <= 180000) { // Last 3 minutes
+                    timerEl.classList.remove('text-warning');
+                    timerEl.classList.add('text-orange');
+                }
+                
+                setTimeout(updateTimer, 1000);
+            }
+            
+            // Handle redirect button
+            redirectBtn.addEventListener('click', function() {
+                cancelForm.submit();
+            });
+            
+            // Start timer
+            updateTimer();
+        })();
+    </script>
+}

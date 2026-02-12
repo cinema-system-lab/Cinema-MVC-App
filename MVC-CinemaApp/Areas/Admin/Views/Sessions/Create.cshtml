@@ -22,6 +22,13 @@
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <form asp-action="Create" method="post" id="sessionForm">
+                    <div id="jsCustomError" class="alert alert-danger d-none mb-4 shadow-sm" style="border-left: 5px solid #dc3545;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div id="jsErrorText"></div>
+                        </div>
+                    </div>
+
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
 
                     <h5 class="section-title">
