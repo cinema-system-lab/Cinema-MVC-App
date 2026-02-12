@@ -54,8 +54,15 @@ namespace Infrastructure.Services
 
         public async Task UpdateMovieAsync(MovieDTO movieDto, int[] selectedGenres)
         {
-            var entity = await _context.Movies.FindAsync(movieDto.Id);
+            var entity = await _context.Movies.AsNoTracking().FirstOrDefaultAsync(m => m.Id == movieDto.Id);
             if (entity == null) return;
+
+            var hasSessions = await _context.Sessions.AnyAsync(s => s.MovieId == movieDto.Id);
+
+            if (hasSessions)
+            {
+                throw new InvalidOperationException("Cannot edit movie that already has scheduled sessions.");
+            }
 
             if (selectedGenres != null && selectedGenres.Length > 0)
             {
@@ -71,7 +78,8 @@ namespace Infrastructure.Services
                 throw new InvalidOperationException("Movie duration cannot exceed 5 hours.");
             }
 
-            _mapper.Map(movieDto, entity);
+            var existingEntity = await _context.Movies.FindAsync(movieDto.Id);
+            _mapper.Map(movieDto, existingEntity);
             await _context.SaveChangesAsync();
         }
 

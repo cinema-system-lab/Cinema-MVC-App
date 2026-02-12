@@ -218,9 +218,14 @@ public class MoviesController : BaseAdminController
             TempData["SuccessMessage"] = "Movie successfully updated!";
             return RedirectToAction(nameof(Index));
         }
+        catch (InvalidOperationException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View(movie);
+        }
         catch (Exception ex)
         {
-            ModelState.AddModelError(string.Empty, $"Error: {ex.Message}");
+            ModelState.AddModelError(string.Empty, $"Unexpected error: {ex.Message}");
             return View(movie);
         }
     }
