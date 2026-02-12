@@ -4,6 +4,9 @@
 @{
     ViewData["Title"] = "Choose seats";
     var premiumPrice = Model.BasePrice * 1.5m;
+    var holdExpiresAtUtc = ViewBag.HoldExpiresAtUtc as DateTime?;
+    var userHeldSeatIds = ViewBag.UserHeldSeatIds as int[] ?? Array.Empty<int>();
+    var isReset = ViewBag.IsReset as bool? ?? false;
 }
 
 <div class="container py-5">
@@ -63,7 +66,7 @@
 
                             <div class="hold-timer text-end" aria-live="polite">
                                 <div class="hold-timer__label">Time left</div>
-                                <div class="hold-timer__value" id="hold-timer-value">15:00</div>
+                                <div class="hold-timer__value" id="hold-timer-value">--:--</div>
                             </div>
                         </div>
 
@@ -110,6 +113,7 @@
                                         @foreach (var seat in rowGroup.OrderBy(s => s.SeatNumber))
                                         {
                                             var isOccupied = Model.OccupiedSeatIds.Contains(seat.Id);
+                                            var isUserHeld = userHeldSeatIds.Contains(seat.Id);
                                             var isPremium = seat.Type == SeatType.Premium;
                                             var seatPrice = Model.GetSeatPrice(seat);
 
@@ -125,9 +129,10 @@
                                             else
                                             {
                                                 var btnClass = isPremium ? "btn-warning" : "btn-success";
+                                                var selectedClass = isUserHeld ? "selected" : "";
                                                 var seatTitle = isPremium ? $"Premium - {seatPrice} ₴" : $"Standard - {seatPrice} ₴";
 
-                                                <label class="btn btn-sm @btnClass seat-btn mb-0" title="@seatTitle">
+                                                <label class="btn btn-sm @btnClass seat-btn mb-0 @selectedClass" title="@seatTitle">
                                                     <input type="checkbox"
                                                            name="SeatIds"
                                                            value="@seat.Id"
@@ -136,6 +141,7 @@
                                                            data-seat="@seat.SeatNumber"
                                                            data-type="@(isPremium ? "Premium" : "Standard")"
                                                            autocomplete="off"
+                                                           @(isUserHeld ? "checked" : "")
                                                            class="d-none seat-checkbox"/>
                                                     <span>@seat.SeatNumber</span>
                                                 </label>
@@ -160,6 +166,24 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Timer Expired Modal -->
+<div class="modal fade" id="timerExpiredModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="timerExpiredLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-warning">
+            <div class="modal-body text-center py-5">
+                <i class="bi bi-clock-history text-warning display-1 mb-3"></i>
+                <h4 class="text-white mb-3">Time's Up!</h4>
+                <p class="text-muted mb-4">
+                    Your seat reservation time has expired. Please start again to select your seats.
+                </p>
+                <a asp-controller="Movies" asp-action="Details" asp-route-id="@Model.MovieId" class="btn btn-warning px-4">
+                    <i class="bi bi-arrow-repeat me-2"></i>Start Again
+                </a>
             </div>
         </div>
     </div>
@@ -247,10 +271,46 @@
 
             const sessionId = @Model.SessionId;
 
-            const TIMER_SECONDS = 15 * 60;
+            const TIMER_SECONDS = 3 * 60;  // 3 minutes for testing
 
             const STORAGE_KEY = `seatSelectionTimerExpiresAtMs:${sessionId}`;
+            
+            // Server-provided hold expiration (if user has held seats)
+            const serverHoldExpiresAtStr = '@(holdExpiresAtUtc?.ToString("o") ?? "")';
+            const isReset = @(isReset ? "true" : "false");
+            
+            if (isReset) {
+                // Fresh start from Movie Details - clear old timer
+                localStorage.removeItem(STORAGE_KEY);
+                
+                // Remove reset parameter from URL to prevent re-triggering on browser back
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('reset')) {
+                    url.searchParams.delete('reset');
+                    window.history.replaceState({}, '', url.toString());
+                }
+            }
 
+            // Determine the timer expiration
+            let expiresAtMs;
+            
+            // Check localStorage first (source of truth for navigation)
+            const existingExpiry = localStorage.getItem(STORAGE_KEY);
+            const existingMs = existingExpiry ? parseInt(existingExpiry, 10) : NaN;
+            
+            if (!isReset && Number.isFinite(existingMs) && existingMs > Date.now()) {
+                // Keep existing localStorage timer (coming back from payment)
+                expiresAtMs = existingMs;
+            } else if (serverHoldExpiresAtStr && !isReset) {
+                // Fallback: use server expiration if no valid localStorage timer
+                expiresAtMs = Date.parse(serverHoldExpiresAtStr);
+            } else {
+                // Fresh start - new timer
+                expiresAtMs = Date.now() + TIMER_SECONDS * 1000;
+            }
+            
+            // Store the expiration time
+            localStorage.setItem(STORAGE_KEY, String(expiresAtMs));
             const timerValueEl = document.getElementById('hold-timer-value');
             const timerBox = timerValueEl?.closest('.hold-timer');
 
@@ -276,15 +336,36 @@
                 localStorage.removeItem(STORAGE_KEY);
             }
 
+            let timerExpired = false;
+
             function tick() {
-                if (!timerValueEl) return;
+                if (!timerValueEl || timerExpired) return;
 
                 const expiresAtMs = getExpiresAtMs();
                 const now = Date.now();
 
                 if (!expiresAtMs || expiresAtMs <= now) {
-                    timerValueEl.textContent = '15:00';
-                    timerBox?.classList.remove('hold-timer--danger');
+                    timerValueEl.textContent = '00:00';
+                    timerBox?.classList.add('hold-timer--danger');
+                    timerExpired = true;
+                    
+                    // Disable form submission
+                    const submitBtn = document.getElementById('submit-order-btn');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.remove('btn-danger');
+                        submitBtn.classList.add('btn-secondary');
+                    }
+                    
+                    // Disable all seat checkboxes
+                    document.querySelectorAll('.seat-checkbox').forEach(cb => {
+                        cb.disabled = true;
+                        cb.closest('.seat-btn')?.classList.add('disabled');
+                    });
+                    
+                    // Show expiration modal
+                    const modal = new bootstrap.Modal(document.getElementById('timerExpiredModal'));
+                    modal.show();
                     return;
                 }
 
@@ -294,10 +375,6 @@
                 if (timerBox) {
                     if (remainingSec <= 60) timerBox.classList.add('hold-timer--danger');
                     else timerBox.classList.remove('hold-timer--danger');
-                }
-
-                if (remainingSec <= 0) {
-                    clearTimer();
                 }
             }
 
@@ -361,13 +438,7 @@
                     return { ok: false, rejected: data?.rejectedSeatIds || [seatId] };
                 }
 
-                if (data.expiresAtUtc) {
-                    const ms = Date.parse(data.expiresAtUtc);
-                    if (!Number.isNaN(ms)) setExpiresAtMs(ms);
-                } else {
-                    setExpiresAtMs(Date.now() + TIMER_SECONDS * 1000);
-                }
-
+                // Don't update timer from server - keep using page load timer
                 return { ok: true };
             }
 
@@ -377,9 +448,7 @@
                     sessionId: sessionId,
                     seatIds: [seatId]
                 });
-
-                const anyChecked = document.querySelectorAll('.seat-checkbox:checked').length > 0;
-                if (!anyChecked) clearTimer();
+                // Don't clear timer - it keeps running from page load
             }
 
             document.querySelectorAll('.seat-checkbox').forEach(cb => {
@@ -415,6 +484,9 @@
                 });
             });
 
+            // Update summary on page load (for pre-selected seats)
+            updateSummary();
+            
             tick();
             setInterval(tick, 250);
 
