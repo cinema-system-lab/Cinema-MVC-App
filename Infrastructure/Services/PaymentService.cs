@@ -23,11 +23,21 @@ public class PaymentService : IPaymentService
 
     public async Task<IEnumerable<PaymentDTO>> GetAllPaymentsAsync()
     {
-        var payments = await _context.Payments
+        return await _context.Payments
+            .Include(p => p.Order)
+            .ThenInclude(o => o.User)
             .OrderByDescending(p => p.PaymentDate)
+            .Select(p => new PaymentDTO
+            {
+                Id = p.Id,
+                OrderId = p.OrderId,
+                UserId = p.Order.UserId,
+                UserEmail = p.Order.User.Email,
+                Amount = p.Amount,
+                PaymentDate = p.PaymentDate,
+                Status = p.Status
+            })
             .ToListAsync();
-            
-        return _mapper.Map<IEnumerable<PaymentDTO>>(payments);
     }
 
     public async Task<PaymentDTO> GetPaymentByIdAsync(Guid id)
