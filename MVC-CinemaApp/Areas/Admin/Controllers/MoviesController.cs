@@ -17,9 +17,18 @@ public class MoviesController : BaseAdminController
     }
 
     // GET: /Movies or /Movies/Index
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string status = "all")
     {
         var movies = await _movieService.GetAllMoviesAsync();
+    
+        movies = status switch
+        {
+            "active" => movies.Where(m => m.IsActive),
+            "inactive" => movies.Where(m => !m.IsActive),
+            _ => movies
+        };
+    
+        ViewData["CurrentStatus"] = status;
         return View(movies);
     }
 

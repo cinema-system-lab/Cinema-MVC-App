@@ -1,6 +1,7 @@
 @model IEnumerable<Core.DTOs.MovieDTO>
 @{
     ViewData["Title"] = "Movies Management";
+    var currentStatus = ViewData["CurrentStatus"]?.ToString() ?? "all";
 }
 
 <link rel="stylesheet" href="~/css/admin-movie.css" asp-append-version="true"/>
@@ -19,7 +20,7 @@
         </a>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-3 flex-wrap">
         <div class="search-container">
             <i class="bi bi-search"></i>
             <input type="text"
@@ -29,8 +30,29 @@
                    data-search-columns=".movie-title, .director-badge"
                    placeholder="Search by title or director...">
         </div>
-        <div class="text-muted small">
-            Showing <span id="visibleCount">@Model.Count()</span> movies
+        
+        <div class="d-flex gap-2 align-items-center">
+            <div class="btn-group status-filter-group" role="group" aria-label="Status filter">
+                <a asp-action="Index" 
+                   asp-route-status="all" 
+                   class="btn-filter @(currentStatus == "all" ? "active" : "")">
+                    <i class="bi bi-collection-fill"></i> All
+                </a>
+                <a asp-action="Index" 
+                   asp-route-status="active" 
+                   class="btn-filter @(currentStatus == "active" ? "active" : "")">
+                    <i class="bi bi-check-circle-fill"></i> Active
+                </a>
+                <a asp-action="Index" 
+                   asp-route-status="inactive" 
+                   class="btn-filter @(currentStatus == "inactive" ? "active" : "")">
+                    <i class="bi bi-x-circle-fill"></i> Inactive
+                </a>
+            </div>
+            
+            <div class="text-muted small">
+                Showing <span id="visibleCount">@Model.Count()</span> movies
+            </div>
         </div>
     </div>
 
@@ -39,7 +61,20 @@
             <div class="empty-state">
                 <i class="bi bi-film"></i>
                 <h5 class="text-white mb-2">No Movies Found</h5>
-                <p class="text-muted mb-0">No movies found in the database.</p>
+                <p class="text-muted mb-0">
+                    @if (currentStatus == "active")
+                    {
+                        <text>No active movies found in the database.</text>
+                    }
+                    else if (currentStatus == "inactive")
+                    {
+                        <text>No inactive movies found in the database.</text>
+                    }
+                    else
+                    {
+                        <text>No movies found in the database.</text>
+                    }
+                </p>
             </div>
         } else {
             <div class="table-responsive">
@@ -56,6 +91,7 @@
                         <th class="sortable" data-column="1">
                             Director <i class="bi bi-arrow-down-up ms-1"></i>
                         </th>
+                        <th class="text-center">Status</th>
                         <th class="text-end pe-4">Actions Management</th>
                     </tr>
                     </thead>
@@ -69,6 +105,20 @@
                                 <div class="director-badge">
                                     <i class="bi bi-person-video2 me-2"></i> @movie.Director
                                 </div>
+                            </td>
+                            <td class="text-center">
+                                @if (movie.IsActive)
+                                {
+                                    <span class="status-badge status-active">
+                                        <i class="bi bi-check-circle-fill"></i> Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-inactive">
+                                        <i class="bi bi-x-circle-fill"></i> Inactive
+                                    </span>
+                                }
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-flex justify-content-end gap-2">
