@@ -157,21 +157,26 @@
 }
 
 .custom-input-group .form-control {
-    background: transparent !important;
-    border: none !important;
-    color: white !important;
+    background: transparent;
+    border: none;
+    color: white;
     padding: 12px;
 }
 
 .custom-input-group .input-group-text {
     border: none;
     color: #6c757d;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 15px;
 }
 
 .tmdb-results-container {
-    max-height: 500px;
+    margin-top: 1rem;
+    max-height: 450px;
     overflow-y: auto;
-    padding-right: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -191,14 +196,12 @@
     border-radius: 12px;
     margin-bottom: 12px;
     padding: 12px;
-    transition: transform 0.2s, border-color 0.2s;
     text-decoration: none !important;
 }
 
 .tmdb-result-item:hover {
     background: #2b3036;
     border-color: var(--accent-green, #10b981);
-    transform: translateX(5px);
 }
 
 .tmdb-result-img {
@@ -207,6 +210,10 @@
     object-fit: cover;
     border-radius: 6px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.tmdb-result-img i {
+    color: var(--accent-green);
 }
 
 .tmdb-result-info h6 {
@@ -219,4 +226,27 @@
     color: #a0aec0;
     font-size: 0.85rem;
     line-height: 1.4;
+}
+
+.custom-input-group {
+    border: 1px solid #2d3238;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.custom-input-group .input-group-text {
+    background: transparent;
+    border: none;
+    padding-left: 1.25rem;
+    padding-right: 0.5rem;
+    color: var(--accent-green);
+    display: flex;
+    align-items: center;
+}
+
+#tmdbSearchInput:focus {
+    outline: none;
+    box-shadow: none;
 }
