@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Core.DTOs;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces.Services;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -31,10 +32,6 @@ public class SessionService : ISessionService
 
     public async Task CreateSessionAsync(SessionDTO session)
     {
-        if ((session.EndTime - session.StartTime).TotalMinutes > 300)
-        {
-            throw new InvalidOperationException("The session duration cannot exceed 5 hours.");
-        }
 
         var duration = (session.EndTime - session.StartTime).TotalMinutes;
 
@@ -66,11 +63,6 @@ public class SessionService : ISessionService
         var entity = await _context.Sessions.FindAsync(session.Id);
         if (entity == null) return;
 
-        if ((session.EndTime - session.StartTime).TotalMinutes > 300)
-        {
-            throw new InvalidOperationException("The session duration cannot exceed 5 hours.");
-        }
-
         var duration = (session.EndTime - session.StartTime).TotalMinutes;
 
         if (duration > 300)
@@ -98,7 +90,10 @@ public class SessionService : ISessionService
         if (overlapExists)
             throw new InvalidOperationException("Session overlaps with another session in the same hall");
 
-        var hasTickets = await _context.Tickets.AnyAsync(t => t.SessionId == session.Id);
+        var hasTickets = await _context.Tickets.AnyAsync(t =>
+            t.SessionId == session.Id &&
+            (t.Order.Status == OrderStatus.Paid || t.Order.Status == OrderStatus.Pending));
+        
         if (hasTickets)
             throw new InvalidOperationException("Cannot update session with sold tickets");
 
@@ -122,7 +117,10 @@ public class SessionService : ISessionService
             throw new InvalidOperationException("Cannot delete an ongoing session.");
         }
 
-        var hasTickets = await _context.Tickets.AnyAsync(t => t.SessionId == id);
+        var hasTickets = await _context.Tickets.AnyAsync(t =>
+                t.SessionId == id &&
+                (t.Order.Status == OrderStatus.Paid || t.Order.Status == OrderStatus.Pending));
+        
         if (hasTickets)
         {
             throw new InvalidOperationException("Cannot delete session with sold tickets. Please refund or cancel orders first.");
