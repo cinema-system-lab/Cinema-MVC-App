@@ -113,11 +113,6 @@ dotnet ef database update --project Infrastructure --startup-project MVC-CinemaA
 4. Run the application
 dotnet run --project MVC-CinemaApp
 
-
-The application will be available at:
-
-https://localhost:5001
-
 👥 Team
 
 The project was developed as a team effort by:
