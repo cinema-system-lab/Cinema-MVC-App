@@ -1,0 +1,93 @@
+@using Core.Constants
+@model IEnumerable<Core.DTOs.MovieDTO>
+
+@{
+    ViewData["Title"] = "Cinema Catalog";
+    var today = DateTime.Today;
+
+    var nowShowing = Model.Where(m => m.IsActive && m.ReleaseDate <= today).OrderByDescending(m => m.ReleaseDate);
+    var comingSoon = Model.Where(m => m.IsActive && m.ReleaseDate > today).OrderBy(m => m.ReleaseDate);
+    // var archived = Model.Where(m => !m.IsActive).OrderByDescending(m => m.ReleaseDate);
+}
+
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 border-bottom border-secondary border-opacity-25 pb-0 gap-3">
+        <div class="d-flex gap-4 gap-md-5 admin-nav-tabs">
+            <h1 class="nav-tab active" onclick="showSection('now', this)">Now Showing</h1>
+            <h1 class="nav-tab" onclick="showSection('soon', this)">Coming Soon</h1>
+            @* <h1 class="nav-tab" onclick="showSection('archive', this)">Archive</h1> *@
+        </div>
+    </div>
+
+    <div id="section-now" class="movie-section animate-fade">
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @if (nowShowing.Any())
+            {
+                @foreach (var movie in nowShowing)
+                {
+                    <div class="col">@await Html.PartialAsync("_MovieCard", movie)</div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5 text-muted">No movies in projection.</div>
+            }
+        </div>
+    </div>
+
+    <div id="section-soon" class="movie-section d-none animate-fade">
+        @if (comingSoon.Any())
+        {
+            @foreach (var group in comingSoon.GroupBy(m => m.ReleaseDate.Date))
+            {
+                <div class="timeline-section mb-5">
+                    <div class="timeline-date mb-3">
+                        <span class="day text-white fs-2 fw-bold">@group.Key.Day</span>
+                        <span class="month text-danger text-uppercase fw-bold ms-1">@group.Key.ToString("MMM")</span>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                            @foreach (var movie in group)
+                            {
+                                <div class="col">@await Html.PartialAsync("_MovieCard", movie)</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5 text-muted">No upcoming releases.</div>
+        }
+    </div>
+
+    @* <div id="section-archive" class="movie-section d-none animate-fade"> *@
+    @*     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4"> *@
+    @*         @if (archived.Any()) *@
+    @*         { *@
+    @*             @foreach (var movie in archived) *@
+    @*             { *@
+    @*                 <div class="col grayscale-filter"> *@
+    @*                     @await Html.PartialAsync("_MovieCard", movie) *@
+    @*                 </div> *@
+    @*             } *@
+    @*         } *@
+    @*         else *@
+    @*         { *@
+    @*             <div class="col-12 text-center py-5 text-muted">Archive is empty.</div> *@
+    @*         } *@
+    @*     </div> *@
+    @* </div> *@
+</div>
+
+@section Scripts {
+    <script>
+        function showSection(sectionId, element) {
+            document.querySelectorAll('.movie-section').forEach(s => s.classList.add('d-none'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('section-' + sectionId).classList.remove('d-none');
+            element.classList.add('active');
+        }
+    </script>
+}

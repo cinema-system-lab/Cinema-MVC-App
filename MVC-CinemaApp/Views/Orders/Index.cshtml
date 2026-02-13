@@ -1,0 +1,279 @@
+@using Core.Enums
+@model List<Core.DTOs.OrderDTO>
+
+@{
+    ViewData["Title"] = "My Orders";
+    var totalSpent = Model.Where(o => o.Status == OrderStatus.Paid).Sum(o => o.TotalPrice);
+    var pendingOrders = Model.Count(o => o.Status == OrderStatus.Pending);
+    var completedOrders = Model.Count(o => o.Status == OrderStatus.Paid);
+    var sortedOrders = Model.OrderByDescending(o => o.SessionStartTime).ToList();
+}
+
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="section-header mb-4">
+        <h1 class="section-title">
+            <i class="bi bi-ticket-perforated-fill text-danger me-3"></i>My Orders
+        </h1>
+        <p class="section-subtitle">Track and manage your movie bookings</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stats-icon"><i class="bi bi-wallet2"></i></div>
+                <div class="stats-value">₴<span id="statTotalSpent">0</span></div>
+                <div class="stats-label">Total Spent</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stats-icon"><i class="bi bi-check-circle"></i></div>
+                <div class="stats-value" id="statCompleted">0</div>
+                <div class="stats-label">Completed Orders</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stats-icon"><i class="bi bi-clock-history"></i></div>
+                <div class="stats-value" id="statPending">0</div>
+                <div class="stats-label">Pending Orders</div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMsg)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@successMsg
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] is string errorMsg)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@errorMsg
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <h3>No Orders Yet</h3>
+                    <p>Start exploring our amazing movie collection!</p>
+                    <a asp-controller="Sessions" asp-action="Schedule" class="btn btn-hero">
+                        <i class="bi bi-film me-2"></i>Browse Movies
+                    </a>
+                </div>
+            }
+            else
+            {
+                <!-- Order Filters -->
+                <div class="order-filters">
+                    <div>
+                        <label for="statusFilter">Status:</label>
+                        <select id="statusFilter" onchange="filterOrders()">
+                            <option value="all">All Orders</option>
+                            <option value="pending">Pending</option>
+                            <option value="paid">Paid</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="timeFilter">Show:</label>
+                        <select id="timeFilter" onchange="filterOrders()">
+                            <option value="recent">Recent (Last 3 months)</option>
+                            <option value="all">All Time</option>
+                            <option value="year">This Year</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sortOrder">Sort:</label>
+                        <select id="sortOrder" onchange="filterOrders()">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="price-high">Highest Price</option>
+                            <option value="price-low">Lowest Price</option>
+                        </select>
+                    </div>
+                    <span class="filter-count" id="orderCount">Showing @Model.Count orders</span>
+                </div>
+
+                <div class="orders-grid" id="ordersContainer">
+                    @foreach (var order in sortedOrders)
+                    {
+                        var statusClass = order.Status switch
+                        {
+                            OrderStatus.Paid => "status-paid",
+                            OrderStatus.Pending => "status-pending",
+                            OrderStatus.Cancelled => "status-cancelled",
+                            OrderStatus.Refunded => "status-refunded",
+                            _ => "status-unknown"
+                        };
+                        
+                        var statusIcon = order.Status switch
+                        {
+                            OrderStatus.Paid => "check-circle-fill",
+                            OrderStatus.Pending => "clock-history",
+                            OrderStatus.Cancelled => "x-circle-fill",
+                            OrderStatus.Refunded => "arrow-counterclockwise",
+                            _ => "question-circle"
+                        };
+                        
+                        <div class="order-card @statusClass" 
+                             data-status="@order.Status.ToString().ToLower()"
+                             data-date="@order.SessionStartTime.Ticks"
+                     data-created="@order.CreatedAt.Ticks"
+                             data-price="@order.TotalPrice">
+                            <div class="order-header">
+                                <div>
+                                    <h4 class="order-movie-title">@order.MovieTitle</h4>
+                                    <div class="order-meta">
+                                        <span><i class="bi bi-geo-alt"></i> @order.HallName</span>
+                                        <span><i class="bi bi-calendar3"></i> @order.SessionStartTime.ToString("dd MMM yyyy, HH:mm")</span>
+                                    </div>
+                                </div>
+                                <div class="order-status @statusClass">
+                                    <i class="bi bi-@statusIcon"></i>
+                                    <span>@order.Status</span>
+                                </div>
+                            </div>
+                            <div class="order-body">
+                                <div class="order-info-row">
+                                    <div class="info-item">
+                                        <span class="info-label">Tickets</span>
+                                        <span class="info-value">@order.Tickets.Count</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Total Price</span>
+                                        <span class="info-value price">@order.TotalPrice ₴</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-actions">
+                                <a asp-action="Details" asp-route-id="@order.Id" class="btn-order-action btn-details">
+                                    <i class="bi bi-eye"></i> View Details
+                                </a>
+
+                                @if (order.Status == OrderStatus.Pending)
+                                {
+                                    <a asp-controller="Payments"
+                                       asp-action="Checkout"
+                                       asp-route-orderId="@order.Id"
+                                       class="btn-order-action btn-pay">
+                                        <i class="bi bi-credit-card"></i> Pay Now
+                                    </a>
+
+                                    <form asp-action="Cancel"
+                                          asp-route-id="@order.Id"
+                                          method="post"
+                                          class="d-inline">
+                                        <button class="btn-order-action btn-cancel"
+                                                onclick="return confirm('Are you sure you want to cancel this order?')">
+                                            <i class="bi bi-x-circle"></i> Cancel
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterOrders() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const timeFilter = document.getElementById('timeFilter').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+
+            const allOrders = Array.from(document.querySelectorAll('.order-card'));
+            const now = new Date();
+
+            let visibleCount = 0;
+            let totalSpent = 0;
+            let completedCount = 0;
+            let pendingCount = 0;
+
+            allOrders.forEach(order => {
+                const status = order.dataset.status;
+                const price = parseFloat(order.dataset.price.replace(',', '.'));
+
+                const sessionMs = parseInt(order.dataset.date) / 10000;
+                const createdMs = parseInt(order.dataset.created) / 10000;
+
+                const netEpochDiff = 62135596800000;
+
+                const sessionDate = new Date(sessionMs - netEpochDiff);
+                const createdDate = new Date(createdMs - netEpochDiff);
+
+                // 1. Фильтр по статусу
+                let showByStatus = (statusFilter === 'all' || status === statusFilter);
+
+                // 2. Фильтр по времени
+                let showByTime = true;
+                if (timeFilter === 'recent') {
+                    const threeMonthsAgo = new Date();
+                    threeMonthsAgo.setMonth(now.getMonth() - 3);
+                    showByTime = createdDate >= threeMonthsAgo || sessionDate >= now;
+                } else if (timeFilter === 'year') {
+                    showByTime = createdDate.getFullYear() === now.getFullYear();
+                } else if (timeFilter === 'month') {
+                    // Проверка и месяца и года одновременно
+                    showByTime = createdDate.getMonth() === now.getMonth() &&
+                                 createdDate.getFullYear() === now.getFullYear();
+                } else if (timeFilter === 'all') {
+                    showByTime = true;
+                }
+
+                if (showByStatus && showByTime) {
+                    order.style.display = 'block';
+                    visibleCount++;
+
+                    // Обновляем локальную статистику для видимых заказов
+                    if (status === 'paid') {
+                        totalSpent += price;
+                        completedCount++;
+                    } else if (status === 'pending') {
+                        pendingCount++;
+                    }
+                } else {
+                    order.style.display = 'none';
+                }
+            });
+
+            // Сортировка
+            const container = document.getElementById('ordersContainer');
+            const visibleOrders = allOrders.filter(o => o.style.display === 'block');
+
+            visibleOrders.sort((a, b) => {
+                if (sortOrder === 'newest') return parseInt(b.dataset.created) - parseInt(a.dataset.created);
+                if (sortOrder === 'oldest') return parseInt(a.dataset.created) - parseInt(b.dataset.created);
+                if (sortOrder === 'price-high') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                if (sortOrder === 'price-low') return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                return 0;
+            });
+
+            visibleOrders.forEach(order => container.appendChild(order));
+
+            // Обновляем текст счетчика и КАРТОЧКИ СТАТИСТИКИ
+            document.getElementById('orderCount').textContent = `Showing ${visibleCount} of ${allOrders.length} orders`;
+            document.getElementById('statTotalSpent').textContent = totalSpent.toLocaleString('uk-UA', { minimumFractionDigits: 0 });
+            document.getElementById('statCompleted').textContent = completedCount;
+            document.getElementById('statPending').textContent = pendingCount;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            filterOrders();
+        });
+    </script>
+}
+

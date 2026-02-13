@@ -1,0 +1,22 @@
+﻿@model Core.DTOs.MovieDTO
+<div class="movie-item">
+    <a asp-controller="Movies" asp-action="Details" asp-route-id="@Model.Id" class="movie-link text-decoration-none">
+        <div class="poster-container">
+            <img src="@(string.IsNullOrEmpty(Model.PosterUrl) ? "/img/no-poster.png" : Model.PosterUrl)" class="poster-img" loading="lazy">
+            <div class="poster-overlay">
+                <span class="btn-buy-card">Buy Tickets</span>
+            </div>
+            @if (Model.AgeRestriction > 0)
+            {
+                <div class="age-tag text-white">@Model.AgeRestriction+</div>
+            }
+            <div class="rating-tag text-white">
+                <i class="bi bi-star-fill text-warning"></i> @Model.Rating.ToString("F1")
+            </div>
+        </div>
+        <div class="movie-info text-start">
+            <h3 class="movie-title">@Model.Title.ToUpper()</h3>
+            <p class="movie-genres">@Model.Genres.ToString().Replace(",", " •")</p>
+        </div>
+    </a>
+</div>

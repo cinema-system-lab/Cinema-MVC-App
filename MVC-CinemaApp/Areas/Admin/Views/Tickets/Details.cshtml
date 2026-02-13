@@ -1,0 +1,76 @@
+@model Core.DTOs.TicketDTO
+@{
+ViewData["Title"] = "Ticket Details";
+}
+
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin-ticket.css" asp-append-version="true" />
+
+<div class="container py-5">
+    <div class="mb-4">
+        <a asp-action="Index" class="back-link">
+            <i class="bi bi-chevron-left"></i> Back to My Tickets
+        </a>
+    </div>
+
+    <div class="details-card">
+        <div class="ticket-header">
+            <i class="bi bi-ticket-perforated-fill ticket-icon d-block"></i>
+            <div class="ticket-title">@Model.MovieTitle</div>
+            <div class="ticket-subtitle">E-Ticket Confirmation</div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="info-label">
+                    <i class="bi bi-hash me-1"></i> Order ID
+                </div>
+                <div class="info-value" style="font-family: monospace; font-size: 0.9rem;">
+                    @Model.OrderId
+                </div>
+
+                <div class="info-label">
+                    <i class="bi bi-door-closed me-1"></i> Cinema Hall
+                </div>
+                <div class="info-value">@Model.HallName</div>
+
+                <div class="info-label">
+                    <i class="bi bi-calendar-event me-1"></i> Showtime
+                </div>
+                <div class="info-value">
+                    <div>@Model.StartTime.ToString("dddd, MMMM dd, yyyy")</div>
+                    <div class="text-muted small">@Model.StartTime.ToString("HH:mm")</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="seat-display mb-3">
+                    <div class="seat-label">
+                        <i class="bi bi-grid-3x3-gap me-1"></i> Seat
+                    </div>
+                    <div class="seat-value">
+                        Row @Model.RowNumber, Seat @Model.SeatNumber
+                    </div>
+                </div>
+
+                <div class="price-display">
+                    <div class="price-label">
+                        <i class="bi bi-ticket-perforated me-1"></i> Ticket Price
+                    </div>
+                    <div class="price-value">₴@Model.Price</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="qr-placeholder mt-4">
+            <i class="bi bi-qr-code fs-1 opacity-25 d-block mb-2"></i>
+            <p class="mb-0 small">Present this ticket at the cinema entrance</p>
+        </div>
+        
+        <div class="d-flex gap-3 mt-4 pt-3" style="border-top: 1px solid var(--admin-border);">
+            <a asp-action="Index" class="btn-action btn-soft-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Tickets
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+﻿/* Стили для детальной страницы фильма */
+
+.movie-hero {
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+}
+
+/* Стили вкладок дат */
+.nav-pills .nav-link {
+    transition: all 0.3s ease;
+}
+
+    .nav-pills .nav-link.active {
+        background-color: #dc3545 !important;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+/* Карточки времени сеансов */
+.session-time-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+    .session-time-card:hover {
+        border-color: #dc3545 !important;
+        transform: translateY(-5px);
+        background-color: #1a1a1a !important;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .session-time-card .text-danger {
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+/* Липкая панель деталей */
+.sticky-top {
+    z-index: 10;
+}

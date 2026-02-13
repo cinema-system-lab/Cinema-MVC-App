@@ -1,0 +1,98 @@
+@using Core.Enums
+@model Core.DTOs.OrderDTO
+
+@{
+    ViewData["Title"] = "Payment Successful";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <div class="d-inline-flex align-items-center justify-content-center bg-success rounded-circle shadow-lg mb-4"
+                     style="width: 90px; height: 90px;">
+                    <i class="bi bi-check-lg text-white fs-1"></i>
+                </div>
+                <h1 class="text-white fw-bold display-5">Payment Successful!</h1>
+                <p class="text-muted fs-5">Your tickets are confirmed. We've sent the details to your email.</p>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-lg mb-5 overflow-hidden">
+                <div class="card-header bg-black py-3 border-secondary">
+                    <h5 class="text-white-50 text-uppercase small m-0 letter-spacing-1">Movie Ticket Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row align-items-center mb-4">
+                        <div class="col-md-7">
+                            <h2 class="text-white fw-bold mb-3">@Model.MovieTitle</h2>
+                            <div class="d-flex flex-wrap gap-3">
+                                <span class="text-white-50 small">
+                                    <i class="bi bi-calendar3 me-1 text-primary"></i>
+                                    @Model.SessionStartTime.ToLocalTime().ToString("ddd, dd MMM yyyy")
+                                </span>
+                                <span class="text-white-50 small">
+                                    <i class="bi bi-clock me-1 text-primary"></i>
+                                    @Model.SessionStartTime.ToLocalTime().ToString("HH:mm")
+                                </span>
+                                <span class="text-white-50 small">
+                                    <i class="bi bi-geo-alt me-1 text-primary"></i>
+                                    @Model.HallName
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                            <div class="p-3 bg-black rounded-3 border border-secondary d-inline-block shadow-sm">
+                                <div class="small text-muted mb-1 text-uppercase">Total Amount Paid</div>
+                                <div class="h3 m-0 text-success fw-bold">@Model.TotalPrice ₴</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive rounded-3 overflow-hidden border border-secondary">
+                        <table class="table table-dark table-borderless align-middle mb-0">
+                            <thead class="bg-black text-muted small text-uppercase">
+                                <tr>
+                                    <th class="ps-4">Row</th>
+                                    <th>Seat</th>
+                                    <th>Type</th>
+                                    <th class="text-end pe-4">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ticket in Model.Tickets)
+                                {
+                                    <tr class="border-top border-secondary">
+                                        <td class="ps-4 fw-bold">@ticket.RowNumber</td>
+                                        <td class="fw-bold text-primary">@ticket.SeatNumber</td>
+                                        <td>
+                                            @if (ticket.SeatType == SeatType.Premium)
+                                            {
+                                                <span class="badge bg-warning text-dark px-2">
+                                                    <i class="bi bi-gem me-1"></i>Premium
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary px-2">Standard</span>
+                                            }
+                                        </td>
+                                        <td class="text-end pe-4">@ticket.Price ₴</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-light btn-lg px-5 rounded-pill shadow-sm">
+                    <i class="bi bi-collection-play me-2"></i>View My Orders
+                </a>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-danger btn-lg px-5 rounded-pill shadow-sm">
+                    <i class="bi bi-house-door me-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

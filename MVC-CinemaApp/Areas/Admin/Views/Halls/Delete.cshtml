@@ -1,0 +1,61 @@
+@model Core.DTOs.HallDTO
+@{
+    ViewData["Title"] = "Delete Hall";
+}
+
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-hall.css" asp-append-version="true"/>
+
+<div class="container delete-container">
+    <div class="delete-card">
+        <div class="warning-icon">
+            <i class="bi bi-exclamation-octagon"></i>
+        </div>
+
+        <h3 class="fw-bold text-white mb-2">Confirm Hall Deletion</h3>
+        <p class="text-muted mb-4">You are about to permanently remove this cinema hall. This action cannot be
+            undone.</p>
+
+        <div class="hall-info-box">
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-door-closed"></i> Hall Name
+                </span>
+                <span class="info-value">@Model.Name</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-badge-3d"></i> Hall Type
+                </span>
+                <span class="type-badge">
+                    <i class="bi bi-badge-3d"></i> @Model.Type
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-fingerprint"></i> UUID
+                </span>
+                <span class="info-value"
+                      style="font-size: 0.85rem; font-family: monospace; color: var(--admin-text-muted);">@Model.Id</span>
+            </div>
+        </div>
+
+        <div class="warning-message">
+            <i class="bi bi-shield-exclamation"></i>
+            <strong>Warning:</strong> Deleting this hall will also remove all associated seats and may affect scheduled
+            sessions.
+        </div>
+
+        <form asp-action="DeleteConfirmed" method="post" class="d-flex align-items-center justify-content-center gap-3">
+            <input type="hidden" asp-for="Id"/>
+
+            <a asp-action="Index" class="btn-action btn-cancel">
+                <i class="bi bi-x-circle"></i> Cancel
+            </a>
+
+            <button type="submit" class="btn-delete-confirm shadow-sm">
+                <i class="bi bi-trash3-fill"></i> Permanently Delete
+            </button>
+        </form>
+    </div>
+</div> 

@@ -1,0 +1,162 @@
+@model IEnumerable<Core.DTOs.MovieDTO>
+@{
+    ViewData["Title"] = "Movies Management";
+    var currentStatus = ViewData["CurrentStatus"]?.ToString() ?? "all";
+}
+
+<link rel="stylesheet" href="~/css/admin-movie.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true"/>
+
+<div class="container-fluid py-2">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold m-0 text-white">Movie Library</h4>
+            <p class="text-muted small m-0">Manage cinema content catalog</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Tmdb" asp-action="Index" class="btn-action btn-soft-info shadow-sm">
+                <i class="bi bi-cloud-download-fill"></i> TMDB Import
+            </a>
+            <a asp-action="Create" class="btn-action btn-soft-success shadow-sm">
+                <i class="bi bi-plus-circle-fill"></i> Add New Movie
+            </a>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-3 flex-wrap">
+        <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text"
+                   id="movieSearch"
+                   class="search-input"
+                   data-search-target="movieTableBody"
+                   data-search-columns=".movie-title, .director-badge"
+                   placeholder="Search by title or director...">
+        </div>
+        
+        <div class="d-flex gap-2 align-items-center">
+            <div class="btn-group status-filter-group" role="group" aria-label="Status filter">
+                <a asp-action="Index" 
+                   asp-route-status="all" 
+                   class="btn-filter @(currentStatus == "all" ? "active" : "")">
+                    <i class="bi bi-collection-fill"></i> All
+                </a>
+                <a asp-action="Index" 
+                   asp-route-status="active" 
+                   class="btn-filter @(currentStatus == "active" ? "active" : "")">
+                    <i class="bi bi-check-circle-fill"></i> Active
+                </a>
+                <a asp-action="Index" 
+                   asp-route-status="inactive" 
+                   class="btn-filter @(currentStatus == "inactive" ? "active" : "")">
+                    <i class="bi bi-x-circle-fill"></i> Inactive
+                </a>
+            </div>
+            
+            <div class="text-muted small">
+                Showing <span id="visibleCount">@Model.Count()</span> movies
+            </div>
+        </div>
+    </div>
+
+    <div class="movie-card">
+        @if (Model == null || !Model.Any()) {
+            <div class="empty-state">
+                <i class="bi bi-film"></i>
+                <h5 class="text-white mb-2">No Movies Found</h5>
+                <p class="text-muted mb-0">
+                    @if (currentStatus == "active")
+                    {
+                        <text>No active movies found in the database.</text>
+                    }
+                    else if (currentStatus == "inactive")
+                    {
+                        <text>No inactive movies found in the database.</text>
+                    }
+                    else
+                    {
+                        <text>No movies found in the database.</text>
+                    }
+                </p>
+            </div>
+        } else {
+            <div class="table-responsive">
+                <table class="table table-admin"
+                       id="movieTable"
+                       data-pagination="true"
+                       data-pagination-items="10"
+                       data-sort-enabled="true">
+                    <thead>
+                    <tr>
+                        <th class="ps-4 sortable" data-column="0">
+                            Title <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="1">
+                            Director <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end pe-4">Actions Management</th>
+                    </tr>
+                    </thead>
+                    <tbody id="movieTableBody">
+                    @foreach (var movie in Model) {
+                        <tr class="movie-row">
+                            <td class="ps-4">
+                                <div class="movie-title">@movie.Title</div>
+                            </td>
+                            <td>
+                                <div class="director-badge">
+                                    <i class="bi bi-person-video2 me-2"></i> @movie.Director
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                @if (movie.IsActive)
+                                {
+                                    <span class="status-badge status-active">
+                                        <i class="bi bi-check-circle-fill"></i> Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-inactive">
+                                        <i class="bi bi-x-circle-fill"></i> Inactive
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Details" asp-route-id="@movie.Id" class="btn-action btn-soft-info">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
+
+                                    <a asp-action="Edit" asp-route-id="@movie.Id"
+                                       class="btn-action btn-soft-warning">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@movie.Id"
+                                       class="btn-action btn-soft-danger">
+                                        <i class="bi bi-trash3"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                <div id="noResults" class="d-none">
+                    <i class="bi bi-search"></i>
+                    <p>No matches found for your search.</p>
+                </div>
+            </div>
+
+            @await Html.PartialAsync("_Pagination")
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/pagination.js" asp-append-version="true"></script>
+    <script src="~/js/search-sort.js" asp-append-version="true"></script>
+}

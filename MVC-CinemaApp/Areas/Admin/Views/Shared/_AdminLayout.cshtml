@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Cinema Admin</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark navbar-admin">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                    CINEMA<span class="text-primary text-opacity-75">ADMIN</span>
+                </a>
+
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse" id="adminNavbar">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link px-3 mx-1" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                <i class="bi bi-grid-1x2-fill me-2 small"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-area="Admin" asp-controller="Movies" asp-action="Index">Movies</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-area="Admin" asp-controller="Halls" asp-action="Index">Halls</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-area="Admin" asp-controller="Sessions" asp-action="Index">Sessions</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-area="Admin" asp-controller="Tickets" asp-action="Index">Tickets</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-area="Admin" asp-controller="Payments" asp-action="Index">Payments</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-area="Admin" asp-controller="Orders" asp-action="Index">Orders</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 mx-1" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-arrow-up-right-circle me-2 small"></i>View Site
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="navbar-nav align-items-center">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item me-3 d-none d-md-block">
+                                <div class="admin-badge font-monospace">
+                                    <span class="text-primary me-1">●</span> @User.Identity.Name
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-logout shadow-none">
+                                        <span>Sign Out</span>
+                                        <i class="bi bi-box-arrow-right"></i>
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container main-content">
+        <main role="main" class="pb-5">
+            <div class="container mt-4">
+                @if (TempData["SuccessMessage"] != null || TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show bg-dark border-success text-success shadow-lg mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                            <div>
+                                <strong>Success!</strong> @(TempData["SuccessMessage"] ?? TempData["Success"])
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null || TempData["Error"] != null || !ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show bg-dark border-danger text-danger shadow-lg mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                            <div>
+                                <strong>Attention!</strong> @(TempData["ErrorMessage"] ?? TempData["Error"])
+                                <div asp-validation-summary="All" class="small mt-1 text-white-50"></div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            </div>
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="py-4 mt-auto">
+        <div class="container text-center text-muted small">
+            &copy; @DateTime.Now.Year — <span class="text-light opacity-50 fw-medium">Cinema Admin Panel</span>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

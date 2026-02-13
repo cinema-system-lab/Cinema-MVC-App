@@ -1,0 +1,128 @@
+@using Core.Constants
+@using Cinema_MVC_App.Models;
+@model MovieDetailsVM
+
+@{
+    ViewData["Title"] = Model.Movie.Title;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/client/movie-details.css" asp-append-version="true" />
+}
+
+<div class="movie-hero" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.4), #000), url('@Model.Movie.PosterUrl'); background-size: cover; background-position: center;">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <img src="@Model.Movie.PosterUrl" class="img-fluid rounded-4 shadow-lg d-none d-md-block" alt="@Model.Movie.Title">
+            </div>
+            <div class="col-md-9 text-white mt-4 mt-md-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary rounded-pill">@Model.Movie.AgeRestriction+</span>
+                    <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> @Model.Movie.Rating.ToString("F1")</span>
+                </div>
+                <h1 class="display-3 fw-bold mb-3">@Model.Movie.Title.ToUpper()</h1>
+                <p class="fs-5 text-light opacity-75">@Model.Movie.Genres.ToString().Replace(",", " •")</p>
+
+                @if (!string.IsNullOrEmpty(Model.Movie.TrailerUrl))
+                {
+                    <a href="@Model.Movie.TrailerUrl" target="_blank" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="bi bi-play-fill"></i> WATCH TRAILER
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h3 class="fw-bold mb-4 border-start border-danger border-4 ps-3">SHOWTIMES</h3>
+
+            @if (Model.SessionsByDate.Any())
+            {
+                <ul class="nav nav-pills mb-4 bg-dark p-2 rounded-4 d-inline-flex" id="pills-tab" role="tablist">
+                    @{
+                        int dayIdx = 0;
+                    }
+                    @foreach (var date in Model.SessionsByDate.Keys)
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link @(dayIdx == 0 ? "active" : "") text-white rounded-3 px-4 py-2"
+                                    id="pill-@dayIdx" data-bs-toggle="pill" data-bs-target="#tab-@dayIdx" type="button">
+                                <div class="fw-bold">@date.ToString("dd")</div>
+                                <div class="small opacity-50 text-uppercase">@date.ToString("MMM")</div>
+                            </button>
+                        </li>
+                        dayIdx++;
+                    }
+                </ul>
+
+                <div class="tab-content" id="pills-tabContent">
+                    @{
+                        dayIdx = 0;
+                    }
+                    @foreach (var entry in Model.SessionsByDate)
+                    {
+                        <div class="tab-pane fade @(dayIdx == 0 ? "show active" : "")" id="tab-@dayIdx">
+                            <div class="row g-3">
+                                @foreach (var session in entry.Value)
+                                {
+                                    Model.HallNames.TryGetValue(session.HallId, out var hallName);
+
+                                    <div class="col-md-4 col-6">
+                                        <a asp-controller="Tickets"
+                                           asp-action="Book"
+                                           asp-route-sessionId="@session.Id"
+                                           asp-route-reset="true"
+                                           class="text-decoration-none">
+                                            <div class="session-time-card p-3 rounded-4 border border-secondary text-center bg-dark text-white shadow-sm">
+                                                <div class="h4 fw-bold mb-1">@session.StartTime.ToString("HH:mm")</div>
+                                                <div class="small text-muted">@(hallName ?? "Standard Hall")</div>
+                                                <div class="text-danger mt-2 fw-bold text-uppercase">Buy Tickets</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        dayIdx++;
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="p-5 text-center bg-dark rounded-4 border border-secondary">
+                    <i class="bi bi-calendar-x display-4 text-muted"></i>
+                    <p class="mt-3 text-muted">No sessions available at the moment.</p>
+                </div>
+            }
+
+            <div class="mt-5">
+                <h4 class="fw-bold mb-3 text-uppercase">Synopsis</h4>
+                <p class="text-muted fs-5 lh-base">@Model.Movie.Description</p>
+                <p class="text-muted"><strong>Cast:</strong> @Model.Movie.Actors</p>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="bg-dark p-4 rounded-4 border border-secondary shadow-sm sticky-top" style="top: 100px;">
+                <h5 class="fw-bold mb-4">MOVIE DETAILS</h5>
+                <div class="mb-3 d-flex justify-content-between">
+                    <span class="text-muted small">Director:</span>
+                    <span class="text-white fw-bold">@Model.Movie.Director</span>
+                </div>
+                <div class="mb-3 d-flex justify-content-between">
+                    <span class="text-muted small">Duration:</span>
+                    <span class="text-white fw-bold">@Model.Movie.DurationMinutes min.</span>
+                </div>
+                <div class="mb-4 d-flex justify-content-between">
+                    <span class="text-muted small">Release Date:</span>
+                    <span class="text-white fw-bold">@Model.Movie.ReleaseDate.ToString("MMMM dd, yyyy")</span>
+                </div>
+                @* АДМИН-БЛОК УДАЛЕН *@
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,205 @@
+﻿@model List<Core.DTOs.TMDB.TmdbMovieDto>
+@using Core.Enums
+
+@{
+    ViewData["Title"] = "TMDB Import";
+    var searchQuery = ViewBag.SearchQuery ?? "";
+    var totalResults = ViewBag.TotalResults ?? 0;
+}
+
+@functions {
+    GenreType MapTmdbGenresToLocal(List<Core.DTOs.TMDB.TmdbGenreDto>? tmdbGenres)
+    {
+        if (tmdbGenres == null || !tmdbGenres.Any())
+            return GenreType.None;
+
+        var genreMap = new Dictionary<int, GenreType>
+        {
+            { 28, GenreType.Action },
+            { 18, GenreType.Drama },
+            { 35, GenreType.Comedy },
+            { 27, GenreType.Horror },
+            { 878, GenreType.SciFi },
+            { 99, GenreType.Documentary },
+            { 53, GenreType.Thriller },
+            { 14, GenreType.Fantasy },
+            { 16, GenreType.Animation },
+            { 12, GenreType.Adventure },
+            { 80, GenreType.Crime },
+            { 10751, GenreType.Family },
+            { 9648, GenreType.Mystery },
+            { 10749, GenreType.Romance },
+            { 37, GenreType.Western },
+            { 10752, GenreType.War },
+            { 36, GenreType.History },
+            { 10402, GenreType.Music }
+        };
+
+        GenreType mappedGenres = GenreType.None;
+        foreach (var g in tmdbGenres)
+        {
+            if (genreMap.TryGetValue(g.Id, out var genreValue))
+            {
+                mappedGenres |= genreValue;
+            }
+        }
+
+        return mappedGenres;
+    }
+}
+
+<link rel="stylesheet" href="~/css/admin-movie.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/admin-tmdb.css" asp-append-version="true" />
+
+<div class="container-fluid py-2">
+    <div class="mb-4 d-flex justify-content-between align-items-end">
+        <div>
+            <h4 class="fw-bold m-0 text-white">TMDB Import</h4>
+            <p class="text-muted small m-0">Search and import movies from The Movie Database</p>
+        </div>
+        <a asp-controller="Movies" asp-action="Index" class="text-muted small text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Back to Library
+        </a>
+    </div>
+
+    <div class="movie-card mb-4">
+        <form asp-action="Index" method="get" class="p-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-8 col-md-7">
+                    <label for="searchQuery" class="form-label text-white">Search Movie</label>
+                    <div class="search-container">
+                        <i class="bi bi-search"></i>
+                        <input type="text"
+                               name="searchQuery"
+                               id="searchQuery"
+                               class="search-input"
+                               value="@searchQuery"
+                               placeholder="Enter movie name (e.g. Matrix, Inception)..." />
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-5">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn-action btn-soft-success flex-fill">
+                            <i class="bi bi-cloud-download"></i> Search
+                        </button>
+                        <a asp-action="Index" class="btn-action btn-soft-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-white small">
+            <strong>@ViewBag.Title</strong>
+            @if (totalResults > 0)
+            {
+                <span class="text-muted ms-2">(@totalResults total results)</span>
+            }
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="movie-card">
+            <div class="empty-state">
+                <i class="bi bi-cloud-download"></i>
+                <h5 class="text-white mb-2">No Results Found</h5>
+                <p class="text-muted mb-0">
+                    @if (string.IsNullOrEmpty(searchQuery))
+                    {
+                        <span>Use the search bar above to find movies from TMDB</span>
+                    }
+                    else
+                    {
+                        <span>No movies found for "@searchQuery". Try a different search term.</span>
+                    }
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="tmdb-grid">
+            @foreach (var movie in Model)
+            {
+                <div class="tmdb-movie-card">
+                    <div class="tmdb-poster-container">
+                        @if (!string.IsNullOrEmpty(movie.FullPosterUrl))
+                        {
+                            <img src="@movie.FullPosterUrl"
+                                 alt="@movie.Title"
+                                 loading="lazy"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'tmdb-no-poster\'><i class=\'bi bi-image fs-1\'></i><span class=\'mt-2\'>No Image</span></div>';" />
+                        }
+                        else
+                        {
+                            <div class="tmdb-no-poster">
+                                <i class="bi bi-image fs-1"></i>
+                                <span class="mt-2">No Image</span>
+                            </div>
+                        }
+
+                        <div class="tmdb-hover-overlay">
+                            <div class="tmdb-hover-title">@movie.Title</div>
+
+                            <div class="tmdb-hover-meta">
+                                @if (!string.IsNullOrEmpty(movie.ReleaseDate))
+                                {
+                                    var year = DateTime.TryParse(movie.ReleaseDate, out var date) ? date.Year.ToString() : movie.ReleaseDate.Split('-').FirstOrDefault();
+                                    <span class="tmdb-hover-year">
+                                        <i class="bi bi-calendar3 me-1"></i>@year
+                                    </span>
+                                }
+                                @if (movie.VoteAverage > 0)
+                                {
+                                    <span class="tmdb-hover-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        @movie.VoteAverage.ToString("F1")
+                                    </span>
+                                }
+                            </div>
+
+                            @{
+                                var mappedGenres = MapTmdbGenresToLocal(movie.Genres);
+                                var genresList = Enum.GetValues<GenreType>()
+                                    .Where(g => g != GenreType.None && mappedGenres.HasFlag(g))
+                                    .ToList();
+                            }
+                            @if (genresList.Any())
+                            {
+                                <div class="tmdb-hover-genres mt-2 mb-2">
+                                    @foreach (var genre in genresList.Take(3))
+                                    {
+                                        <span class="badge bg-secondary me-1">@genre</span>
+                                    }
+                                    @if (genresList.Count > 3)
+                                    {
+                                        <span class="badge bg-secondary">+@(genresList.Count - 3)</span>
+                                    }
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(movie.Overview))
+                            {
+                                <div class="tmdb-hover-overview">
+                                    @movie.Overview
+                                </div>
+                            }
+
+                            <a asp-controller="Movies"
+                               asp-action="CreateFromTmdb"
+                               asp-route-tmdbId="@movie.Id"
+                               class="tmdb-hover-btn">
+                                <i class="bi bi-download"></i> Import This
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,141 @@
+@using Core.Enums
+@model Core.DTOs.OrderDTO
+
+@{
+    ViewData["Title"] = "Order Details";
+    bool isPaid = Model.Status == OrderStatus.Paid;
+    bool isPending = Model.Status == OrderStatus.Pending;
+}
+
+<div class="container py-4">
+    @if (TempData["ErrorMessage"] is string errorMsg)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@errorMsg
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card bg-dark border-secondary shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div>
+                    <h2 class="mb-3 text-white fw-bold">Order #@Model.Id.ToString().Substring(0, 8)</h2>
+                    <p class="mb-1 text-white"><i class="bi bi-film me-2 text-danger"></i><strong>Movie:</strong> @Model.MovieTitle</p>
+                    <p class="mb-1 text-white-50"><i class="bi bi-geo-alt me-2"></i><strong>Hall:</strong> @Model.HallName</p>
+                    <p class="mb-1 text-white-50">
+                        <i class="bi bi-calendar3 me-2"></i><strong>Session:</strong> @Model.SessionStartTime.ToString("dd MMM yyyy, HH:mm")
+                    </p>
+                </div>
+                <div class="text-end">
+                    @{
+                        var statusClass = Model.Status switch
+                        {
+                            OrderStatus.Paid => "bg-success",
+                            OrderStatus.Pending => "bg-warning text-dark",
+                            OrderStatus.Cancelled => "bg-danger",
+                            OrderStatus.Refunded => "bg-info",
+                            _ => "bg-secondary"
+                        };
+                    }
+                    <span class="badge rounded-pill @statusClass px-3 py-2 mb-2">@Model.Status</span>
+                    <p class="mb-0 text-success fw-bold fs-4">@Model.TotalPrice ₴</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-dark border-secondary shadow-sm">
+        <div class="card-body p-4">
+            <h4 class="mb-4 text-white"><i class="bi bi-ticket-perforated me-2"></i>Your Tickets</h4>
+
+            @if (!Model.Tickets.Any())
+            {
+                <div class="text-center py-4">
+                    <i class="bi bi-emoji-frown fs-1 text-muted"></i>
+                    <p class="text-muted mt-2">No tickets found for this order.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead class="text-muted small text-uppercase">
+                            <tr>
+                                <th scope="col" class="border-0 ps-4">Seat Info</th>
+                                <th scope="col" class="border-0">Type</th>
+                                <th scope="col" class="border-0 text-end pe-4">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in Model.Tickets)
+                            {
+                                <tr class="@(isPaid ? "clickable-row" : "opacity-50")"
+                                    data-href="@(isPaid? Url.Action("Details", "Tickets", new { orderId = Model.Id, sessionId = t.SessionId, seatId = t.SeatId }) : "")"
+                                    style="@(isPaid ? "cursor: pointer;" : "cursor: not-allowed;")">
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-white">Row @t.RowNumber, Seat @t.SeatNumber</div>
+                                        <div class="small @(isPaid ? "text-muted" : "text-danger")">
+                                            @(isPending ? "Pay to unlock ticket" : isPaid ? "Tap to view e-ticket" : "")
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (t.SeatType == SeatType.Premium)
+                                        {
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Premium</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary opacity-75">Standard</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <span class="text-success fw-bold">@t.Price ₴</span>
+                                        @if (isPaid)
+                                        {
+                                            <i class="bi bi-chevron-right ms-2 text-muted small"></i>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <div class="d-flex justify-content-between mt-4 pt-3 border-top border-secondary">
+                <a asp-action="Index" class="btn btn-outline-light rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Back to History
+                </a>
+
+                @if (Model.Status == OrderStatus.Pending)
+                {
+                    <div class="d-flex gap-2">
+                        <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-inline">
+                            <button class="btn btn-outline-danger rounded-pill px-4" onclick="return confirm('Are you sure?')">Cancel</button>
+                        </form>
+                        <a asp-controller="Payments" asp-action="Checkout" asp-route-orderId="@Model.Id" class="btn btn-success rounded-pill px-4">
+                            <i class="bi bi-credit-card me-2"></i>Pay Now
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll(".clickable-row");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    const href = row.dataset.href;
+                    if (href) {
+                        window.location.href = href;
+                    }
+                });
+            });
+        });
+    </script>
+}

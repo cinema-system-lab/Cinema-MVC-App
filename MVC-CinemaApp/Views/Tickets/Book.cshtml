@@ -1,0 +1,505 @@
+@using Core.Enums
+@model Cinema_MVC_App.Models.SeatSelectionVM
+
+@{
+    ViewData["Title"] = "Choose seats";
+    var premiumPrice = Model.BasePrice * 1.5m;
+    var holdExpiresAtUtc = ViewBag.HoldExpiresAtUtc as DateTime?;
+    var userHeldSeatIds = ViewBag.UserHeldSeatIds as int[] ?? Array.Empty<int>();
+    var isReset = ViewBag.IsReset as bool? ?? false;
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card bg-dark text-white border-secondary shadow-sm">
+                <div class="card-body">
+                    <div class="mb-3 text-center">
+                        @if (!string.IsNullOrEmpty(Model.PosterUrl))
+                        {
+                            <img src="@Model.PosterUrl" alt="@Model.MovieTitle" class="img-fluid rounded-3 mb-3"/>
+                        }
+                        <h3 class="fw-bold text-uppercase">@Model.MovieTitle</h3>
+                        <p class="mb-1 text-muted">
+                            <i class="bi bi-calendar-event me-1"></i>
+                            @Model.StartTime.ToString("dd MMM yyyy, HH:mm")
+                        </p>
+                        <p class="mb-1 text-muted">
+                            <i class="bi bi-geo-alt-fill me-1"></i>
+                            @Model.HallName (@Model.HallType)
+                        </p>
+                        <p class="mb-0 text-success fw-semibold">
+                            <i class="bi bi-ticket-perforated-fill me-1"></i>
+                            Standard: @Model.BasePrice ₴
+                        </p>
+                        <p class="mb-0 text-warning fw-semibold">
+                            <i class="bi bi-star-fill me-1"></i>
+                            Premium: @premiumPrice ₴
+                        </p>
+                    </div>
+
+                    <hr class="border-secondary"/>
+
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-3">Legend</h6>
+                        <div class="d-flex flex-column gap-2 small">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="seat-box bg-success"></span> Standard Available
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="seat-box bg-warning"></span> Premium Available
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="seat-box bg-secondary"></span> Taken
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="seat-box border border-info bg-info-subtle"></span> Selected
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary"/>
+
+                    <div id="selection-summary">
+                        <div class="d-flex align-items-start justify-content-between gap-3">
+                            <h6 class="text-uppercase text-muted mb-2">Your Selection</h6>
+
+                            <div class="hold-timer text-end" aria-live="polite">
+                                <div class="hold-timer__label">Time left</div>
+                                <div class="hold-timer__value" id="hold-timer-value">--:--</div>
+                            </div>
+                        </div>
+
+                        <div id="selected-seats-list" class="small text-white-50 mb-2">No seats selected</div>
+                        <div class="fw-bold text-success fs-5">Total: <span id="total-price">0</span> ₴</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card bg-dark text-white border-secondary shadow-sm">
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] is string errorMsg)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @errorMsg
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <h4 class="fw-bold mb-3 text-uppercase">Choose your seats</h4>
+                    <p class="text-muted small mb-4">
+                        Click on available seats to add them to your order.
+                    </p>
+
+                    <div class="seat-grid"> <div class="screen-element">SCREEN</div> <div class="d-flex flex-column">
+                        </div>
+                    </div>
+
+                    <form asp-controller="Payments" asp-action="CreateFromSeats" method="post" id="seat-selection-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="SessionId" name="SessionId"/>
+
+                        <div class="seats-grid mb-4">
+                            @foreach (var rowGroup in Model.SeatsByRow.OrderBy(g => g.Key))
+                            {
+                                <div class="seat-row mb-2">
+                                    <div class="seat-row-label fw-semibold">
+                                        Row @rowGroup.Key
+                                    </div>
+
+                                    <div class="seat-row-seats d-flex flex-wrap justify-content-center gap-2">
+                                        @foreach (var seat in rowGroup.OrderBy(s => s.SeatNumber))
+                                        {
+                                            var isOccupied = Model.OccupiedSeatIds.Contains(seat.Id);
+                                            var isUserHeld = userHeldSeatIds.Contains(seat.Id);
+                                            var isPremium = seat.Type == SeatType.Premium;
+                                            var seatPrice = Model.GetSeatPrice(seat);
+
+                                            if (isOccupied)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-sm btn-secondary seat-btn"
+                                                        disabled
+                                                        title="Seat taken">
+                                                    @seat.SeatNumber
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                var btnClass = isPremium ? "btn-warning" : "btn-success";
+                                                var selectedClass = isUserHeld ? "selected" : "";
+                                                var seatTitle = isPremium ? $"Premium - {seatPrice} ₴" : $"Standard - {seatPrice} ₴";
+
+                                                <label class="btn btn-sm @btnClass seat-btn mb-0 @selectedClass" title="@seatTitle">
+                                                    <input type="checkbox"
+                                                           name="SeatIds"
+                                                           value="@seat.Id"
+                                                           data-price="@seatPrice"
+                                                           data-row="@seat.RowNumber"
+                                                           data-seat="@seat.SeatNumber"
+                                                           data-type="@(isPremium ? "Premium" : "Standard")"
+                                                           autocomplete="off"
+                                                           @(isUserHeld ? "checked" : "")
+                                                           class="d-none seat-checkbox"/>
+                                                    <span>@seat.SeatNumber</span>
+                                                </label>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-controller="Movies"
+                               asp-action="Details"
+                               asp-route-id="@Model.MovieId"
+                               class="btn btn-outline-secondary">
+                                Back
+                            </a>
+
+                            <button type="submit" class="btn btn-danger px-4 fw-bold" id="submit-order-btn">
+                                Continue to payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Timer Expired Modal -->
+<div class="modal fade" id="timerExpiredModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="timerExpiredLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-warning">
+            <div class="modal-body text-center py-5">
+                <i class="bi bi-clock-history text-warning display-1 mb-3"></i>
+                <h4 class="text-white mb-3">Time's Up!</h4>
+                <p class="text-muted mb-4">
+                    Your seat reservation time has expired. Please start again to select your seats.
+                </p>
+                <a asp-controller="Movies" asp-action="Details" asp-route-id="@Model.MovieId" class="btn btn-warning px-4">
+                    <i class="bi bi-arrow-repeat me-2"></i>Start Again
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .seat-box { width: 18px; height: 18px; border-radius: 4px; display: inline-block; }
+    
+    .seat-btn {
+        width: 38px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease-in-out;
+        margin-bottom: 0 !important;
+    }
+
+    .seat-btn.selected {
+        background-color: #0dcaf0 !important;
+        color: #000;
+        border: 2px solid #0dcaf0;
+    }
+    
+    .bg-info-subtle { background-color: rgba(13, 202, 240, 0.3); }
+    
+    .screen-element {
+        display: block;
+        width: calc(100% - 60px);
+        margin: 0 0 30px 60px;
+        padding: 5px 0;
+
+        text-align: center;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
+        border-top: 3px solid rgba(255, 255, 255, 0.5);
+        border-radius: 50% 50% 0 0 / 20px 20px 0 0;
+        color: #adb5bd;
+        font-size: 0.85rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        box-shadow: 0 -10px 20px -5px rgba(255, 255, 255, 0.1);
+    }
+
+    .seats-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+
+        padding-left: 60px;
+    }
+
+    .seat-row {
+        position: relative;
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .seat-row-label {
+        position: absolute;
+        right: 100%;
+        top: 0;
+        height: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+
+        padding-right: 25px;
+        width: 100px;
+
+        white-space: nowrap;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        (function () {
+            const form = document.getElementById('seat-selection-form');
+
+            const sessionId = @Model.SessionId;
+
+            const TIMER_SECONDS = 3 * 60;  // 3 minutes for testing
+
+            const STORAGE_KEY = `seatSelectionTimerExpiresAtMs:${sessionId}`;
+            
+            // Server-provided hold expiration (if user has held seats)
+            const serverHoldExpiresAtStr = '@(holdExpiresAtUtc?.ToString("o") ?? "")';
+            const isReset = @(isReset ? "true" : "false");
+            
+            if (isReset) {
+                // Fresh start from Movie Details - clear old timer
+                localStorage.removeItem(STORAGE_KEY);
+                
+                // Remove reset parameter from URL to prevent re-triggering on browser back
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('reset')) {
+                    url.searchParams.delete('reset');
+                    window.history.replaceState({}, '', url.toString());
+                }
+            }
+
+            // Determine the timer expiration
+            let expiresAtMs;
+            
+            // Check localStorage first (source of truth for navigation)
+            const existingExpiry = localStorage.getItem(STORAGE_KEY);
+            const existingMs = existingExpiry ? parseInt(existingExpiry, 10) : NaN;
+            
+            if (!isReset && Number.isFinite(existingMs) && existingMs > Date.now()) {
+                // Keep existing localStorage timer (coming back from payment)
+                expiresAtMs = existingMs;
+            } else if (serverHoldExpiresAtStr && !isReset) {
+                // Fallback: use server expiration if no valid localStorage timer
+                expiresAtMs = Date.parse(serverHoldExpiresAtStr);
+            } else {
+                // Fresh start - new timer
+                expiresAtMs = Date.now() + TIMER_SECONDS * 1000;
+            }
+            
+            // Store the expiration time
+            localStorage.setItem(STORAGE_KEY, String(expiresAtMs));
+            const timerValueEl = document.getElementById('hold-timer-value');
+            const timerBox = timerValueEl?.closest('.hold-timer');
+
+            const token = form?.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            function formatMMSS(totalSeconds) {
+                const m = Math.floor(totalSeconds / 60);
+                const s = totalSeconds % 60;
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }
+
+            function getExpiresAtMs() {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                const ms = raw ? parseInt(raw, 10) : NaN;
+                return Number.isFinite(ms) ? ms : null;
+            }
+
+            function setExpiresAtMs(ms) {
+                localStorage.setItem(STORAGE_KEY, String(ms));
+            }
+
+            function clearTimer() {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+
+            let timerExpired = false;
+
+            function tick() {
+                if (!timerValueEl || timerExpired) return;
+
+                const expiresAtMs = getExpiresAtMs();
+                const now = Date.now();
+
+                if (!expiresAtMs || expiresAtMs <= now) {
+                    timerValueEl.textContent = '00:00';
+                    timerBox?.classList.add('hold-timer--danger');
+                    timerExpired = true;
+                    
+                    // Disable form submission
+                    const submitBtn = document.getElementById('submit-order-btn');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.remove('btn-danger');
+                        submitBtn.classList.add('btn-secondary');
+                    }
+                    
+                    // Disable all seat checkboxes
+                    document.querySelectorAll('.seat-checkbox').forEach(cb => {
+                        cb.disabled = true;
+                        cb.closest('.seat-btn')?.classList.add('disabled');
+                    });
+                    
+                    // Show expiration modal
+                    const modal = new bootstrap.Modal(document.getElementById('timerExpiredModal'));
+                    modal.show();
+                    return;
+                }
+
+                const remainingSec = Math.max(0, Math.floor((expiresAtMs - now) / 1000));
+                timerValueEl.textContent = formatMMSS(remainingSec);
+
+                if (timerBox) {
+                    if (remainingSec <= 60) timerBox.classList.add('hold-timer--danger');
+                    else timerBox.classList.remove('hold-timer--danger');
+                }
+            }
+
+            async function postJson(url, payload) {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'RequestVerificationToken': token } : {})
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const text = await res.text().catch(() => '');
+                    throw new Error(text || `HTTP ${res.status}`);
+                }
+
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) return await res.json();
+                return null;
+            }
+
+            function updateSummary() {
+                const checkboxes = document.querySelectorAll('.seat-checkbox:checked');
+                const listEl = document.getElementById('selected-seats-list');
+                const totalEl = document.getElementById('total-price');
+
+                if (checkboxes.length === 0) {
+                    listEl.textContent = 'No seats selected';
+                    totalEl.textContent = '0';
+                    return;
+                }
+
+                let total = 0;
+                const seats = [];
+
+                checkboxes.forEach(cb => {
+                    const price = parseFloat(cb.dataset.price);
+                    const row = cb.dataset.row;
+                    const seat = cb.dataset.seat;
+                    const type = cb.dataset.type;
+
+                    total += price;
+                    seats.push(`Row ${row}, Seat ${seat} (${type})`);
+                });
+
+                listEl.innerHTML = seats.map(s => `<div>• ${s}</div>`).join('');
+                totalEl.textContent = total.toFixed(2);
+            }
+
+            async function holdSeat(cb) {
+                const seatId = parseInt(cb.value, 10);
+
+                const data = await postJson('/Tickets/HoldSeats', {
+                    sessionId: sessionId,
+                    seatIds: [seatId]
+                });
+
+                if (!data || data.success !== true) {
+                    return { ok: false, rejected: data?.rejectedSeatIds || [seatId] };
+                }
+
+                // Don't update timer from server - keep using page load timer
+                return { ok: true };
+            }
+
+            async function releaseSeat(cb) {
+                const seatId = parseInt(cb.value, 10);
+                await postJson('/Tickets/ReleaseSeats', {
+                    sessionId: sessionId,
+                    seatIds: [seatId]
+                });
+                // Don't clear timer - it keeps running from page load
+            }
+
+            document.querySelectorAll('.seat-checkbox').forEach(cb => {
+                cb.addEventListener('change', async function () {
+                    const label = this.closest('.seat-btn');
+                    if (!label) return;
+
+                    if (this.checked) {
+                        label.classList.add('selected');
+                        try {
+                            const result = await holdSeat(this);
+                            if (!result.ok) {
+                                this.checked = false;
+                                label.classList.remove('selected');
+                                alert('Seat is already reserved by another user. Please choose another seat.');
+                            }
+                        } catch (e) {
+                            this.checked = false;
+                            label.classList.remove('selected');
+                            alert('Failed to reserve seat. Please try again.');
+                        }
+                    } else {
+                        label.classList.remove('selected');
+                        try {
+                            await releaseSeat(this);
+                        } catch (e) {
+                            alert('Failed to release seat. Please refresh the page.');
+                        }
+                    }
+
+                    updateSummary();
+                    tick();
+                });
+            });
+
+            // Update summary on page load (for pre-selected seats)
+            updateSummary();
+            
+            tick();
+            setInterval(tick, 250);
+
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    const anyChecked = form.querySelectorAll('.seat-checkbox:checked').length > 0;
+                    if (!anyChecked) {
+                        e.preventDefault();
+                        alert('Please select at least one seat.');
+                    }
+                });
+            }
+        })();
+    </script>
+}
+
