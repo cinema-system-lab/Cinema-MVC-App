@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "Order Details";
     bool isPaid = Model.Status == OrderStatus.Paid;
+    bool isPending = Model.Status == OrderStatus.Pending;
 }
 
 <div class="container py-4">
@@ -75,7 +76,7 @@
                                     <td class="ps-4">
                                         <div class="fw-bold text-white">Row @t.RowNumber, Seat @t.SeatNumber</div>
                                         <div class="small @(isPaid ? "text-muted" : "text-danger")">
-                                            @(isPaid ? "Tap to view e-ticket" : "Pay to unlock ticket")
+                                            @(isPending ? "Pay to unlock ticket" : isPaid ? "Tap to view e-ticket" : "")
                                         </div>
                                     </td>
                                     <td>
