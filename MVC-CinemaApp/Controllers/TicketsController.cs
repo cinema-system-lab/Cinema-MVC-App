@@ -1,9 +1,10 @@
-using System.Collections.Concurrent;
-using System.Security.Claims;
 using Cinema_MVC_App.Models;
+using Core.Enums;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Concurrent;
+using System.Security.Claims;
 
 namespace Cinema_MVC_App.Controllers;
 
@@ -15,21 +16,24 @@ public class TicketsController : Controller
     private readonly IHallService _hallService;
     private readonly ISeatService _seatService;
     private readonly ITicketService _ticketService;
+    private readonly IOrderService _orderService;
 
     private const int HoldMinutes = 15;
 
     public TicketsController(
-        ISessionService sessionService,
-        IMovieService movieService,
-        IHallService hallService,
-        ISeatService seatService,
-        ITicketService ticketService)
+    ISessionService sessionService,
+    IMovieService movieService,
+    IHallService hallService,
+    ISeatService seatService,
+    ITicketService ticketService,
+    IOrderService orderService)
     {
         _sessionService = sessionService;
         _movieService = movieService;
         _hallService = hallService;
         _seatService = seatService;
         _ticketService = ticketService;
+        _orderService = orderService;
     }
 
     [HttpGet]
@@ -87,7 +91,28 @@ public class TicketsController : Controller
 
         return View(viewModel);
     }
-    
+
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid orderId, int sessionId, int seatId)
+    {
+        var order = await _orderService.GetOrderByIdAsync(orderId);
+
+        if (order == null) return NotFound();
+
+        if (order.Status != OrderStatus.Paid)
+        {
+            TempData["ErrorMessage"] = "Ticket is not available until the order is paid.";
+            return RedirectToAction("Details", "Orders", new { id = orderId });
+        }
+
+        // 3. Если все ок, получаем билет
+        var ticket = await _ticketService.GetTicketByIdAsync(orderId, sessionId, seatId);
+
+        if (ticket == null) return NotFound();
+
+        return View(ticket);
+    }
+
     public sealed record HoldSeatsRequest(int SessionId, int[] SeatIds);
     public sealed record HoldSeatsResponse(bool Success, int[] HeldSeatIds, int[] RejectedSeatIds, DateTime? ExpiresAtUtc);
 

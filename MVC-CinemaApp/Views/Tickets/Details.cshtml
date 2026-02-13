@@ -39,9 +39,9 @@
 
                 <div class="p-4 bg-white text-center">
                     <div class="mb-3">
-                        <div class="barcode bg-dark mx-auto mb-2" style="height: 50px; width: 80%; opacity: 0.8;"></div>
-                        <small class="text-muted text-uppercase ls-wide">Order: #@Model.OrderId</small>
-                    </div>
+                        <div class="barcode-wrapper">
+                            <div class="barcode-placeholder"></div>
+                        </div><small class="text-muted text-uppercase ls-wide">Order: #@Model.OrderId</small></div>
 
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <span class="text-muted">Paid Amount</span>
@@ -51,42 +51,80 @@
             </div>
 
             <div class="mt-4 d-flex gap-2">
-                <a asp-action="Index" class="btn btn-outline-light flex-grow-1 rounded-pill">
-                    <i class="bi bi-arrow-left me-2"></i>My Tickets
+                <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId"
+                   class="btn btn-outline-light flex-grow-1 rounded-pill">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Order
                 </a>
-                <button onclick="window.print()" class="btn btn-secondary rounded-pill">
+                <button onclick="prepareAndPrint()" class="btn btn-secondary rounded-pill">
                     <i class="bi bi-printer"></i>
                 </button>
             </div>
+            </div>
         </div>
     </div>
-</div>
+
+<script>
+    function prepareAndPrint() {
+        window.print();
+    }
+</script>
 
 <style>
-    .barcode {
+    .barcode-placeholder {
         background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px);
+        height: 50px;
+        width: 200px;
+        margin: 10px auto;
+        border: 1px solid #000;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
-    .ls-wide {
-        letter-spacing: 2px;
+    .barcode-wrapper {
+        width: 100%;
+        padding: 10px 0;
+        text-align: center;
     }
 
     .ticket-card {
-        border: 1px solid rgba(0,0,0,0.1);
+        background: #fff;
+        color: #000;
+        border-radius: 15px;
+        overflow: hidden;
     }
 
     @@media print {
-        .btn, .bg-dark {
-            display: none !important;
+        html, body {
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
         }
-
-        body {
-            background: white !important;
+        nav, footer, .btn, .no-print, .back-link, script {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .container {
+            margin: 0 !important;
+            padding: 10px !important;
+            display: block !important;
         }
 
         .ticket-card {
-            shadow: none !important;
-            border: 1px solid #ccc;
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+            page-break-inside: avoid !important;
+            max-width: 500px !important;
+            margin: 0 auto !important;
+            color: black !important;
+            break-inside: avoid !important;
+            transform: scale(0.95);
+        }
+        .barcode-placeholder {
+            display: block !important;
+            background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px) !important;
         }
     }
 </style>

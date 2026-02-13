@@ -10,9 +10,26 @@
     applyFilters();
 }
 
+// Modern chip-based filters
+function filterByGenre(genre, btn) {
+    document.querySelectorAll('#genreChips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+}
+
+function filterByHall(hallType, btn) {
+    document.querySelectorAll('#hallTypeChips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+}
+
 function applyFilters() {
-    const selectedGenre = document.getElementById('genreFilter').value;
-    const selectedHallType = document.getElementById('hallTypeFilter').value;
+    const selectedGenreBtn = document.querySelector('#genreChips .chip.active');
+    const selectedHallBtn = document.querySelector('#hallTypeChips .chip.active');
+    
+    const selectedGenre = selectedGenreBtn ? selectedGenreBtn.getAttribute('data-genre') : 'all';
+    const selectedHallType = selectedHallBtn ? selectedHallBtn.getAttribute('data-hall') : 'all';
+    
     const activeSection = document.querySelector('.date-section:not(.d-none)');
 
     if (!activeSection) return;

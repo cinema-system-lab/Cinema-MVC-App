@@ -1,0 +1,40 @@
+@model Core.DTOs.MovieDTO
+
+<div class="movie-card fade-in">
+    <a asp-controller="Movies" asp-action="Details" asp-route-id="@Model.Id" class="text-decoration-none">
+        <div class="movie-poster-wrapper">
+            <img src="@(string.IsNullOrEmpty(Model.PosterUrl) ? "/img/no-poster.png" : Model.PosterUrl)" 
+                 alt="@Model.Title" 
+                 class="movie-poster"
+                 loading="lazy">
+            
+            <div class="movie-badges">
+                @if (Model.AgeRestriction > 0)
+                {
+                    <span class="badge-age">@Model.AgeRestriction+</span>
+                }
+                <span class="badge-rating">
+                    <i class="bi bi-star-fill text-warning"></i>
+                    @Model.Rating.ToString("F1")
+                </span>
+            </div>
+            
+            <div class="movie-overlay">
+                <button type="button" class="btn-quick-book" onclick="event.preventDefault(); window.location.href='@Url.Action("Details", "Movies", new { id = Model.Id })'">
+                    <i class="bi bi-play-circle me-2"></i>View Details
+                </button>
+            </div>
+        </div>
+        
+        <div class="movie-body">
+            <h3 class="movie-title">@Model.Title</h3>
+            
+            <div class="movie-meta">
+                <span class="meta-item">
+                    <i class="bi bi-clock"></i>
+                    @Model.DurationMinutes min
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
