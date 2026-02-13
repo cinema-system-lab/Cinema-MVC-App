@@ -1,9 +1,7 @@
-﻿using Core.Constants;
-using Core.DTOs;
+﻿using Cinema_MVC_App.Models;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Cinema_MVC_App.Controllers;
 
@@ -23,34 +21,20 @@ public class SessionsController : Controller
         _hallService = hallService;
     }
 
-    // GET: /Sessions
-    [AllowAnonymous]
-    public async Task<IActionResult> Index()
+    // GET: /Sessions/Schedule
+    public async Task<IActionResult> Schedule()
     {
-        var sessions = await _sessionService.GetAllSessionsAsync();
-        var movies = (await _movieService.GetAllMoviesAsync())
-                    .Where(m => m.IsActive);
+        var allSessions = await _sessionService.GetAllSessionsAsync();
+        var movies = await _movieService.GetAllMoviesAsync();
         var halls = await _hallService.GetAllHallsAsync();
 
-        ViewBag.MovieNames = movies.ToDictionary(m => m.Id, m => m.Title);
-        ViewBag.HallNames = halls.ToDictionary(h => h.Id, h => h.Name);
-        
-        return View(sessions);
-    }
+        var model = new SessionsListVM
+        {
+            Sessions = allSessions.Where(s => s.StartTime >= DateTime.Today).OrderBy(s => s.StartTime),
+            Movies = movies.ToDictionary(m => m.Id),
+            Halls = halls.ToDictionary(h => h.Id)
+        };
 
-    // GET: /Sessions/Details/{id}
-    [AllowAnonymous]
-    public async Task<IActionResult> Details(int id)
-    {
-        var session = await _sessionService.GetSessionAsync(id);
-        if (session == null) return NotFound();
-        
-        var movie = await _movieService.GetMovieAsync(session.MovieId);
-        var hall = await _hallService.GetHallAsync(session.HallId);
-
-        ViewBag.MovieName = movie?.Title ?? "Unknown";
-        ViewBag.HallName = hall?.Name ?? "Unknown";
-        
-        return View(session);
+        return View(model);
     }
 }

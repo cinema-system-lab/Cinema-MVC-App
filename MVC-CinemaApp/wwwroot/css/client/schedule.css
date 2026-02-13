@@ -1,0 +1,76 @@
+﻿.date-scroll-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.date-scroll-container::-webkit-scrollbar-thumb {
+    background: #dc3545;
+    border-radius: 10px;
+}
+
+.date-card {
+    min-width: 80px;
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+    .date-card:hover, .date-card.active {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+    }
+
+.session-box {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 8px 16px;
+    border-radius: 10px;
+    text-align: center;
+    transition: 0.3s;
+    min-width: 90px;
+}
+
+    .session-box .time {
+        color: #fff;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .session-box .hall {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .session-box .price {
+        color: #dc3545;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+
+    .session-box:hover {
+        border-color: #dc3545;
+        background: #252525;
+        transform: scale(1.05);
+    }
+
+.poster-link {
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+    .poster-link:hover {
+        transform: scale(1.02);
+    }
+
+.poster-hover img {
+    transition: filter 0.3s ease;
+}
+
+.poster-hover:hover img {
+    filter: brightness(1.2);
+}

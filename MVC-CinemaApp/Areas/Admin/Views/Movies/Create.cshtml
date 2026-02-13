@@ -21,8 +21,7 @@
         </a>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Create Movie</h2>
+    <div class="d-flex justify-content-end align-items-center mb-3">
         <button type="button" class="btn-action btn-save shadow-sm" data-bs-toggle="modal" data-bs-target="#tmdbModal">
             <i class="bi bi-cloud-download"></i> Import from TMDB
         </button>
@@ -172,23 +171,23 @@
 <div class="modal fade" id="tmdbModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content admin-modal-content">
-            <div class="modal-header border-0 pb-0">
+            <div class="modal-header border-0 p-4 pb-0 d-flex justify-content-between align-items-start">
                 <div>
                     <h4 class="modal-title fw-bold text-white">Import from TMDB</h4>
                     <p class="text-muted small mb-0">Search millions of movies to auto-fill your form</p>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                <button type="button" class="btn-close btn-close-white m-0" data-bs-dismiss="modal"
                         aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="tmdb-search-wrapper mb-4">
                     <div class="input-group custom-input-group shadow-sm">
-                        <span class="input-group-text bg-transparent border-end-0">
-                            <i class="bi bi-search text-success"></i>
+                        <span class="input-group-text bg-transparent border-0">
+                            <i class="bi bi-search"></i>
                         </span>
-                        <input type="text" id="tmdbSearchInput" class="form-control border-start-0"
+                        <input type="text" id="tmdbSearchInput" class="form-control border-0"
                                placeholder="Search movie title (e.g. Interstellar)...">
-                        <button class="btn btn-save px-4" type="button" id="btnSearchTmdb">
+                        <button class="btn-action btn-create px-4" type="button" id="btnSearchTmdb">
                             Search
                         </button>
                     </div>
@@ -212,87 +211,6 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="~/js/movie-form.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('#genresSelect').select2({
-                placeholder: "Select at least one genre",
-                width: '100%'
-            });
-            $('#genresSelect').on('change', function () {
-                $(this).valid();
-            });
-
-            let ratingInput = $('#ratingInput');
-            $('#btnSearchTmdb').click(function () {
-                performTmdbSearch();
-            });
-
-            $('#tmdbSearchInput').keypress(function (e) {
-                if (e.which == 13) {
-                    performTmdbSearch();
-                }
-            });
-
-            function performTmdbSearch() {
-                var query = $('#tmdbSearchInput').val();
-                if (!query) return;
-
-                $('#tmdbResultsList').empty();
-                $('#tmdbLoading').removeClass('d-none');
-
-                $.ajax({
-                    url: '/Admin/Movies/SearchTmdbJson',
-                    data: {query: query},
-                    success: function (data) {
-                        $('#tmdbLoading').addClass('d-none');
-                        if (data.length === 0) {
-                            $('#tmdbResultsList').html('<div class="alert alert-warning">Nothing found.</div>');
-                            return;
-                        }
-
-                        data.forEach(function (movie) {
-                            var img = movie.poster
-                                ? `<img src="${movie.poster}" class="tmdb-result-img me-3">`
-                                : `<div class="tmdb-result-img me-3 d-flex align-items-center justify-content-center bg-dark"><i class="bi bi-film"></i></div>`;
-
-                            var item = `
-                                    <a href="/Admin/Movies/CreateFromTmdb?tmdbId=${movie.id}" class="tmdb-result-item d-flex align-items-center">
-                                        ${img}
-                                        <div class="tmdb-result-info flex-grow-1">
-                                            <h6 class="mb-0">${movie.title}</h6>
-                                            <div class="d-flex align-items-center gap-2 mb-1">
-                                                <span class="badge bg-dark text-warning small">${movie.year}</span>
-                                                <span class="text-muted small"><i class="bi bi-star-fill text-warning"></i> ${movie.vote_average || 'N/A'}</span>
-                                            </div>
-                                            <p class="mb-0 text-truncate" style="max-width: 450px;">${movie.overview || 'No description available.'}</p>
-                                        </div>
-                                        <div class="ms-3">
-                                            <span class="btn btn-sm btn-outline-success rounded-pill px-3">Select</span>
-                                        </div>
-                                    </a>
-                                `;
-                            $('#tmdbResultsList').append(item);
-                        });
-                    },
-                    error: function () {
-                        $('#tmdbLoading').addClass('d-none');
-                        $('#tmdbResultsList').html('<div class="alert alert-danger">Error searching TMDB.</div>');
-                    }
-                });
-            }
-
-            function updatePosterPreview(url) {
-                if (url) {
-                    $('#posterPreview').html(`<img src="${url}" class="img-fluid rounded shadow" style="width: 100%; height: auto; display: block;" />`);
-                }
-            }
-
-            updatePosterPreview($('#posterUrlInput').val());
-
-            $('#posterUrlInput').on('input', function () {
-                updatePosterPreview($(this).val());
-            });
-        });
-    </script>
+    <script src="~/js/tmdb-search.js"></script>
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

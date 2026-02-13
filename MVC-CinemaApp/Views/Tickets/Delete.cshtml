@@ -1,70 +1,59 @@
 @model Core.DTOs.TicketDTO
+
 @{
-    ViewData["Title"] = "Cancel Ticket";
+    ViewData["Title"] = "Ticket Refund";
 }
 
-<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
-<link rel="stylesheet" href="~/css/admin-ticket.css" asp-append-version="true" />
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark text-white border-danger shadow-lg">
+                <div class="card-header bg-danger text-white py-3">
+                    <h4 class="mb-0 text-center text-uppercase fw-bold">Ticket Cancellation</h4>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-octagon text-danger display-1"></i>
+                    </div>
 
-<div class="container delete-container">
-    <div class="delete-card">
-        <div class="warning-icon">
-            <i class="bi bi-exclamation-octagon"></i>
+                    <h3 class="fw-bold mb-3">Are you sure?</h3>
+                    <p class="text-white-50 mb-4">
+                        You are about to cancel your ticket for <br>
+                        <strong class="text-white fs-5">"@Model.MovieTitle"</strong>
+                    </p>
+
+                    <div class="alert alert-secondary bg-black border-secondary text-start mb-4">
+                        <div class="small text-muted text-uppercase mb-2">Ticket Details:</div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Session Time:</span>
+                            <span class="text-white">@Model.StartTime.ToString("f")</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Seat:</span>
+                            <span class="text-white">Row @Model.RowNumber, Seat @Model.SeatNumber</span>
+                        </div>
+                    </div>
+
+                    <form asp-action="DeleteConfirmed" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.OrderId" />
+                        <input type="hidden" name="sessionId" value="@Model.SessionId" />
+                        <input type="hidden" name="seatId" value="@Model.SeatId" />
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg fw-bold rounded-pill">
+                                Yes, Cancel Ticket
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
+                                No, Keep my ticket
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-transparent border-secondary text-center py-3">
+                    <small class="text-muted italic">Note: Refund policy depends on the time remaining before the session.</small>
+                </div>
+            </div>
         </div>
-
-        <h3 class="fw-bold text-white mb-2">Cancel Ticket?</h3>
-        <p class="text-muted mb-4">You are about to cancel your movie ticket. This action cannot be undone.</p>
-
-        <div class="ticket-info-box">
-            <div class="info-row">
-                <span class="info-label">
-                    <i class="bi bi-film"></i> Movie
-                </span>
-                <span class="movie-badge">@Model.MovieTitle</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">
-                    <i class="bi bi-door-closed"></i> Hall
-                </span>
-                <span class="info-value">@Model.HallName</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">
-                    <i class="bi bi-calendar3"></i> Showtime
-                </span>
-                <span class="info-value">@Model.StartTime.ToString("MMM dd, yyyy HH:mm")</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">
-                    <i class="bi bi-grid-3x3-gap"></i> Seat
-                </span>
-                <span class="info-value">Row @Model.RowNumber, Seat @Model.SeatNumber</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">
-                    <i class="bi bi-currency-dollar"></i> Price
-                </span>
-                <span class="info-value" style="color: #34d399;">@Model.Price.ToString("C")</span>
-            </div>
-        </div>
-
-        <div class="warning-message">
-            <i class="bi bi-info-circle"></i>
-            Your payment will be refunded according to our cancellation policy.
-        </div>
-
-        <form asp-action="DeleteConfirmed" method="post" class="d-flex align-items-center justify-content-center gap-3">
-            <input type="hidden" name="orderId" value="@Model.OrderId" />
-            <input type="hidden" name="sessionId" value="@Model.SessionId" />
-            <input type="hidden" name="seatId" value="@Model.SeatId" />
-            
-            <a asp-action="Index" class="btn-action btn-cancel">
-                <i class="bi bi-x-circle"></i> Keep Ticket
-            </a>
-            
-            <button type="submit" class="btn-delete-confirm shadow-sm">
-                <i class="bi bi-trash3-fill"></i> Cancel Ticket
-            </button>
-        </form>
     </div>
 </div>

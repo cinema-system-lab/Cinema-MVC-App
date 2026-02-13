@@ -17,9 +17,18 @@ public class MoviesController : BaseAdminController
     }
 
     // GET: /Movies or /Movies/Index
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string status = "all")
     {
         var movies = await _movieService.GetAllMoviesAsync();
+    
+        movies = status switch
+        {
+            "active" => movies.Where(m => m.IsActive),
+            "inactive" => movies.Where(m => !m.IsActive),
+            _ => movies
+        };
+    
+        ViewData["CurrentStatus"] = status;
         return View(movies);
     }
 
@@ -209,9 +218,14 @@ public class MoviesController : BaseAdminController
             TempData["SuccessMessage"] = "Movie successfully updated!";
             return RedirectToAction(nameof(Index));
         }
+        catch (InvalidOperationException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View(movie);
+        }
         catch (Exception ex)
         {
-            ModelState.AddModelError(string.Empty, $"Error: {ex.Message}");
+            ModelState.AddModelError(string.Empty, $"Unexpected error: {ex.Message}");
             return View(movie);
         }
     }
@@ -235,12 +249,17 @@ public class MoviesController : BaseAdminController
         {
             await _movieService.DeleteMovieAsync(id);
             TempData["SuccessMessage"] = "Movie deleted!";
+            return RedirectToAction(nameof(Index));
         }
         catch (InvalidOperationException ex)
         {
-            TempData["ErrorMessage"] = ex.Message;
+            var movie = await _movieService.GetMovieAsync(id);
+            if (movie == null) return NotFound();
+
+            ModelState.AddModelError(string.Empty, ex.Message);
+
+            return View("Delete", movie);
         }
-        return RedirectToAction(nameof(Index));
     }
 
     // GET: /Movies/SearchTmdbJson?query=avatar

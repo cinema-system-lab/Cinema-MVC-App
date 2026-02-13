@@ -1,76 +1,130 @@
 @model Core.DTOs.TicketDTO
+
 @{
-ViewData["Title"] = "Ticket Details";
+    ViewData["Title"] = "Your Ticket";
 }
 
-<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
-<link rel="stylesheet" href="~/css/admin-ticket.css" asp-append-version="true" />
-
 <div class="container py-5">
-    <div class="mb-4">
-        <a asp-action="Index" class="back-link">
-            <i class="bi bi-chevron-left"></i> Back to My Tickets
-        </a>
-    </div>
-
-    <div class="details-card">
-        <div class="ticket-header">
-            <i class="bi bi-ticket-perforated-fill ticket-icon d-block"></i>
-            <div class="ticket-title">@Model.MovieTitle</div>
-            <div class="ticket-subtitle">E-Ticket Confirmation</div>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="info-label">
-                    <i class="bi bi-hash me-1"></i> Order ID
-                </div>
-                <div class="info-value" style="font-family: monospace; font-size: 0.9rem;">
-                    @Model.OrderId
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="ticket-card bg-white text-dark shadow-lg overflow-hidden" style="border-radius: 20px;">
+                <div class="bg-danger p-4 text-white text-center position-relative">
+                    <div class="small text-uppercase opacity-75 mb-1">Movie Ticket</div>
+                    <h3 class="fw-bold text-uppercase mb-0">@Model.MovieTitle</h3>
+                    <div class="position-absolute start-0 top-100 translate-middle-y bg-dark" style="width: 20px; height: 20px; border-radius: 50%; margin-left: -10px;"></div>
+                    <div class="position-absolute end-0 top-100 translate-middle-y bg-dark" style="width: 20px; height: 20px; border-radius: 50%; margin-right: -10px;"></div>
                 </div>
 
-                <div class="info-label">
-                    <i class="bi bi-door-closed me-1"></i> Cinema Hall
+                <div class="p-4 bg-light border-bottom border-2 border-dashed border-secondary">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="small text-muted text-uppercase">Date & Time</div>
+                            <div class="fw-bold text-dark">@Model.StartTime.ToString("dd MMM yyyy")</div>
+                            <div class="fw-bold text-danger fs-5">@Model.StartTime.ToString("HH:mm")</div>
+                        </div>
+                        <div class="col-6 text-end">
+                            <div class="small text-muted text-uppercase">Cinema Hall</div>
+                            <div class="fw-bold text-dark">@Model.HallName</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted text-uppercase">Row</div>
+                            <div class="fw-bold fs-4 text-dark">@Model.RowNumber</div>
+                        </div>
+                        <div class="col-6 text-end">
+                            <div class="small text-muted text-uppercase">Seat</div>
+                            <div class="fw-bold fs-4 text-dark">@Model.SeatNumber</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="info-value">@Model.HallName</div>
 
-                <div class="info-label">
-                    <i class="bi bi-calendar-event me-1"></i> Showtime
-                </div>
-                <div class="info-value">
-                    <div>@Model.StartTime.ToString("dddd, MMMM dd, yyyy")</div>
-                    <div class="text-muted small">@Model.StartTime.ToString("HH:mm")</div>
+                <div class="p-4 bg-white text-center">
+                    <div class="mb-3">
+                        <div class="barcode-wrapper">
+                            <div class="barcode-placeholder"></div>
+                        </div><small class="text-muted text-uppercase ls-wide">Order: #@Model.OrderId</small></div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <span class="text-muted">Paid Amount</span>
+                        <span class="fw-bold fs-4 text-success">@Model.Price ₴</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="seat-display mb-3">
-                    <div class="seat-label">
-                        <i class="bi bi-grid-3x3-gap me-1"></i> Seat
-                    </div>
-                    <div class="seat-value">
-                        Row @Model.RowNumber, Seat @Model.SeatNumber
-                    </div>
-                </div>
-
-                <div class="price-display">
-                    <div class="price-label">
-                        <i class="bi bi-ticket-perforated me-1"></i> Ticket Price
-                    </div>
-                    <div class="price-value">@Model.Price.ToString("C")</div>
-                </div>
+            <div class="mt-4 d-flex gap-2">
+                <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId"
+                   class="btn btn-outline-light flex-grow-1 rounded-pill">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Order
+                </a>
+                <button onclick="prepareAndPrint()" class="btn btn-secondary rounded-pill">
+                    <i class="bi bi-printer"></i>
+                </button>
+            </div>
             </div>
         </div>
-
-        <div class="qr-placeholder mt-4">
-            <i class="bi bi-qr-code fs-1 opacity-25 d-block mb-2"></i>
-            <p class="mb-0 small">Present this ticket at the cinema entrance</p>
-        </div>
-        
-        <div class="d-flex gap-3 mt-4 pt-3" style="border-top: 1px solid var(--admin-border);">
-            <a asp-action="Index" class="btn-action btn-soft-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Tickets
-            </a>
-        </div>
     </div>
-</div>
+
+<script>
+    function prepareAndPrint() {
+        window.print();
+    }
+</script>
+
+<style>
+    .barcode-placeholder {
+        background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px);
+        height: 50px;
+        width: 200px;
+        margin: 10px auto;
+        border: 1px solid #000;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .barcode-wrapper {
+        width: 100%;
+        padding: 10px 0;
+        text-align: center;
+    }
+
+    .ticket-card {
+        background: #fff;
+        color: #000;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    @@media print {
+        html, body {
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+        }
+        nav, footer, .btn, .no-print, .back-link, script {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .container {
+            margin: 0 !important;
+            padding: 10px !important;
+            display: block !important;
+        }
+
+        .ticket-card {
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+            page-break-inside: avoid !important;
+            max-width: 500px !important;
+            margin: 0 auto !important;
+            color: black !important;
+            break-inside: avoid !important;
+            transform: scale(0.95);
+        }
+        .barcode-placeholder {
+            display: block !important;
+            background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px) !important;
+        }
+    }
+</style>

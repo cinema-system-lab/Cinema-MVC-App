@@ -12,7 +12,7 @@ public class PaymentProfile : Profile
         
         CreateMap<CreatePaymentDTO, Payment>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
-            .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => DateTime.Now))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Core.Enums.PaymentStatus.Pending));
     }
 }

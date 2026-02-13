@@ -1,71 +1,68 @@
 ﻿@using Core.Constants
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>@ViewData["Title"] - Cinema</title>
-        
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-        <link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true" />
-        <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
-    </head>
-    <body>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Cinema App</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/user-enhanced.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="d-flex flex-column min-vh-100 bg-dark text-white">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-custom mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top border-bottom border-secondary border-opacity-25 shadow-sm" style="backdrop-filter: blur(10px); background: rgba(20, 20, 20, 0.9);">
             <div class="container">
-                <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
-                    CINEMA
+                <a class="navbar-brand fw-bold text-white d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-ticket-perforated-fill text-danger me-2"></i> CINEMA APP
                 </a>
-                
-                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                
+
                 <div class="navbar-collapse collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-controller="Movies" asp-action="Index">Movies</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-controller="Halls" asp-action="Index">Halls</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-controller="Sessions" asp-action="Index">Sessions</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-controller="Tickets" asp-action="Index">Tickets</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-controller="Payments" asp-action="Index">Payments</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 mx-1" asp-controller="Orders" asp-action="Index">Orders</a></li>
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Movies" asp-action="Index">Movies</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Sessions" asp-action="Schedule">Schedule</a></li>
                     </ul>
-                    <ul class="navbar-nav align-items-center">
+
+                    <ul class="navbar-nav align-items-center gap-3">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             @if (User.IsInRole(Roles.Admin))
                             {
-                                <li class="nav-item me-2">
-                                    <a class="nav-link admin-link fw-bold d-flex align-items-center" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                                        <i class="bi bi-grid-1x2-fill me-2 small"></i> Admin Panel
+                                <li class="nav-item">
+                                    <a class="btn btn-outline-warning btn-sm fw-bold px-3 rounded-pill" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                        <i class="bi bi-speedometer2 me-1"></i> Admin Panel
                                     </a>
                                 </li>
                             }
 
-                            <li class="nav-item me-3 d-none d-md-block">
-                                <span class="navbar-text text-muted font-monospace small">
-                                    <span class="text-primary">●</span> @User.Identity.Name
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-auth-outline btn-sm px-3">
-                                        Logout
-                                    </button>
-                                </form>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center bg-secondary bg-opacity-10 rounded-pill px-3 py-1 border border-secondary border-opacity-50"
+                                   href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <span class="small me-1">@User.Identity.Name</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg border-secondary">
+                                    <li><a class="dropdown-item" asp-controller="Orders" asp-action="Index">My Orders</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="px-3 py-1">
+                                            <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
                         {
-                            <li class="nav-item me-2">
-                                <a class="nav-link fw-medium" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Login</a></li>
                             <li class="nav-item">
-                                <a class="btn btn-primary-custom btn-sm" asp-controller="Account" asp-action="Register">Join Now</a>
+                                <a class="btn btn-danger btn-sm rounded-pill px-4 fw-bold" asp-controller="Account" asp-action="Register">Join Us</a>
                             </li>
                         }
                     </ul>
@@ -74,35 +71,31 @@
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-modern alert-dismissible fade show mb-4 shadow-sm" role="alert">
-                    <i class="bi bi-check-circle-fill me-2 text-success"></i> @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-            @if (TempData["ErrorMessage"] != null)
-            {
-                <div class="alert alert-modern alert-dismissible fade show mb-4 shadow-sm" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i> @TempData["ErrorMessage"]
-                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-            @RenderBody()
-        </main>
-    </div>
+    <main role="main" class="pb-3 flex-grow-1 container mt-4">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
 
-    <footer class="mt-auto">
+        @RenderBody()
+    </main>
+
+    <footer class="mt-auto py-4 border-top border-secondary border-opacity-25 bg-black">
         <div class="container">
-            <div class="row align-items-center py-2">
-                <div class="col-md-6 text-center text-md-start">
-                    <span class="text-muted small">&copy;@DateTime.Now.Year — </span>
-                    <span class="text-light opacity-50 small fw-bold text-uppercase">Cinema</span>
-                </div>
-                <div class="col-md-6 text-center text-md-end pt-2 pt-md-0">
-                    <a asp-controller="Home" asp-action="Privacy" class="text-muted small text-decoration-none me-3">Privacy Policy</a>
+            <div class="text-center text-muted small">
+                <div>&copy; @DateTime.Now.Year Cinema App. All rights reserved.</div>
+                <div class="mt-1">
+                    <a asp-controller="Home" asp-action="Privacy" class="text-muted small text-decoration-none">Privacy Policy</a>
                 </div>
             </div>
         </div>
@@ -111,7 +104,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
+    <script src="~/js/user-enhanced.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
-    </body>
+</body>
 </html>

@@ -1,167 +1,69 @@
 ﻿@model Core.DTOs.PaymentDTO
+
 @{
-    ViewData["Title"] = "Payment Details";
-
-    var availableStatuses = new List<(Core.Enums.PaymentStatus Status, string DisplayName)>();
-
-    switch (Model.Status) {
-        case Core.Enums.PaymentStatus.Pending:
-            availableStatuses.Add((Core.Enums.PaymentStatus.Success, "Success"));
-            availableStatuses.Add((Core.Enums.PaymentStatus.Failed, "Failed"));
-            break;
-        case Core.Enums.PaymentStatus.Success:
-            availableStatuses.Add((Core.Enums.PaymentStatus.Refunded, "Refunded"));
-            break;
-    }
+    ViewData["Title"] = "Payment Status";
 }
 
-<link rel="stylesheet" href="~/css/admin-base.css" asp-append-version="true"/>
-<link rel="stylesheet" href="~/css/admin-payments.css" asp-append-version="true"/>
-
 <div class="container py-5">
-    <div class="mb-4">
-        <a asp-action="Index" class="back-link">
-            <i class="bi bi-arrow-left"></i> Back to Payments
-        </a>
-    </div>
-
-    @if (TempData["Success"] != null) {
-        <div class="alert-custom success">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>@TempData["Success"]</span>
-        </div>
-    }
-
-    @if (TempData["Error"] != null) {
-        <div class="alert-custom error">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>@TempData["Error"]</span>
-        </div>
-    }
-
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="details-card">
-                <div class="payment-header">
-                    <i class="bi bi-receipt payment-icon"></i>
-                    <div class="payment-amount">
-                        <i class="bi bi-currency-dollar"></i>@Model.Amount.ToString("F2")
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-header bg-transparent border-secondary text-center py-4">
+                    <h2 class="text-white mb-0">
+                        <i class="bi bi-receipt text-danger me-2"></i>Payment Receipt
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h1 class="text-success display-4 fw-bold">@Model.Amount ₴</h1>
+                        <p class="text-muted text-uppercase small">Total Amount Paid</p>
                     </div>
-                    <p class="text-muted mb-0 mt-2">Payment Transaction</p>
-                </div>
 
-                <div class="info-label">
-                    <i class="bi bi-hash me-1"></i> Payment ID
-                </div>
-                <div class="info-value" style="font-family: monospace; font-size: 0.9rem;">
-                    @Model.Id
-                </div>
-
-                <div class="info-label">
-                    <i class="bi bi-bag me-1"></i> Order ID
-                </div>
-                <div class="info-value" style="font-family: monospace; font-size: 0.9rem;">
-                    @Model.OrderId
-                </div>
-
-                <div class="info-label">
-                    <i class="bi bi-calendar-event me-1"></i> Payment Date & Time
-                </div>
-                <div class="info-value">
-                    <div class="mb-1">
-                        <i class="bi bi-calendar3"></i> @Model.PaymentDate.ToString("dddd, MMMM dd, yyyy")
+                    <div class="list-group list-group-flush border-top border-secondary">
+                        <div class="list-group-item bg-transparent text-white d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted">Payment ID</span>
+                            <span class="font-monospace small">@Model.Id</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-white d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted">Order Reference</span>
+                            <span class="font-monospace">#@Model.OrderId</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-white d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted">Date & Time</span>
+                            <span>@Model.PaymentDate.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-white d-flex justify-content-between px-0 py-3">
+                            <span class="text-muted">Status</span>
+                            <span>
+                                @switch (Model.Status)
+                                {
+                                    case Core.Enums.PaymentStatus.Success:
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Completed</span>
+                                        break;
+                                    case Core.Enums.PaymentStatus.Pending:
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> Processing</span>
+                                        break;
+                                    case Core.Enums.PaymentStatus.Failed:
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Declined</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@Model.Status</span>
+                                        break;
+                                }
+                            </span>
+                        </div>
                     </div>
-                    <div class="text-muted small">
-                        <i class="bi bi-clock"></i> @Model.PaymentDate.ToString("HH:mm:ss")
-                    </div>
-                </div>
 
-                <div class="info-label">
-                    <i class="bi bi-info-circle me-1"></i> Status
-                </div>
-                <div class="info-value">
-                    @switch (Model.Status) {
-                        case Core.Enums.PaymentStatus.Pending:
-                            <span class="status-badge badge-pending">
-                                <i class="bi bi-clock"></i> Pending
-                            </span>
-                            break;
-                        case Core.Enums.PaymentStatus.Success:
-                            <span class="status-badge badge-success-status">
-                                <i class="bi bi-check-circle-fill"></i> Success
-                            </span>
-                            break;
-                        case Core.Enums.PaymentStatus.Failed:
-                            <span class="status-badge badge-failed">
-                                <i class="bi bi-x-circle-fill"></i> Failed
-                            </span>
-                            break;
-                        case Core.Enums.PaymentStatus.Refunded:
-                            <span class="status-badge badge-refunded">
-                                <i class="bi bi-arrow-counterclockwise"></i> Refunded
-                            </span>
-                            break;
-                    }
+                    <div class="d-grid gap-2 mt-4">
+                        <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-light rounded-pill">
+                            <i class="bi bi-ticket-detailed me-2"></i>My Tickets
+                        </a>
+                        <button onclick="window.print()" class="btn btn-link text-muted btn-sm text-decoration-none">
+                            <i class="bi bi-printer me-1"></i> Print Receipt
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-4">
-            @if (availableStatuses.Any()) {
-                <div class="update-card">
-                    <div class="update-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-arrow-repeat me-2"></i>Update Status
-                        </h5>
-                    </div>
-                    <div class="update-body">
-                        <form asp-action="UpdateStatus" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.Id"/>
-
-                            <div class="mb-3">
-                                <label class="form-label">New Status</label>
-                                <select name="newStatus" class="form-select" required>
-                                    <option value="">-- Select Status --</option>
-                                    @foreach (var status in availableStatuses) {
-                                        <option value="@((int)status.Status)">@status.DisplayName</option>
-                                    }
-                                </select>
-                            </div>
-
-                            <button type="submit" class="btn-action btn-update">
-                                <i class="bi bi-check-circle"></i> Update Status
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            } else {
-                <div class="update-card">
-                    <div class="update-body">
-                        <div class="final-status-box">
-                            <i class="bi bi-lock-fill"></i>
-                            <h6 class="text-white mb-2">Final Status</h6>
-                            <p class="text-muted small mb-0">
-                                This payment has reached a final status and cannot be modified.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
     </div>
 </div>
-
-@section Scripts {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('select[name="newStatus"]').select2({
-                width: '100%',
-                minimumResultsForSearch: -1,
-                dropdownParent: $('.update-card')
-            });
-        });
-    </script>
-}

@@ -1,4 +1,4 @@
-﻿using Core.DTOs;
+using Core.DTOs;
 using Core.Entities;
 using Core.Enums;
 using Core.Constants;
@@ -125,62 +125,78 @@ public class OrderService : IOrderService
         };
     }
 
-    public async Task<List<OrderDTO>> GetOrdersByUserAsync(string userId)
+    private OrderDTO MapToDTO(Order o)
     {
-        return await _context.Orders
-            .Select(o => new OrderDTO
-            {
-                Id = o.Id,
-                SessionId = o.SessionId,
-                Status = o.Status,
-                CreatedAt = o.CreatedAt,
-                MovieTitle = o.Session.Movie.Title,
-                HallName = o.Session.Hall.Name,
-                SessionStartTime = o.Session.StartTime,
-                TotalPrice = _context.Tickets.Count(t => t.OrderId == o.Id) * o.Session.BasePrice
-            })
+        var session = o.Session;
+        var movie = session.Movie;
+        var hall = session.Hall;
+
+        var tickets = o.Tickets.Select(t => new TicketDTO
+        {
+            OrderId = t.OrderId,
+            SessionId = t.SessionId,
+            SeatId = t.SeatId,
+            MovieTitle = movie.Title,
+            HallName = hall.Name,
+            StartTime = session.StartTime,
+            RowNumber = t.Seat.RowNumber,
+            SeatNumber = t.Seat.SeatNumber,
+            SeatType = t.Seat.Type,
+            Price = t.Seat.Type == SeatType.Premium
+                ? session.BasePrice * 1.5m
+                : session.BasePrice
+        }).ToList();
+
+        return new OrderDTO
+        {
+            Id = o.Id,
+            UserId = o.UserId,
+            CreatedAt = o.CreatedAt,
+            Status = o.Status,
+            SessionId = o.SessionId,
+            MovieTitle = movie.Title,
+            HallName = hall.Name,
+            SessionStartTime = session.StartTime,
+            TotalPrice = tickets.Sum(t => t.Price),
+            Tickets = tickets
+        };
+    }
+
+    public async Task<List<OrderDTO>> GetAllOrdersAsync()
+    {
+        var orders = await _context.Orders
+            .Include(o => o.Session).ThenInclude(s => s.Movie)
+            .Include(o => o.Session).ThenInclude(s => s.Hall)
+            .Include(o => o.Tickets).ThenInclude(t => t.Seat)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
+
+        return orders.Select(MapToDTO).ToList();
+    }
+
+    public async Task<List<OrderDTO>> GetOrdersByUserAsync(string userId)
+    {
+        var orders = await _context.Orders
+            .Where(o => o.UserId == userId)
+            .Include(o => o.Session).ThenInclude(s => s.Movie)
+            .Include(o => o.Session).ThenInclude(s => s.Hall)
+            .Include(o => o.Tickets).ThenInclude(t => t.Seat)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        return orders.Select(MapToDTO).ToList();
     }
     
     public async Task<OrderDTO?> GetOrderByIdAsync(Guid id)
     {
         var order = await _context.Orders
-            .Include(o => o.Session)
-                .ThenInclude(s => s.Movie)
-            .Include(o => o.Session)
-                .ThenInclude(s => s.Hall)
-            .Include(o => o.Tickets)
-                .ThenInclude(t => t.Seat)
-            .FirstOrDefaultAsync(o => o.Id == id);
-    
-        if (order == null) return null;
-    
-        var ticketCount = await _context.Tickets
-            .CountAsync(t => t.OrderId == id);
-    
-        return new OrderDTO
-        {
-            Id = order.Id,
-            SessionId = order.SessionId,
-            Status = order.Status,
-            CreatedAt = order.CreatedAt,
-            MovieTitle = order.Session?.Movie?.Title ?? "N/A",
-            HallName = order.Session?.Hall?.Name ?? "N/A",
-            SessionStartTime = order.Session?.StartTime ?? DateTime.MinValue,
-            TotalPrice = ticketCount * (order.Session?.BasePrice ?? 0),
-            Tickets = order.Tickets?.Select(t => new TicketDTO
-            {
-                OrderId = t.OrderId,
-                SessionId = t.SessionId,
-                SeatId = t.SeatId,
-                MovieTitle = order.Session?.Movie?.Title ?? "N/A",
-                HallName = order.Session?.Hall?.Name ?? "N/A",
-                StartTime = order.Session?.StartTime ?? DateTime.MinValue,
-                RowNumber = t.Seat?.RowNumber ?? 0,
-                SeatNumber = t.Seat?.SeatNumber ?? 0,
-                Price = order.Session?.BasePrice ?? 0
-            }).ToList() ?? new List<TicketDTO>()
-        };
+            .Where(o => o.Id == id)
+            .Include(o => o.Session).ThenInclude(s => s.Movie)
+            .Include(o => o.Session).ThenInclude(s => s.Hall)
+            .Include(o => o.Tickets).ThenInclude(t => t.Seat)
+            .FirstOrDefaultAsync();
+
+        return order == null ? null : MapToDTO(order);
     }
+
 }

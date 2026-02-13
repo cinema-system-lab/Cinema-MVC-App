@@ -1,0 +1,142 @@
+﻿@using Core.DTOs
+@using Core.Enums
+@using Cinema_MVC_App.Models;
+@using System.Linq
+@model SessionsListVM
+
+@{
+    ViewData["Title"] = "Movie Schedule";
+    var groupedByDate = Model.GroupedByDate;
+
+    var allGenres = Model.Movies.Values
+        .SelectMany(m => m.Genres.ToString().Split(','))
+        .Select(g => g.Trim())
+        .Distinct()
+        .OrderBy(g => g);
+
+    var hallTypes = Enum.GetValues(typeof(HallType)).Cast<HallType>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/client/schedule.css" asp-append-version="true" />
+}
+
+<div class="container py-5">
+    <header class="section-header mb-5">
+        <h1 class="section-title">Movie Schedule</h1>
+        <p class="section-subtitle">Book your favorite movies at the perfect time</p>
+    </header>
+
+    <div class="d-flex gap-2 mb-4 overflow-auto pb-3 date-scroll-container">
+        @foreach (var dateGroup in groupedByDate)
+        {
+            var hasFutureSessions = dateGroup.Any(s =>
+            !(dateGroup.Key == DateTime.Today && s.StartTime.TimeOfDay < DateTime.Now.TimeOfDay));
+
+            if (!hasFutureSessions) continue;
+
+            var isToday = dateGroup.Key == DateTime.Today;
+            <button class="btn date-card @(isToday ? "active" : "")"
+                    onclick="filterDate('@dateGroup.Key.ToString("yyyy-MM-dd")', this)">
+                <span class="d-block small text-uppercase opacity-75">@dateGroup.Key.ToString("ddd")</span>
+                <span class="fw-bold fs-4">@dateGroup.Key.Day</span>
+                <span class="d-block small text-uppercase">@dateGroup.Key.ToString("MMM")</span>
+            </button>
+        }
+    </div>
+
+    <!-- Modern Filter Bar -->
+    <div class="filter-bar-modern mb-5">
+        <div class="filter-section">
+            <div class="filter-title">
+                <i class="bi bi-funnel-fill text-danger me-2"></i>
+                <span>Genres</span>
+            </div>
+            <div class="filter-chips" id="genreChips">
+                <button class="chip active" data-genre="all" onclick="filterByGenre('all', this)">All</button>
+                @foreach (var genre in allGenres)
+                {
+                    <button class="chip" data-genre="@genre.ToLower()" onclick="filterByGenre('@genre.ToLower()', this)">@genre</button>
+                }
+            </div>
+        </div>
+        <div class="filter-section mt-3">
+            <div class="filter-title">
+                <i class="bi bi-badge-3d text-danger me-2"></i>
+                <span>Experience</span>
+            </div>
+            <div class="filter-chips" id="hallTypeChips">
+                <button class="chip active" data-hall="all" onclick="filterByHall('all', this)">All Halls</button>
+                @foreach (var type in hallTypes)
+                {
+                    <button class="chip" data-hall="@((byte)type)" onclick="filterByHall('@((byte)type)', this)">@type.ToString()</button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div id="schedule-container">
+        @foreach (var dateGroup in groupedByDate)
+        {
+            var validSessionsInDate = dateGroup
+            .Where(s => !(dateGroup.Key == DateTime.Today && s.StartTime.TimeOfDay < DateTime.Now.TimeOfDay))
+            .ToList();
+
+            if (!validSessionsInDate.Any()) continue;
+
+            <div class="date-section @(dateGroup.Key == DateTime.Today ? "" : "d-none")" id="date-@dateGroup.Key.ToString("yyyy-MM-dd")">
+
+                @foreach (var movieGroup in validSessionsInDate.GroupBy(s => s.MovieId))
+                {
+                    if (Model.Movies.TryGetValue(movieGroup.Key, out var movie))
+                    {
+                        var futureSessions = movieGroup.OrderBy(s => s.StartTime).ToList();
+
+                        <div class="movie-row mb-5 pb-4 border-bottom border-secondary border-opacity-25"
+                             data-genres="@movie.Genres.ToString().ToLower()">
+                            <div class="row g-4">
+                                <div class="col-4 col-md-3 col-lg-2">
+                                    <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="poster-link">
+                                        <div class="position-relative poster-hover">
+                                            <img src="@movie.PosterUrl" class="img-fluid rounded-3 shadow-lg" alt="@movie.Title">
+                                            <span class="position-absolute top-0 start-0 badge bg-primary m-2 shadow">@movie.AgeRestriction+</span>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <div class="col-8 col-md-9 col-lg-10">
+                                    <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="text-decoration-none">
+                                        <h4 class="fw-bold text-white mb-1 hover-danger">@movie.Title.ToUpper()</h4>
+                                    </a>
+                                    <p class="text-danger small mb-3 fw-bold">
+                                        @movie.Genres.ToString().Replace(",", " •") | <i class="bi bi-clock-history me-1"></i> @movie.DurationMinutes MIN
+                                    </p>
+
+                                    <div class="d-flex flex-wrap gap-3">
+                                        @foreach (var session in futureSessions)
+                                        {
+                                            Model.Halls.TryGetValue(session.HallId, out var hall);
+                                            var hallTypeVal = hall != null ? (byte)hall.Type : (byte)1;
+
+                                            <a asp-controller="Tickets" asp-action="Book" asp-route-sessionId="@session.Id"
+                                               class="session-box text-decoration-none"
+                                               data-hall-type="@hallTypeVal">
+                                                <div class="time">@session.StartTime.ToString("HH:mm")</div>
+                                                <div class="hall text-muted">@(hall?.Name ?? "Standard")</div>
+                                                <div class="price">@session.BasePrice ₴</div>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/client/schedule.js" asp-append-version="true"></script>
+}

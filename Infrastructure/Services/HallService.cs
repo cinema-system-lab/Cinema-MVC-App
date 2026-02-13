@@ -72,12 +72,12 @@ public class HallService : IHallService
 
         var now = DateTime.Now;
         var hasFutureSessions = await _context.Sessions
-            .AnyAsync(s => s.HallId == id && s.EndTime >= now);
+            .AnyAsync(s => s.HallId == id);
 
         if (hasFutureSessions)
         {
             throw new InvalidOperationException(
-                "Cannot delete hall because it has scheduled sessions."
+                "Cannot delete hall because it has scheduled sessions or had."
             );
         }
 

@@ -242,3 +242,23 @@
     display: flex;
     align-items: center;
 }
+
+.clickable-row {
+    transition: all 0.2s ease-in-out !important;
+}
+
+.clickable-row:hover .ticket-number {
+    color: var(--accent-green);
+}
+
+.clickable-row:hover .bi-chevron-right {
+    opacity: 1 !important;
+    color: var(--accent-green) !important;
+    transform: translateX(2px);
+}
+
+.ticket-number {
+    font-weight: 600;
+    color: var(--admin-text-muted);
+    transition: color 0.2s;
+}

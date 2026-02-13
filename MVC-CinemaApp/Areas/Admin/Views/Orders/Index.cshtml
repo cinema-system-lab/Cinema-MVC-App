@@ -47,8 +47,8 @@
                        id="orderSearch"
                        class="search-input"
                        data-search-target="ordersTableBody"
-                       data-search-columns=".movie-title, .hall-badge"
-                       placeholder="Search by movie or hall...">
+                       data-search-columns=".movie-title, .hall-badge, .session-id, .user-email"
+                       placeholder="Search by...">
             </div>
             <div class="text-muted small">
                 Showing <span id="visibleCount">@Model.Count</span> of @Model.Count orders
@@ -74,6 +74,12 @@
                             Session <i class="bi bi-arrow-down-up ms-1"></i>
                         </th>
                         <th class="sortable" data-column="3">
+                            Session ID <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="4">
+                            User <i class="bi bi-arrow-down-up ms-1"></i>
+                        </th>
+                        <th class="sortable" data-column="5">
                             Status <i class="bi bi-arrow-down-up ms-1"></i>
                         </th>
                         <th class="text-end">Price</th>
@@ -82,6 +88,10 @@
                     </thead>
                     <tbody id="ordersTableBody">
                     @foreach (var order in Model) {
+                        var userEmail = ViewBag.UserEmails.ContainsKey(order.UserId) 
+                            ? ViewBag.UserEmails[order.UserId] as string 
+                            : "Unknown";
+                        
                         <tr class="order-row">
                             <td class="ps-4">
                                 <div class="movie-title">
@@ -95,37 +105,50 @@
                                 </div>
                             </td>
                             <td>
-                        <span class="text-white-50" style="font-size: 0.85rem;">
-                            @order.SessionStartTime.ToLocalTime().ToString("MMM dd, HH:mm")
-                        </span>
+                                <span class="text-white-50" style="font-size: 0.85rem;">
+                                    @order.SessionStartTime.ToLocalTime().ToString("MMM dd, HH:mm")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="text-white-50 session-id">
+                                    <span class="id-badge" style="font-size: 0.85rem;">
+                                        <i class="bi bi-hash"></i>@order.SessionId
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-email">
+                                    <i class="bi bi-person-circle me-1"></i>
+                                    <span class="text-white-50" style="font-size: 0.85rem;">@userEmail</span>
+                                </div>
                             </td>
                             <td>
                                 @if (order.Status.ToString().ToLower() == "pending") {
                                     <span class="status-badge pending">
-                                <i class="bi bi-hourglass-split"></i> Pending
-                            </span>
+                                        <i class="bi bi-hourglass-split"></i> Pending
+                                    </span>
                                 } else if (order.Status.ToString().ToLower() == "paid") {
                                     <span class="status-badge paid">
-                                <i class="bi bi-check-circle-fill"></i> Paid
-                            </span>
+                                        <i class="bi bi-check-circle-fill"></i> Paid
+                                    </span>
                                 } else if (order.Status.ToString().ToLower() == "cancelled") {
                                     <span class="status-badge cancelled">
-                                <i class="bi bi-x-circle-fill"></i> Cancelled
-                            </span>
+                                        <i class="bi bi-x-circle-fill"></i> Cancelled
+                                    </span>
                                 } else if (order.Status.ToString().ToLower() == "refunded") {
                                     <span class="status-badge refunded">
-                                <i class="bi bi-arrow-counterclockwise"></i> Refunded
-                            </span>
+                                        <i class="bi bi-arrow-counterclockwise"></i> Refunded
+                                    </span>
                                 } else {
                                     <span class="status-badge @order.Status.ToString().ToLower()">
-                                @order.Status
-                            </span>
+                                        @order.Status
+                                    </span>
                                 }
                             </td>
                             <td class="text-end">
-                        <span class="price-tag">
-                            ₴@order.TotalPrice.ToString("F2")
-                        </span>
+                                <span class="price-tag">
+                                    ₴@order.TotalPrice.ToString("F2")
+                                </span>
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-flex justify-content-end gap-2">

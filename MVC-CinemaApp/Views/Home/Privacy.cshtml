@@ -1,6 +1,41 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "About & Help";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="display-4 fw-bold mb-4">Welcome to Cinema App</h1>
+            <p class="lead text-muted">Your ultimate destination for the latest movies and a premium experience.</p>
+            <hr class="my-5 border-secondary">
+
+            <div class="mb-5">
+                <h3 class="fw-bold mb-3">About Our Service</h3>
+                <p>We provide a seamless way to browse movies, check real-time schedules, and book your favorite seats.</p>
+            </div>
+
+            <div class="mb-5">
+                <h3 class="fw-bold mb-3">FAQ</h3>
+                <div class="accordion accordion-dark" id="faq">
+                    <div class="accordion-item bg-transparent border-secondary text-white">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#q1">
+                                How do I book a ticket?
+                            </button>
+                        </h2>
+                        <div id="q1" class="accordion-collapse collapse" data-bs-parent="#faq">
+                            <div class="accordion-body text-muted">
+                                Just click on a movie, pick a time and seat, and confirm!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-4 bg-dark border border-secondary text-center">
+                <h4 class="fw-bold">Still have questions?</h4>
+                <p class="text-muted">support@cinemaapp.com</p>
+            </div>
+        </div>
+    </div>
+</div>

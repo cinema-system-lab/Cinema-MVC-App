@@ -1,4 +1,4 @@
-﻿using Core.DTOs;
+using Core.DTOs;
 
 namespace Core.Interfaces.Services
 {
@@ -13,5 +13,7 @@ namespace Core.Interfaces.Services
         Task CreateTicketAsync(TicketCreateDTO ticketDto);
 
         Task DeleteTicketAsync(Guid orderId, int sessionId, int seatId);
+
+        Task<List<int>> GetOccupiedSeatIdsAsync(int sessionId);
     }
 }

@@ -7,13 +7,23 @@ namespace Cinema_MVC_App.Areas.Admin.Controllers;
 public class PaymentsController : BaseAdminController
 {
     private readonly IPaymentService _paymentService;
-
-    public PaymentsController(IPaymentService paymentService)
-        => _paymentService = paymentService;
+    private readonly IUserService _userService;
+    
+    public PaymentsController(IPaymentService paymentService, IUserService userService)
+    {
+        _paymentService = paymentService;
+        _userService = userService;
+    }
 
     // GET: /Payments
     public async Task<IActionResult> Index()
-        => View(await _paymentService.GetAllPaymentsAsync());
+    {
+        var payments = await _paymentService.GetAllPaymentsAsync();
+        var allUsers = await _userService.GetAllUsersAsync();
+        ViewBag.UserEmails = allUsers.ToDictionary(u => u.Id, u => u.Email);
+
+        return View(payments);
+    }
 
     // GET: /Payments/Details/{id}
     public async Task<IActionResult> Details(Guid id)
@@ -25,34 +35,13 @@ public class PaymentsController : BaseAdminController
         return View(payment);
     }
 
-    // POST: /Payments/UpdateStatus todo
+    // POST: /Payments/UpdateStatus
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(Guid id, PaymentStatus newStatus)
     {
         try
         {
-            var payment = await _paymentService.GetPaymentByIdAsync(id);
-            if (payment == null)
-            {
-                TempData["Error"] = "Payment not found.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var isValidTransition = (payment.Status, newStatus) switch
-            {
-                (PaymentStatus.Pending, PaymentStatus.Success) => true,
-                (PaymentStatus.Pending, PaymentStatus.Failed) => true,
-                (PaymentStatus.Success, PaymentStatus.Refunded) => true,
-                _ => false
-            };
-
-            if (!isValidTransition)
-            {
-                TempData["Error"] = $"Cannot change status from {payment.Status} to {newStatus}. Invalid transition.";
-                return RedirectToAction(nameof(Details), new { id });
-            }
-
             await _paymentService.UpdatePaymentStatusAsync(id, newStatus);
 
             TempData["Success"] = newStatus switch
@@ -63,11 +52,11 @@ public class PaymentsController : BaseAdminController
                 _ => "Payment status updated successfully."
             };
         }
-        catch (InvalidOperationException ex)
+        catch (KeyNotFoundException ex)
         {
             TempData["Error"] = ex.Message;
         }
-        catch (KeyNotFoundException ex)
+        catch (InvalidOperationException ex)
         {
             TempData["Error"] = ex.Message;
         }

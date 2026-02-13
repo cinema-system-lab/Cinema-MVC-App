@@ -134,8 +134,8 @@
         const searchMappings = {
             'ticketSearch': { tableBodyId: 'ticketTableBody', searchColumns: '.movie-title, .hall-badge' },
             'sessionSearch': { tableBodyId: 'sessionTableBody', searchColumns: '.movie-title, .hall-badge' },
-            'paymentSearch': { tableBodyId: 'paymentTableBody', searchColumns: '.payment-id' },
-            'orderSearch': { tableBodyId: 'ordersTableBody', searchColumns: '.movie-title, .hall-badge' },
+            'paymentSearch': { tableBodyId: 'paymentTableBody', searchColumns: '.payment-id, .user-email' },
+            'orderSearch': { tableBodyId: 'ordersTableBody', searchColumns: '.movie-title, .hall-badge, .session-id, .user-email' },
             'movieSearch': { tableBodyId: 'movieTableBody', searchColumns: '.movie-title, .director-badge' },
             'hallSearch': { tableBodyId: 'hallTableBody', searchColumns: '.hall-name, .type-badge' }
         };

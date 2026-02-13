@@ -1,79 +1,71 @@
 @model Core.DTOs.RegisterDTO
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Join Us";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0 text-center">
-                    <i class="bi bi-person-plus me-2"></i>Create Account
-                </h4>
-            </div>
-            <div class="card-body">
-                <form asp-action="Register" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="FirstName" class="form-label">First Name</label>
-                            <input asp-for="FirstName" class="form-control" placeholder="Enter first name" autocomplete="given-name" />
-                            <span asp-validation-for="FirstName" class="text-danger"></span>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-5">
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-header border-secondary py-3 text-center">
+                    <h3 class="fw-bold m-0 text-white text-uppercase">Join Us</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Register" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FirstName" class="form-label text-muted small fw-bold text-uppercase">First Name</label>
+                                <input asp-for="FirstName" class="form-control admin-input" placeholder="Name" autocomplete="given-name" />
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="LastName" class="form-label text-muted small fw-bold text-uppercase">Last Name</label>
+                                <input asp-for="LastName" class="form-control admin-input" placeholder="Surname" autocomplete="family-name" />
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="LastName" class="form-label">Last Name</label>
-                            <input asp-for="LastName" class="form-control" placeholder="Enter last name" autocomplete="family-name" />
-                            <span asp-validation-for="LastName" class="text-danger"></span>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label text-muted small fw-bold text-uppercase">Email Address</label>
+                            <input asp-for="Email" class="form-control admin-input" placeholder="email@domain.com" autocomplete="email" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label">Email</label>
-                        <input asp-for="Email" class="form-control" placeholder="Enter your email" autocomplete="email" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label">Password</label>
-                        <div class="input-group">
-                            <input asp-for="Password" class="form-control" type="password" placeholder="Create a password" autocomplete="new-password" id="password"/>
-                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', 'togglePwdIcon')">
-                                <span id="togglePwdIcon">👁</span>
-                            </button>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label text-muted small fw-bold text-uppercase">Password</label>
+                            <div class="input-group">
+                                <input asp-for="Password" class="form-control admin-input border-end-0" type="password" placeholder="Create password" autocomplete="new-password" id="regPassword" />
+                                <button class="btn btn-dark border border-secondary border-start-0 text-muted" type="button" onclick="togglePassword('regPassword', 'toggleRegIcon')">
+                                    <i class="bi bi-eye" id="toggleRegIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                            <div class="form-text text-muted smaller">Min 6 chars, incl. uppercase and a digit.</div>
                         </div>
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                        <div class="form-text">
-                            Min 6 chars, uppercase, lowercase, and a digit.
+
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label text-muted small fw-bold text-uppercase">Confirm Password</label>
+                            <div class="input-group">
+                                <input asp-for="ConfirmPassword" class="form-control admin-input border-end-0" type="password" placeholder="Repeat password" id="confirmPassword" />
+                                <button class="btn btn-dark border border-secondary border-start-0 text-muted" type="button" onclick="togglePassword('confirmPassword', 'toggleConfirmIcon')">
+                                    <i class="bi bi-eye" id="toggleConfirmIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
-                        <div class="input-group">
-                            <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Confirm your password" autocomplete="new-password" id="confirmPassword"/>
-                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPassword', 'toggleConfirmIcon')">
-                                <span id="toggleConfirmIcon">👁</span>
-                            </button>
+
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-danger rounded-0 py-2 fw-bold text-uppercase">Create Account</button>
                         </div>
-                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </form>
+
+                    <div class="text-center border-top border-secondary pt-4">
+                        <p class="text-muted small mb-2">Already have an account?</p>
+                        <a asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" class="btn btn-outline-light btn-sm rounded-0 px-4 fw-bold">Login</a>
                     </div>
-                    
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-person-plus me-1"></i>Create Account
-                        </button>
-                    </div>
-                </form>
-                
-                <hr />
-                
-                <div class="text-center">
-                    <p class="mb-0">Already have an account?</p>
-                    <a asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" class="btn btn-outline-secondary mt-2">
-                        <i class="bi bi-box-arrow-in-right me-1"></i>Login
-                    </a>
                 </div>
             </div>
         </div>
@@ -88,10 +80,10 @@
             const icon = document.getElementById(iconId);
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.textContent = '🙈';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
             } else {
                 input.type = 'password';
-                icon.textContent = '👁';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
             }
         }
     </script>

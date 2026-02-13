@@ -1,0 +1,87 @@
+@using Core.Enums
+@model Core.DTOs.OrderDTO
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-4 text-white">
+                        <i class="bi bi-credit-card me-2"></i>Complete Your Payment
+                    </h2>
+
+                    @if (TempData["ErrorMessage"] is string errorMsg)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @errorMsg
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <h5 class="text-muted text-uppercase small mb-3">Order Summary</h5>
+                        
+                        <div class="bg-black rounded p-3 mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1 text-white"><strong>Movie:</strong> @Model.MovieTitle</p>
+                                    <p class="mb-1 text-white-50"><strong>Hall:</strong> @Model.HallName</p>
+                                    <p class="mb-1 text-white-50">
+                                        <strong>Session:</strong> @Model.SessionStartTime.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+                                    </p>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <p class="mb-1 text-white-50">
+                                        <strong>Tickets:</strong> @Model.Tickets.Count
+                                    </p>
+                                    <p class="mb-0 text-success fw-bold fs-4">
+                                        Total: @Model.TotalPrice ₴
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.Tickets.Any())
+                    {
+                        <div class="mb-4">
+                            <h6 class="text-muted text-uppercase small mb-2">Selected Seats</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var t in Model.Tickets)
+                                {
+                                    var badgeClass = t.SeatType == SeatType.Premium ? "bg-warning text-dark" : "bg-secondary";
+                                    <span class="badge @badgeClass">
+                                        Row @t.RowNumber, Seat @t.SeatNumber 
+                                        (@(t.SeatType == SeatType.Premium ? "Premium" : "Standard") - @t.Price ₴)
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <hr class="border-secondary" />
+
+                    <form asp-controller="Payments" asp-action="Pay" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.Id" />
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Back to orders
+                            </a>
+
+                            <button type="submit" class="btn btn-success btn-lg px-5 fw-bold">
+                                <i class="bi bi-credit-card me-2"></i>Pay @Model.TotalPrice ₴
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
